@@ -1,8 +1,7 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import "./auth.css";
-import {Link} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "boxicons/css/boxicons.min.css";
-// // import { useNavigate } from "react-router-dom";
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -21,9 +20,11 @@ const Register = () => {
         error6: "",
     });
 
+    const navigate = useNavigate();
+
     const handleChange = (e) => {
-        const {name, value} = e.target;
-        setFormData((prev) => ({...prev, [name]: value}));
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
         clearError(name);
         validateField(name, value);
     };
@@ -47,7 +48,7 @@ const Register = () => {
     };
 
     const validateField = (name, value) => {
-        const updatedErrors = {...errors};
+        const updatedErrors = { ...errors };
 
         switch (name) {
             case "name":
@@ -77,13 +78,11 @@ const Register = () => {
                 } else if (!/[A-Z]/.test(value)) {
                     updatedErrors.error5 = "Mật khẩu phải chứa ít nhất 1 kí tự viết hoa";
                 } else if (!/[a-z]/.test(value)) {
-                    updatedErrors.error5 =
-                        "Mật khẩu phải chứa ít nhất 1 kí tự viết thường";
+                    updatedErrors.error5 = "Mật khẩu phải chứa ít nhất 1 kí tự viết thường";
                 } else if (!/[0-9]/.test(value)) {
                     updatedErrors.error5 = "Mật khẩu phải chứa ít nhất 1 số";
-                } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value)) {
-                    updatedErrors.error5 =
-                        "Mật khẩu phải chứa ít nhất 1 kí tự đặc biệt";
+                } else if (!/[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]/.test(value)) {
+                    updatedErrors.error5 = "Mật khẩu phải chứa ít nhất 1 kí tự đặc biệt";
                 } else {
                     updatedErrors.error5 = "";
                 }
@@ -108,11 +107,36 @@ const Register = () => {
         return Object.values(errors).every((e) => e === "");
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateForm()) {
-            console.log("Submit dữ liệu: ", formData);
-            // Gửi dữ liệu tới server tại đây
+            try {
+                const response = await fetch("http://localhost:8080/api/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username: formData.name,
+                        password: formData.passw,
+                        email: formData.email,
+                        phone: formData.phone,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(errText);
+                }
+
+                const data = await response.json();
+                console.log("Đăng ký thành công:", data);
+
+                localStorage.setItem("accessToken", data.accessToken);
+                alert("Đăng ký thành công!");
+                navigate("/login");
+            } catch (error) {
+                console.error("Lỗi đăng ký:", error);
+                alert("Đăng ký thất bại: " + error.message);
+            }
         }
     };
 
@@ -147,9 +171,7 @@ const Register = () => {
                                 onChange={handleChange}
                                 className="input"
                             />
-                            <span className="notify" id="error2">
-                {errors.error2}
-              </span>
+                            <span className="notify">{errors.error2}</span>
                         </div>
 
                         <div className="field input-field">
@@ -161,9 +183,7 @@ const Register = () => {
                                 onChange={handleChange}
                                 className="input"
                             />
-                            <span className="notify" id="error3">
-                {errors.error3}
-              </span>
+                            <span className="notify">{errors.error3}</span>
                         </div>
 
                         <div className="field input-field">
@@ -175,9 +195,7 @@ const Register = () => {
                                 onChange={handleChange}
                                 className="input"
                             />
-                            <span className="notify" id="error4">
-                {errors.error4}
-              </span>
+                            <span className="notify">{errors.error4}</span>
                         </div>
 
                         <div className="field input-field">
@@ -190,9 +208,7 @@ const Register = () => {
                                 className="password"
                             />
                             <i className="bx bx-hide eye-icon"></i>
-                            <span className="notify" id="error5">
-                {errors.error5}
-              </span>
+                            <span className="notify">{errors.error5}</span>
                         </div>
 
                         <div className="field input-field">
@@ -205,9 +221,7 @@ const Register = () => {
                                 className="password"
                             />
                             <i className="bx bx-hide eye-icon"></i>
-                            <span className="notify" id="error6">
-                {errors.error6}
-              </span>
+                            <span className="notify">{errors.error6}</span>
                         </div>
 
                         <div className="field button-field">
@@ -219,8 +233,8 @@ const Register = () => {
             <span>
               Bạn đã có tài khoản?{" "}
                 <Link to="/login" className="link login-link">
-                          Đăng nhập
-                        </Link>
+                Đăng nhập
+              </Link>
             </span>
                     </div>
                 </div>

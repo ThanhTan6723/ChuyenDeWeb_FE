@@ -39,18 +39,22 @@ const Login = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
-            // Replace this with your actual API call
-            fetch("/LoginControll", {
+            const bodyPayload = /^\d{10}$/.test(identifier)
+                ? { phone: identifier, email: null, password }
+                : { email: identifier, phone: null, password };
+
+            fetch("http://localhost:8080/api/auth/login", {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({identifier, password}),
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify(bodyPayload),
             })
                 .then((res) => {
                     if (!res.ok) throw new Error("Login failed!");
-                    return res.json();
+                    return res.text(); // vì BE trả về "Login success!" chứ không phải JSON
                 })
-                .then((data) => {
-                    navigate("/dashboard"); // Or returnUrl
+                .then(() => {
+                    navigate("/home");
                 })
                 .catch((err) => {
                     setError("Tài khoản hoặc mật khẩu không đúng!");
@@ -145,7 +149,7 @@ const Login = () => {
                         href="https://accounts.google.com/o/oauth2/auth?scope=email%20profile&redirect_uri=http://localhost:8080/login-google&response_type=code&client_id=103711909118-kj61sqe0bv8srccvmk7tire0ih1oi87o.apps.googleusercontent.com"
                         className="field google"
                     >
-                        <img src="assets/img/google.png" alt="Google" className="google-img"/>
+                        <img src="/img/google.png" alt="Google" className="google-img"/>
                         <span>Tiếp tục với Google</span>
                     </a>
                 </div>
