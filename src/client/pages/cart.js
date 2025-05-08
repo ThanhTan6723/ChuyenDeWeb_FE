@@ -13,9 +13,6 @@ import '../../assets/css/themify-icons.css';
 import '../../assets/css/magnific-popup.css';
 import '../../assets/css/slick.css';
 import '../../assets/css/style.css';
-import CategoryProductArea from "../components/shop/categoryproductarea";
-import BestSellers from "../components/home/bestsellers";
-
 
 const CartPage = () => {
     return (

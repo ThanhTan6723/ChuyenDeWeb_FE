@@ -74,7 +74,6 @@ const Header = () => {
                                     <i className="ti-heart"/>
                                 </a>
                                 <div className="dropdown cart">
-
                                     <Link
                                         className="dropdown-toggle"
                                         to="/cart"
@@ -84,7 +83,7 @@ const Header = () => {
                                         aria-haspopup="true"
                                         aria-expanded="false"
                                     >
-                                        <i className="fas fa-cart-plus"/>
+                                        <i className="fas fa-shopping-cart"/>
                                     </Link>
                                 </div>
                             </div>
