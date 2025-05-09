@@ -11,6 +11,8 @@ const Login = () => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
+    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://localhost:8443";
+
     const validateForm = () => {
         let valid = true;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -36,29 +38,30 @@ const Login = () => {
         return valid;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (validateForm()) {
-            const bodyPayload = /^\d{10}$/.test(identifier)
-                ? { phone: identifier, email: null, password }
-                : { email: identifier, phone: null, password };
+        if (!validateForm()) return;
 
-            fetch("http://localhost:8080/api/auth/login", {
+        const bodyPayload = /^\d{10}$/.test(identifier)
+            ? { phone: identifier, email: null, password }
+            : { email: identifier, phone: null, password };
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
                 body: JSON.stringify(bodyPayload),
-            })
-                .then((res) => {
-                    if (!res.ok) throw new Error("Login failed!");
-                    return res.text(); // vì BE trả về "Login success!" chứ không phải JSON
-                })
-                .then(() => {
-                    navigate("/home");
-                })
-                .catch((err) => {
-                    setError("Tài khoản hoặc mật khẩu không đúng!");
-                });
+            });
+
+            if (!res.ok) throw new Error("Login failed!");
+            const text = await res.text();
+
+            console.log("Login success:", text);
+            navigate("/home");
+        } catch (err) {
+            console.error("Login error:", err);
+            setError("Tài khoản hoặc mật khẩu không đúng!");
         }
     };
 
@@ -110,12 +113,14 @@ const Login = () => {
                         </div>
 
                         <div className="form-link">
+                            <div className="forgot">
                             <Link to="/forgotpassword" className="forgot-pass">
                                 Quên mật khẩu
                             </Link>
+                            </div>
                         </div>
 
-                        <div className="form-link">
+                        <div className="error-box">
                             <span className="error-box">{error}</span>
                         </div>
 
