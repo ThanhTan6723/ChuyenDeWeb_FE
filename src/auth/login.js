@@ -1,7 +1,8 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import "./auth.css";
-import {Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "boxicons/css/boxicons.min.css";
+import { useAuth } from './authcontext';
 
 const Login = () => {
     const [identifier, setIdentifier] = useState("");
@@ -9,6 +10,7 @@ const Login = () => {
     const [errorIdenty, setErrorIdenty] = useState("");
     const [errorP, setErrorP] = useState("");
     const [error, setError] = useState("");
+    const { login } = useAuth();
     const navigate = useNavigate();
 
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://localhost:8443";
@@ -42,26 +44,35 @@ const Login = () => {
         e.preventDefault();
         if (!validateForm()) return;
 
-        const bodyPayload = /^\d{10}$/.test(identifier)
-            ? { phone: identifier, email: null, password }
-            : { email: identifier, phone: null, password };
+        // Tách định danh thành email/phone cho BE
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const payload = {
+            email: emailRegex.test(identifier) ? identifier : null,
+            phone: !emailRegex.test(identifier) ? identifier : null,
+            password
+        };
 
         try {
-            const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify(bodyPayload),
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+                credentials: 'include'
             });
 
-            if (!res.ok) throw new Error("Login failed!");
-            const text = await res.text();
-
-            console.log("Login success:", text);
-            navigate("/home");
+            if (response.ok) {
+                const data = await response.json();
+                login(data.user); // Lưu user vào context
+                navigate('/'); // Chuyển về trang chính
+            } else {
+                const errorData = await response.json();
+                setError(errorData.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại.");
+            }
         } catch (err) {
+            setError("Không thể kết nối tới máy chủ.");
             console.error("Login error:", err);
-            setError("Tài khoản hoặc mật khẩu không đúng!");
         }
     };
 
@@ -88,6 +99,7 @@ const Login = () => {
                                 onChange={(e) => {
                                     setIdentifier(e.target.value);
                                     setErrorIdenty("");
+                                    setError("");
                                 }}
                             />
                             <span className="error">{errorIdenty}</span>
@@ -103,26 +115,26 @@ const Login = () => {
                                 onChange={(e) => {
                                     setPassword(e.target.value);
                                     setErrorP("");
+                                    setError("");
                                 }}
                             />
-                            <i
-                                className="bx bx-hide eye-icon"
-                                onClick={togglePasswordVisibility}
-                            ></i>
+                            <i className="bx bx-hide eye-icon" onClick={togglePasswordVisibility}></i>
                             <span className="error">{errorP}</span>
                         </div>
 
                         <div className="form-link">
                             <div className="forgot">
-                            <Link to="/forgotpassword" className="forgot-pass">
-                                Quên mật khẩu
-                            </Link>
+                                <Link to="/forgotpassword" className="forgot-pass">
+                                    Quên mật khẩu
+                                </Link>
                             </div>
                         </div>
 
-                        <div className="error-box">
-                            <span className="error-box">{error}</span>
-                        </div>
+                        {error && (
+                            <div className="error-box">
+                                <span className="error-box">{error}</span>
+                            </div>
+                        )}
 
                         <div className="field button-field">
                             <button type="submit">Đăng nhập</button>
@@ -130,12 +142,12 @@ const Login = () => {
                     </form>
 
                     <div className="form-link">
-                      <span>
-                        Bạn chưa có tài khoản?{" "}
-                          <Link to="/signup" className="link signup-link">
-                          Đăng ký
-                        </Link>
-                      </span>
+            <span>
+              Bạn chưa có tài khoản?{" "}
+                <Link to="/signup" className="link signup-link">
+                Đăng ký
+              </Link>
+            </span>
                     </div>
                 </div>
 
@@ -154,7 +166,7 @@ const Login = () => {
                         href="https://accounts.google.com/o/oauth2/auth?scope=email%20profile&redirect_uri=http://localhost:8080/login-google&response_type=code&client_id=103711909118-kj61sqe0bv8srccvmk7tire0ih1oi87o.apps.googleusercontent.com"
                         className="field google"
                     >
-                        <img src="/img/google.png" alt="Google" className="google-img"/>
+                        <img src="/img/google.png" alt="Google" className="google-img" />
                         <span>Tiếp tục với Google</span>
                     </a>
                 </div>

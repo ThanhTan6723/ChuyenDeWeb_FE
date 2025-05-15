@@ -1,7 +1,18 @@
-import React from 'react';
-import {Link} from "react-router-dom";
+import React, {useState, useRef, useEffect} from 'react';
+import {Link, useNavigate} from "react-router-dom";
+import {useAuth} from '../../../auth/authcontext';
 
 const Header = () => {
+    const {user, logout} = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        const success = await logout();
+        if (success) {
+            navigate("/home");
+        }
+    };
+
     return (
         <header className="main_menu home_menu">
             <div className="container">
@@ -20,9 +31,9 @@ const Header = () => {
                                 aria-expanded="false"
                                 aria-label="Toggle navigation"
                             >
-                <span className="menu_icon">
-                  <i className="fas fa-bars"/>
-                </span>
+                                <span className="menu_icon">
+                                  <i className="fas fa-bars"/>
+                                </span>
                             </button>
                             <div
                                 className="collapse navbar-collapse main-menu-item"
@@ -40,8 +51,7 @@ const Header = () => {
                                         </Link>
                                     </li>
                                     <li className="nav-item">
-                                        <a
-                                            className="nav-link">
+                                        <a className="nav-link">
                                             voucher
                                         </a>
                                     </li>
@@ -57,16 +67,18 @@ const Header = () => {
                                     </li>
                                 </ul>
                             </div>
-                            {/*<div className="hearer_icon d-flex">*/}
-                            {/*    <li className="nav-item">*/}
-                            {/*       */}
-                            {/*    </li>*/}
-                            {/*</div>*/}
 
                             <div className="hearer_icon d-flex">
-                                <Link className="auth" to="/login">
-                                    Đăng nhập/Đăng ký
-                                </Link>
+                                {user ? (
+                                    <div className="user-menu">
+                                        <span>{user.name}</span>
+                                        <button onClick={handleLogout}>Đăng xuất</button>
+                                    </div>
+                                ) : (
+                                    <Link className="auth" to="/login">
+                                        Đăng nhập/Đăng ký
+                                    </Link>
+                                )}
                                 <a id="search_1" href="javascript:void(0)">
                                     <i className="ti-search"/>
                                 </a>
