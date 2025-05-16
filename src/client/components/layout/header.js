@@ -67,17 +67,30 @@ const Header = () => {
                                     </li>
                                 </ul>
                             </div>
+                            <div className="language" style={{ marginRight: '20px' }}>
+                                <img src="/img/usa.png" style={{marginRight:'5px'}} alt=""/>
+                                <img src="/img/vietnam.png" alt=""/>
+                            </div>
 
                             <div className="hearer_icon d-flex">
                                 {user ? (
-                                    <div className="user-menu">
-                                        <span>{user.name}</span>
-                                        <button onClick={handleLogout}>Đăng xuất</button>
+                                    <div className="user-dropdown">
+                                        <span className="user-name">{user.username}</span>
+                                        <div className="dropdown-content">
+                                            {/*<Link to="/profile">Thông tin tài khoản</Link>*/}
+                                            <a href="#" onClick={(e) => {
+                                                e.preventDefault();
+                                                handleLogout();
+                                            }}>Đăng xuất</a>
+                                        </div>
                                     </div>
                                 ) : (
-                                    <Link className="auth" to="/login">
-                                        Đăng nhập/Đăng ký
-                                    </Link>
+                                    <>
+                                        <img src="/img/login.png" style={{ marginRight: '5px' }} alt="" />
+                                        <Link className="auth" to="/login">
+                                            Đăng nhập/Đăng ký
+                                        </Link>
+                                    </>
                                 )}
                                 <a id="search_1" href="javascript:void(0)">
                                     <i className="ti-search"/>

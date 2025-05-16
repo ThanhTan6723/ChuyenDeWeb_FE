@@ -16,28 +16,29 @@ const Login = () => {
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://localhost:8443";
 
     const validateForm = () => {
-        let valid = true;
+        let isValid = true;
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const phoneRegex = /^\d{10}$/;
 
-        if (!identifier) {
+        if (!identifier.trim()) {
             setErrorIdenty("Vui lòng nhập email hoặc số điện thoại");
-            valid = false;
+            isValid = false;
         } else if (!emailRegex.test(identifier) && !phoneRegex.test(identifier)) {
-            setErrorIdenty("Email hoặc số điện thoại không hợp lệ");
-            valid = false;
+            setErrorIdenty("Định dạng email hoặc số điện thoại không hợp lệ");
+            isValid = false;
         } else {
             setErrorIdenty("");
         }
 
-        if (!password) {
+        if (!password.trim()) {
             setErrorP("Vui lòng nhập mật khẩu");
-            valid = false;
+            isValid = false;
         } else {
             setErrorP("");
         }
 
-        return valid;
+        return isValid;
     };
 
     const handleSubmit = async (e) => {
@@ -64,15 +65,15 @@ const Login = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                login(data.user); // Lưu user vào context
-                navigate('/'); // Chuyển về trang chính
+                login(data.user);
+                navigate('/');
             } else {
                 const errorData = await response.json();
                 setError(errorData.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại.");
             }
         } catch (err) {
-            setError("Không thể kết nối tới máy chủ.");
-            console.error("Login error:", err);
+            // setError("Không thể kết nối tới máy chủ.");
+            // console.error("Login error:", err);
         }
     };
 
