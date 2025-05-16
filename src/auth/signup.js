@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./auth.css";
 import { Link, useNavigate } from "react-router-dom";
 import "boxicons/css/boxicons.min.css";
@@ -12,12 +12,10 @@ const Register = () => {
         repassw: "",
     });
 
-    const [errors, setErrors] = useState({
-        error2: "",
-        error3: "",
-        error4: "",
-        error5: "",
-        error6: "",
+    const [errors, setErrors] = useState({});
+    const [showPassword, setShowPassword] = useState({
+        passw: false,
+        repassw: false,
     });
 
     const navigate = useNavigate();
@@ -25,93 +23,71 @@ const Register = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-        clearError(name);
-        validateField(name, value);
     };
 
-    const clearError = (name) => {
-        setErrors((prev) => ({
-            ...prev,
-            ["error" + getFieldIndex(name)]: "",
-        }));
-    };
-
-    const getFieldIndex = (field) => {
-        const map = {
-            name: "2",
-            email: "3",
-            phone: "4",
-            passw: "5",
-            repassw: "6",
-        };
-        return map[field];
-    };
-
-    const validateField = (name, value) => {
-        const updatedErrors = { ...errors };
-
-        switch (name) {
-            case "name":
-                updatedErrors.error2 = !value ? "Vui lòng nhập tên" : "";
-                break;
-            case "email":
-                const emailRegex = /^\w+@\w+(\.\w+)+(\.\w+)*$/;
-                updatedErrors.error3 = !value
-                    ? "Vui lòng nhập email"
-                    : !emailRegex.test(value)
-                        ? "Email không đúng định dạng"
-                        : "";
-                break;
-            case "phone":
-                const phoneRegex = /^0\d{9}$/;
-                updatedErrors.error4 = !value
-                    ? "Vui lòng nhập số điện thoại"
-                    : !phoneRegex.test(value)
-                        ? "Số điện thoại sai định dạng"
-                        : "";
-                break;
-            case "passw":
-                if (!value) {
-                    updatedErrors.error5 = "Vui lòng nhập mật khẩu";
-                } else if (value.length < 8) {
-                    updatedErrors.error5 = "Mật khẩu phải chứa 8 kí tự";
-                } else if (!/[A-Z]/.test(value)) {
-                    updatedErrors.error5 = "Mật khẩu phải chứa ít nhất 1 kí tự viết hoa";
-                } else if (!/[a-z]/.test(value)) {
-                    updatedErrors.error5 = "Mật khẩu phải chứa ít nhất 1 kí tự viết thường";
-                } else if (!/[0-9]/.test(value)) {
-                    updatedErrors.error5 = "Mật khẩu phải chứa ít nhất 1 số";
-                } else if (!/[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]/.test(value)) {
-                    updatedErrors.error5 = "Mật khẩu phải chứa ít nhất 1 kí tự đặc biệt";
-                } else {
-                    updatedErrors.error5 = "";
-                }
-                break;
-            case "repassw":
-                updatedErrors.error6 = !value
-                    ? "Vui lòng xác nhận mật khẩu"
-                    : value !== formData.passw
-                        ? "Mật khẩu không trùng khớp"
-                        : "";
-                break;
-            default:
-                break;
-        }
-        setErrors(updatedErrors);
+    const togglePasswordVisibility = (field) => {
+        setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
     };
 
     const validateForm = () => {
-        Object.entries(formData).forEach(([key, value]) => {
-            validateField(key, value);
-        });
-        return Object.values(errors).every((e) => e === "");
+        const newErrors = {};
+
+        const emailRegex = /^\w+@\w+(\.\w+)+$/;
+        const phoneRegex = /^0\d{9}$/;
+        const passwordRegex = {
+            length: /.{8,}/,
+            upper: /[A-Z]/,
+            lower: /[a-z]/,
+            digit: /[0-9]/,
+            special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+        };
+
+        if (!formData.name.trim()) {
+            newErrors.name = "Vui lòng nhập tên";
+        }
+
+        if (!formData.email.trim()) {
+            newErrors.email = "Vui lòng nhập email";
+        } else if (!emailRegex.test(formData.email)) {
+            newErrors.email = "Email không đúng định dạng";
+        }
+
+        if (!formData.phone.trim()) {
+            newErrors.phone = "Vui lòng nhập số điện thoại";
+        } else if (!phoneRegex.test(formData.phone)) {
+            newErrors.phone = "Số điện thoại sai định dạng";
+        }
+
+        const pass = formData.passw;
+        if (!pass) {
+            newErrors.passw = "Vui lòng nhập mật khẩu";
+        } else if (!passwordRegex.length.test(pass)) {
+            newErrors.passw = "Mật khẩu phải chứa ít nhất 8 kí tự";
+        } else if (!passwordRegex.upper.test(pass)) {
+            newErrors.passw = "Mật khẩu phải chứa ít nhất 1 chữ in hoa";
+        } else if (!passwordRegex.lower.test(pass)) {
+            newErrors.passw = "Mật khẩu phải chứa ít nhất 1 chữ thường";
+        } else if (!passwordRegex.digit.test(pass)) {
+            newErrors.passw = "Mật khẩu phải chứa ít nhất 1 số";
+        } else if (!passwordRegex.special.test(pass)) {
+            newErrors.passw = "Mật khẩu phải chứa ít nhất 1 kí tự đặc biệt";
+        }
+
+        if (!formData.repassw.trim()) {
+            newErrors.repassw = "Vui lòng xác nhận mật khẩu";
+        } else if (formData.repassw !== formData.passw) {
+            newErrors.repassw = "Mật khẩu không trùng khớp";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateForm()) {
             try {
-                const response = await fetch("http://localhost:8080/api/auth/register", {
+                const response = await fetch("https://localhost:8443/api/auth/register", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -137,30 +113,16 @@ const Register = () => {
                 console.error("Lỗi đăng ký:", error);
                 alert("Đăng ký thất bại: " + error.message);
             }
+        } else {
+            // alert("Vui lòng kiểm tra lại thông tin!");
         }
     };
-
-    useEffect(() => {
-        const eyeIcons = document.querySelectorAll(".eye-icon");
-        eyeIcons.forEach((eyeIcon) => {
-            eyeIcon.addEventListener("click", () => {
-                const passwordField = eyeIcon.previousElementSibling;
-                if (passwordField.type === "password") {
-                    passwordField.type = "text";
-                    eyeIcon.classList.replace("bx-hide", "bx-show");
-                } else {
-                    passwordField.type = "password";
-                    eyeIcon.classList.replace("bx-show", "bx-hide");
-                }
-            });
-        });
-    }, []);
 
     return (
         <section className="login-page">
             <div className="login-form">
                 <div className="form-content">
-                    <header>Signup</header>
+                    <header>Đăng ký</header>
                     <form onSubmit={handleSubmit}>
                         <div className="field input-field">
                             <input
@@ -169,9 +131,8 @@ const Register = () => {
                                 placeholder="Tên"
                                 value={formData.name}
                                 onChange={handleChange}
-                                className="input"
                             />
-                            <span className="notify">{errors.error2}</span>
+                            <span className="notify">{errors.name}</span>
                         </div>
 
                         <div className="field input-field">
@@ -181,9 +142,8 @@ const Register = () => {
                                 placeholder="Email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="input"
                             />
-                            <span className="notify">{errors.error3}</span>
+                            <span className="notify">{errors.email}</span>
                         </div>
 
                         <div className="field input-field">
@@ -193,35 +153,40 @@ const Register = () => {
                                 placeholder="Số điện thoại"
                                 value={formData.phone}
                                 onChange={handleChange}
-                                className="input"
                             />
-                            <span className="notify">{errors.error4}</span>
+                            <span className="notify">{errors.phone}</span>
                         </div>
 
                         <div className="field input-field">
                             <input
                                 name="passw"
-                                type="password"
+                                type={showPassword.passw ? "text" : "password"}
                                 placeholder="Mật khẩu"
                                 value={formData.passw}
                                 onChange={handleChange}
-                                className="password"
                             />
-                            <i className="bx bx-hide eye-icon"></i>
-                            <span className="notify">{errors.error5}</span>
+                            <i
+                                className={`bx ${showPassword.passw ? "bx-show" : "bx-hide"} eye-icon`}
+                                onClick={() => togglePasswordVisibility("passw")}
+                                style={{ cursor: "pointer" }}
+                            ></i>
+                            <span className="notify">{errors.passw}</span>
                         </div>
 
                         <div className="field input-field">
                             <input
                                 name="repassw"
-                                type="password"
+                                type={showPassword.repassw ? "text" : "password"}
                                 placeholder="Xác nhận mật khẩu"
                                 value={formData.repassw}
                                 onChange={handleChange}
-                                className="password"
                             />
-                            <i className="bx bx-hide eye-icon"></i>
-                            <span className="notify">{errors.error6}</span>
+                            <i
+                                className={`bx ${showPassword.repassw ? "bx-show" : "bx-hide"} eye-icon`}
+                                onClick={() => togglePasswordVisibility("repassw")}
+                                style={{ cursor: "pointer" }}
+                            ></i>
+                            <span className="notify">{errors.repassw}</span>
                         </div>
 
                         <div className="field button-field">
@@ -230,12 +195,12 @@ const Register = () => {
                     </form>
 
                     <div className="form-link">
-            <span>
-              Bạn đã có tài khoản?{" "}
-                <Link to="/login" className="link login-link">
-                Đăng nhập
-              </Link>
-            </span>
+                        <span>
+                            Bạn đã có tài khoản?{" "}
+                            <Link to="/login" className="link login-link">
+                                Đăng nhập
+                            </Link>
+                        </span>
                     </div>
                 </div>
             </div>

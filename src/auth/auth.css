@@ -40,8 +40,8 @@
     position: relative;
     height: 50px;
     width: 100%;
-    margin-top: 29px;
-    border-radius: 6px;
+    margin-top: 25px;
+    border-radius: 8px;
 }
 
 .login-page .field input,
@@ -96,6 +96,19 @@
     font-size: 14px;
     font-weight: 400;
     color: #232836;
+}
+
+.login-page .form-link span,
+.login-page .forgot {
+    font-size: 14px;
+    font-weight: 400;
+    color: #232836;
+    margin-top: 22px;
+}
+
+.login-page .error-box {
+    color: red;
+    text-align: center;
 }
 
 .login-page a {
@@ -186,12 +199,4 @@
 .login-page .error {
     color: red;
     font-weight: 400;
-}
-
-.login-page .error-box {
-    color: red;
-    font-weight: 400;
-    background-color: seashell;
-    display: block;
-    margin-top: 5px;
 }
