@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import "./auth.css";
 import {Link, useNavigate} from "react-router-dom";
 import "boxicons/css/boxicons.min.css";
-
+import { useEffect } from "react";
 const Login = () => {
     const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
@@ -68,7 +68,44 @@ const Login = () => {
         e.target.classList.toggle("bx-show");
         e.target.classList.toggle("bx-hide");
     };
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("token");
 
+        if (token) {
+            localStorage.setItem("accessToken", token);
+            // Remove token from URL to clean up
+            window.history.replaceState({}, document.title, "/login");
+        }
+
+        const storedToken = token || localStorage.getItem("accessToken");
+        if (storedToken) {
+            fetchUserInfo(storedToken);
+        }
+    }, []);
+
+    const fetchUserInfo = (token) => {
+        fetch("http://localhost:8080/api/auth/user", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Token expired or invalid");
+                return res.json();
+            })
+            .then(data => {
+                console.log("User info:", data);
+                // Có thể lưu vào context/redux hoặc điều hướng
+                navigate("/home"); // Chỉ điều hướng khi user info hợp lệ
+            })
+            .catch((err) => {
+                console.error("User info fetch failed:", err);
+                localStorage.removeItem("accessToken");
+                // Optional: Hiện thông báo hoặc redirect về login
+                // navigate("/login");
+            });
+    };
     return (
         <section className="login-page">
             <div className="login-form">
@@ -146,7 +183,7 @@ const Login = () => {
 
                 <div className="media-options">
                     <a
-                        href="https://accounts.google.com/o/oauth2/auth?scope=email%20profile&redirect_uri=http://localhost:8080/login-google&response_type=code&client_id=103711909118-kj61sqe0bv8srccvmk7tire0ih1oi87o.apps.googleusercontent.com"
+                        href="https://localhost:8443/oauth2/authorization/google"
                         className="field google"
                     >
                         <img src="/img/google.png" alt="Google" className="google-img"/>
