@@ -1,73 +1,137 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const products = [
-    { id: 1, image: "img/product/product_1.png", name: "Sunstar Fresh Melon Juice", price: "18.00" },
-    { id: 2, image: "img/product/product_2.png", name: "Sunstar Fresh Melon Juice", price: "18.00" },
-    { id: 3, image: "img/product/product_3.png", name: "Sunstar Fresh Melon Juice", price: "18.00" },
-    { id: 4, image: "img/product/product_4.png", name: "Sunstar Fresh Melon Juice", price: "18.00" },
-    { id: 5, image: "img/product/product_5.png", name: "Sunstar Fresh Melon Juice", price: "18.00" },
-    { id: 6, image: "img/product/product_6.png", name: "Sunstar Fresh Melon Juice", price: "18.00" },
-    { id: 7, image: "img/product/product_7.png", name: "Sunstar Fresh Melon Juice", price: "18.00" },
-    { id: 8, image: "img/product/product_1.png", name: "Sunstar Fresh Melon Juice", price: "18.00" },
-    { id: 9, image: "img/product/product_2.png", name: "Sunstar Fresh Melon Juice", price: "18.00" },
-    { id: 10, image: "img/product/product_3.png", name: "Sunstar Fresh Melon Juice", price: "18.00" },
-    { id: 11, image: "img/product/product_4.png", name: "Sunstar Fresh Melon Juice", price: "18.00" },
-];
-
-const itemsPerPage = 5;
+const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dp2jfvmlh/image/upload/';
+const API_URL = 'https://localhost:8443/api/products/grid';
 
 const ProductGrid = () => {
+    const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const itemsPerPage = 5;
 
-    const totalPages = Math.ceil(products.length / itemsPerPage);
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentProducts = products.slice(indexOfFirstItem, indexOfLastItem);
+    useEffect(() => {
+        const fetchProducts = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await fetch(`${API_URL}?page=${currentPage - 1}&size=${itemsPerPage}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch products');
+                }
+                const data = await response.json();
+                if (data.products.length === 0) {
+                    setProducts([]);
+                    setTotalPages(1);
+                    return;
+                }
+                console.log('Data: '+JSON.stringify(data));
+                setProducts(data.products);
+                setTotalPages(data.totalPages);
+            } catch (err) {
+                setError(err.message);
+                console.error('Error fetching products:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, [currentPage]);
 
     const handlePageChange = (pageNumber) => {
-        setCurrentPage(pageNumber);
+        if (pageNumber >= 1 && pageNumber <= totalPages) {
+            setCurrentPage(pageNumber);
+        }
+    };
+
+    const handleQuantityChange = (productId, delta) => {
+        setProducts(products.map(product =>
+            product.id === productId
+                ? { ...product, quantity: Math.max(1, (product.quantity || 1) + delta) }
+                : product
+        ));
+    };
+
+    const handleAddToCart = (product) => {
+        console.log(`Added to cart: ${product.name}, Quantity: ${product.quantity || 1}`);
     };
 
     return (
-        <>
+        <div className="product-grid-container">
+            {loading && <div className="loading">Đang tải...</div>}
+            {error && <div className="error">Lỗi: {error}</div>}
+            {!loading && !error && products.length === 0 && (
+                <p>Không có sản phẩm nào để hiển thị.</p>
+            )}
             <div className="product-grid">
-                {currentProducts.map((product) => (
+                {products.map((product) => (
                     <div className="product-card" key={product.id}>
-                        <div className="discount-badge">-30%</div>
-                        <div className="wishlist-icon">♡</div>
-                        <img src={product.image} alt={product.name} className="product-image" />
-                        <h3 className="product-name">{product.name}</h3>
-                        <div className="unit-rating">
-                            <span>1 UNIT</span>
-                            <span className="star">⭐ 4.5</span>
+                        <img
+                            src={product.mainImageUrl
+                                ? `${CLOUDINARY_BASE_URL}${product.mainImageUrl}.png`
+                                : '/img/product/default.png'}
+                            alt={product.name}
+                            className="product-image"
+                        />
+                        <h3 className="product-name">{product.brand}</h3>
+                        <p className="product-brand">{product.name}</p>
+                        {/*<p className="product-attributes">Thuộc tính: {product.attributes || 'Không có'}</p>*/}
+                        <div className="product-price">
+                            {product.price ? `${product.price.toLocaleString()}₫` : 'Liên hệ'}
                         </div>
-                        <div className="product-price">${product.price}</div>
-                        <div className="quantity-cart">
-                            <button>-</button>
-                            <span>1</span>
-                            <button>+</button>
-                            <span className="add-to-cart">Add to Cart</span>
-                        </div>
+                        {/*<div className="unit-rating">*/}
+                        {/*    <span>{product.stock > 0 ? `${product.stock} UNIT` : 'Hết hàng'}</span>*/}
+                        {/*</div>*/}
+                        {product.stock > 0 && (
+                            <div className="quantity-cart">
+                                <button onClick={() => handleQuantityChange(product.id, -1)}>-</button>
+                                <span>{product.quantity || 1}</span>
+                                <button onClick={() => handleQuantityChange(product.id, 1)}>+</button>
+                                <button
+                                    className="add-to-cart"
+                                    onClick={() => handleAddToCart(product)}
+                                >
+                                    Thêm vào giỏ
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
-
-            {/* Phân trang */}
-            <div className="pagination">
-                {[...Array(totalPages)].map((_, index) => {
-                    const pageNumber = index + 1;
-                    return (
-                        <button
-                            key={index}
-                            onClick={() => handlePageChange(pageNumber)}
-                            className={currentPage === pageNumber ? 'active' : ''}
-                        >
-                            {pageNumber}
-                        </button>
-                    );
-                })}
-            </div>
-        </>
+            {totalPages > 1 && (
+                <div className="pagination">
+                    <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                    >
+                        Trước
+                    </button>
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                        const pageNum = i + 1 + Math.max(0, currentPage - 3);
+                        if (pageNum <= totalPages) {
+                            return (
+                                <button
+                                    key={pageNum}
+                                    onClick={() => handlePageChange(pageNum)}
+                                    className={currentPage === pageNum ? 'active' : ''}
+                                >
+                                    {pageNum}
+                                </button>
+                            );
+                        }
+                        return null;
+                    })}
+                    <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                        Tiếp
+                    </button>
+                </div>
+            )}
+        </div>
     );
 };
 
