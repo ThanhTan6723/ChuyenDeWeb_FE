@@ -1,9 +1,9 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React from 'react';
 import {Link, useNavigate} from "react-router-dom";
 import {useAuth} from '../../../auth/authcontext';
 
 const Header = () => {
-    const {user, logout} = useAuth();
+    const {user, logout, loading} = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -12,6 +12,10 @@ const Header = () => {
             navigate("/home");
         }
     };
+
+    if (loading) {
+        return <div>Đang tải...</div>; // Hoặc một spinner, hoặc không hiển thị gì
+    }
 
     return (
         <header className="main_menu home_menu">
@@ -32,7 +36,7 @@ const Header = () => {
                                 aria-label="Toggle navigation"
                             >
                                 <span className="menu_icon">
-                                  <i className="fas fa-bars"/>
+                                    <i className="fas fa-bars"/>
                                 </span>
                             </button>
                             <div
@@ -67,8 +71,8 @@ const Header = () => {
                                     </li>
                                 </ul>
                             </div>
-                            <div className="language" style={{ marginRight: '20px' }}>
-                                <img src="/img/usa.png" style={{marginRight:'5px'}} alt=""/>
+                            <div className="language" style={{marginRight: '20px'}}>
+                                <img src="/img/usa.png" style={{marginRight: '5px'}} alt=""/>
                                 <img src="/img/vietnam.png" alt=""/>
                             </div>
 
@@ -77,16 +81,18 @@ const Header = () => {
                                     <div className="user-dropdown">
                                         <span className="user-name">{user.username}</span>
                                         <div className="dropdown-content">
-                                            {/*<Link to="/profile">Thông tin tài khoản</Link>*/}
                                             <a href="#" onClick={(e) => {
                                                 e.preventDefault();
                                                 handleLogout();
                                             }}>Đăng xuất</a>
+                                            <a href="#">Kho voucher</a>
+                                            <a href="#">Hỗ trợ</a>
+                                            <a href="#">Thông tin tài khoản</a>
                                         </div>
                                     </div>
                                 ) : (
                                     <>
-                                        <img src="/img/login.png" style={{ marginRight: '5px' }} alt="" />
+                                        <img src="/img/login.png" style={{marginRight: '5px'}} alt=""/>
                                         <Link className="auth" to="/login">
                                             Đăng nhập/Đăng ký
                                         </Link>
@@ -117,18 +123,7 @@ const Header = () => {
                 </div>
             </div>
             <div className="search_input" id="search_input_box">
-                <div className="container ">
-                    {/*<form className="d-flex justify-content-between search-inner">*/}
-                    {/*    <input*/}
-                    {/*        type="text"*/}
-                    {/*        className="form-control"*/}
-                    {/*        id="search_input"*/}
-                    {/*        placeholder="Search Here"*/}
-                    {/*    />*/}
-                    {/*    <button type="submit" className="btn" />*/}
-                    {/*    <span className="ti-close" id="close_search" title="Close Search" />*/}
-                    {/*</form>*/}
-                </div>
+                <div className="container"></div>
             </div>
         </header>
     );
