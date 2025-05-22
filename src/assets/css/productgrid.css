@@ -12,7 +12,9 @@
     border-radius: 16px;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
     position: relative;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px; /* Ensure consistent height for all cards */
 }
 
 .discount-badge {
@@ -45,27 +47,35 @@
     font-size: 16px;
     font-weight: 600;
     margin: 10px 0 4px;
+    text-align: left; /* Left-align product name */
 }
 
-.unit-rating {
-    font-size: 13px;
+.product-brand {
+    font-size: 14px;
     color: #666;
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 6px;
+    margin: 0 0 10px;
+    text-align: left; /* Center-align product brand */
 }
 
 .product-price {
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 10px;
+    text-align: left;
+    color: #ff4400;
 }
 
 .quantity-cart {
     display: flex;
+    flex-direction: column; /* Stack quantity controls and add-to-cart button vertically */
+    align-items: center; /* Center-align items */
+    gap: 10px;
+    margin-top: auto; /* Push to the bottom of the card */
+}
+
+.quantity-cart .quantity-controls {
+    display: flex;
     align-items: center;
-    justify-content: center;
     gap: 10px;
 }
 
@@ -79,16 +89,26 @@
     border-radius: 4px;
 }
 
+.quantity-cart .add-to-cart {
+    width: 90%; /* Make the button full-width */
+    margin-left: 0; /* Remove left margin */
+    padding: 10px;
+    background: #ffcc00;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center text horizontally */
+    align-items: center; /* Center text vertically */
+    text-align: center; /* Fallback for horizontal centering */
+}
+
 .quantity-cart span {
     font-size: 14px;
 }
 
-.add-to-cart {
-    margin-left: 10px;
-    color: #666;
-    font-size: 14px;
-    cursor: pointer;
-}
 .pagination {
     display: flex;
     justify-content: center;

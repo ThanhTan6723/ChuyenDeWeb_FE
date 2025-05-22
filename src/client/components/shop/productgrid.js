@@ -9,7 +9,7 @@ const ProductGrid = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const itemsPerPage = 5;
+    const itemsPerPage = 6;
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -75,20 +75,19 @@ const ProductGrid = () => {
                             alt={product.name}
                             className="product-image"
                         />
-                        <h3 className="product-name">{product.brand}</h3>
-                        <p className="product-brand">{product.name}</p>
-                        {/*<p className="product-attributes">Thuộc tính: {product.attributes || 'Không có'}</p>*/}
                         <div className="product-price">
                             {product.price ? `${product.price.toLocaleString()}₫` : 'Liên hệ'}
                         </div>
-                        {/*<div className="unit-rating">*/}
-                        {/*    <span>{product.stock > 0 ? `${product.stock} UNIT` : 'Hết hàng'}</span>*/}
-                        {/*</div>*/}
+                        <h3 className="product-name">{product.brand}</h3>
+                        <p className="product-brand">{product.name}</p>
+
                         {product.stock > 0 && (
                             <div className="quantity-cart">
-                                <button onClick={() => handleQuantityChange(product.id, -1)}>-</button>
-                                <span>{product.quantity || 1}</span>
-                                <button onClick={() => handleQuantityChange(product.id, 1)}>+</button>
+                                <div className="quantity-controls">
+                                    <button onClick={() => handleQuantityChange(product.id, -1)}>-</button>
+                                    <span>{product.quantity || 1}</span>
+                                    <button onClick={() => handleQuantityChange(product.id, 1)}>+</button>
+                                </div>
                                 <button
                                     className="add-to-cart"
                                     onClick={() => handleAddToCart(product)}
