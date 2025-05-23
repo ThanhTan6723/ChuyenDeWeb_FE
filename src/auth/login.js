@@ -165,6 +165,7 @@ const Login = () => {
                 <div className="media-options">
                     <a
                         href="https://accounts.google.com/o/oauth2/auth?scope=email%20profile&redirect_uri=https://localhost:8443/skins/oauth2/google&response_type=code&client_id=103711909118-kj61sqe0bv8srccvmk7tire0ih1oi87o.apps.googleusercontent.com"
+                        // href="https://localhost:8443/oauth2/authorization/google"
                         className="field google"
                     >
                         <img src="/img/google.png" alt="Google" className="google-img" />
