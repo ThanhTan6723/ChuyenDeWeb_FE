@@ -12,7 +12,9 @@
     border-radius: 16px;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
     position: relative;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px; /* Ensure consistent height for all cards */
 }
 
 .discount-badge {
@@ -36,7 +38,7 @@
 }
 
 .product-image {
-    height: 100px;
+    height: 150px;
     object-fit: contain;
     margin: 20px auto;
 }
@@ -45,28 +47,37 @@
     font-size: 16px;
     font-weight: 600;
     margin: 10px 0 4px;
+    text-align: left; /* Left-align product name */
 }
 
-.unit-rating {
-    font-size: 13px;
+.product-brand {
+    font-size: 14px;
     color: #666;
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 6px;
+    margin: 0 0 10px;
+    text-align: left; /* Center-align product brand */
 }
 
 .product-price {
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 10px;
+    text-align: left;
+    color: #ff4400;
 }
 
 .quantity-cart {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column; /* Stack quantity controls and add-to-cart button vertically */
+    align-items: center; /* Center-align items */
     gap: 10px;
+    margin-top: auto; /* Push to the bottom of the card */
+}
+
+.quantity-cart .quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .quantity-cart button {
@@ -79,16 +90,31 @@
     border-radius: 4px;
 }
 
+.quantity-cart .add-to-cart {
+    width: 90%; /* Make the button full-width */
+    margin-left: 0; /* Remove left margin */
+    padding: 10px;
+    background: #4ce9d1;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center text horizontally */
+    align-items: center; /* Center text vertically */
+    text-align: center; /* Fallback for horizontal centering */
+    margin-bottom: 10px;
+}
+
+.quantity-cart .add-to-cart:hover {
+    background: #4ae1cb; /* Màu đậm hơn khi hover */
+}
+
 .quantity-cart span {
     font-size: 14px;
 }
 
-.add-to-cart {
-    margin-left: 10px;
-    color: #666;
-    font-size: 14px;
-    cursor: pointer;
-}
 .pagination {
     display: flex;
     justify-content: center;
@@ -106,6 +132,106 @@
 }
 
 .pagination button.active {
-    background-color: #91ce50;
+    background-color: #32dabb;
     color: white;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 20px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #666;
+}
+
+.modal-body {
+    display: flex;
+    gap: 20px;
+}
+
+.modal-image {
+    flex: 1;
+}
+
+.modal-image .product-image {
+    height: 460px;
+    width: 100%;
+}
+
+.modal-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.modal-category {
+    font-size: 14px;
+    color: #666;
+}
+
+.modal-description {
+    font-size: 14px;
+    color: #333;
+}
+
+.modal-variants h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.variant-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.variant-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 20px;
+}
+
+.variant-item input[type="radio"] {
+    margin: 0;
+}
+
+.variant-item span {
+    font-size: 14px;
 }
