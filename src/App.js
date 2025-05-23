@@ -7,6 +7,7 @@ import Login from './auth/login';
 import Signup from './auth/signup';
 import ForgotPassword from './auth/forgotpassword';
 import CartPage from './client/pages/cart';
+import ResetPassword from "./auth/ResetPassword";
 
 function App() {
     return (
@@ -19,6 +20,7 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/forgotpassword" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/cart" element={<CartPage />} />
                 </Routes>
             </Router>
