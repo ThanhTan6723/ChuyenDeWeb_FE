@@ -235,3 +235,7 @@
 .variant-item span {
     font-size: 14px;
 }
+
+body.modal-active {
+    overflow: hidden;
+}

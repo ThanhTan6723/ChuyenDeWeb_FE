@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {useNavigate} from "react-router-dom";
 
 const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dp2jfvmlh/image/upload/';
 const API_URL = 'https://localhost:8443/api/products/grid';
@@ -15,6 +16,7 @@ const ProductGrid = () => {
     const [selectedVariant, setSelectedVariant] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const itemsPerPage = 6;
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -47,6 +49,19 @@ const ProductGrid = () => {
 
         fetchProducts();
     }, [currentPage]);
+
+    // Effect to toggle modal-active class on body
+    useEffect(() => {
+        if (modalOpen) {
+            document.body.classList.add('modal-active');
+        } else {
+            document.body.classList.remove('modal-active');
+        }
+        // Cleanup on component unmount
+        return () => {
+            document.body.classList.remove('modal-active');
+        };
+    }, [modalOpen]);
 
     const fetchProductDetails = async (productId) => {
         setLoading(true);
@@ -132,7 +147,12 @@ const ProductGrid = () => {
             )}
             <div className="product-grid">
                 {products.map((product) => (
-                    <div className="product-card" key={product.id}>
+                    <div
+                        className="product-card"
+                        key={product.id}
+                        onClick={() => navigate(`/shop-detail/${product.id}`)}
+                        style={{ cursor: 'pointer' }}
+                    >
                         <img
                             src={product.mainImageUrl
                                 ? `${CLOUDINARY_BASE_URL}${product.mainImageUrl}.png`
@@ -149,7 +169,10 @@ const ProductGrid = () => {
                             <div className="quantity-cart">
                                 <button
                                     className="add-to-cart"
-                                    onClick={() => handleAddToCart(product)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleAddToCart(product);
+                                    }}
                                 >
                                     Thêm vào giỏ
                                 </button>
@@ -213,7 +236,7 @@ const ProductGrid = () => {
                                    {selectedVariant.price ? `${selectedVariant.price.toLocaleString()}₫` : 'Liên hệ'}
                                 </p>
                                 <div className="modal-variants">
-                                    <h3>Công dụng</h3>
+                                    <h3>Tùy chọn</h3>
                                     {selectedProduct.variants?.length > 0 ? (
                                         <div className="variant-list">
                                             {selectedProduct.variants.map((variant) => (
