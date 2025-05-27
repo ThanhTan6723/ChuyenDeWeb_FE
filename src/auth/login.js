@@ -10,14 +10,12 @@ const Login = () => {
     const [errorIdenty, setErrorIdenty] = useState("");
     const [errorP, setErrorP] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://localhost:8443";
-
     const validateForm = () => {
         let isValid = true;
-
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const phoneRegex = /^\d{10}$/;
 
@@ -43,37 +41,28 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!validateForm()) return;
+        setError("");
+        setLoading(true);
 
-        // Tách định danh thành email/phone cho BE
+        if (!validateForm()) {
+            setLoading(false);
+            return;
+        }
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const payload = {
-            email: emailRegex.test(identifier) ? identifier : null,
-            phone: !emailRegex.test(identifier) ? identifier : null,
-            password
-        };
+        const email = emailRegex.test(identifier) ? identifier : "";
+        const phone = !emailRegex.test(identifier) ? identifier : "";
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                login(data.user);
-                navigate('/');
-            } else {
-                const errorData = await response.json();
-                setError(errorData.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại.");
+            const success = await login(email, password, phone, navigate);
+            if (!success) {
+                setError("Đăng nhập thất bại. Vui lòng kiểm tra email/số điện thoại hoặc mật khẩu.");
             }
         } catch (err) {
-            setError("Không thể kết nối tới máy chủ.");
-            console.error("Login error:", err);
+            setError("Không thể kết nối tới máy chủ. Vui lòng thử lại sau.");
+            console.error("Lỗi đăng nhập:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -102,8 +91,9 @@ const Login = () => {
                                     setErrorIdenty("");
                                     setError("");
                                 }}
+                                disabled={loading}
                             />
-                            <span className="error">{errorIdenty}</span>
+                            {errorIdenty && <span className="error">{errorIdenty}</span>}
                         </div>
 
                         <div className="field input-field">
@@ -118,9 +108,10 @@ const Login = () => {
                                     setErrorP("");
                                     setError("");
                                 }}
+                                disabled={loading}
                             />
                             <i className="bx bx-hide eye-icon" onClick={togglePasswordVisibility}></i>
-                            <span className="error">{errorP}</span>
+                            {errorP && <span className="error">{errorP}</span>}
                         </div>
 
                         <div className="form-link">
@@ -133,12 +124,14 @@ const Login = () => {
 
                         {error && (
                             <div className="error-box">
-                                <span className="error-box">{error}</span>
+                                <span className="error">{error}</span>
                             </div>
                         )}
 
                         <div className="field button-field">
-                            <button type="submit">Đăng nhập</button>
+                            <button type="submit" disabled={loading}>
+                                {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+                            </button>
                         </div>
                     </form>
 
@@ -153,21 +146,14 @@ const Login = () => {
                 </div>
 
                 <div className="media-options">
-                    <a
-                        href="https://www.facebook.com/v20.0/dialog/oauth?client_id=463688686382911&redirect_uri=http://localhost:8080/login-facebook"
-                        className="field facebook"
-                    >
+                    <a href={`${process.env.REACT_APP_API_BASE_URL || "https://localhost:8443"}/oauth2/authorization/facebook`} className="field facebook">
                         <i className="bx bxl-facebook facebook-icon"></i>
                         <span>Tiếp tục với Facebook</span>
                     </a>
                 </div>
 
                 <div className="media-options">
-                    <a
-                        href="https://accounts.google.com/o/oauth2/auth?scope=email%20profile&redirect_uri=https://localhost:8443/skins/oauth2/google&response_type=code&client_id=103711909118-kj61sqe0bv8srccvmk7tire0ih1oi87o.apps.googleusercontent.com"
-                        // href="https://localhost:8443/oauth2/authorization/google"
-                        className="field google"
-                    >
+                    <a href={`${process.env.REACT_APP_API_BASE_URL || "https://localhost:8443"}/oauth2/authorization/google`} className="field google">
                         <img src="/img/google.png" alt="Google" className="google-img" />
                         <span>Tiếp tục với Google</span>
                     </a>

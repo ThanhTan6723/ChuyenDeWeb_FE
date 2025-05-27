@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '../../../auth/authcontext';
 
-const CART_API_URL = 'https://localhost:8443/api/cart';
+const CART_API_URL = `${process.env.REACT_APP_API_BASE_URL || "https://localhost:8443"}/api/cart`;
 
 const Header = () => {
     const { user, logout, loading } = useAuth();
@@ -15,105 +15,109 @@ const Header = () => {
     const [showLoginModal, setShowLoginModal] = useState(false);
 
     const handleLogout = async () => {
-        const success = await logout();
-        if (success) {
-            navigate("/home");
+        try {
+            const success = await logout(navigate);
+            if (success) {
+                setCartItems([]);
+                setCartCount(0);
+                setShowCartDropdown(false);
+            } else {
+                console.error("Đăng xuất không thành công");
+            }
+        } catch (err) {
+            console.error("Lỗi khi đăng xuất:", err);
         }
     };
 
-    // Fetch cart and calculate total quantity for badge
     const fetchCart = useCallback(async () => {
-        setCartLoading(true);
-        try {
-            const token = localStorage.getItem('accessToken');
-            if (!token) {
-                setShowLoginModal(true);
-                setCartItems([]);
-                setCartCount(0);
-                return;
-            }
+        if (!user) {
+            setShowLoginModal(true);
+            setCartItems([]);
+            setCartCount(0);
+            return;
+        }
 
+        setCartLoading(true);
+        setCartError(null);
+
+        try {
             const response = await fetch(CART_API_URL, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
                 },
                 credentials: 'include',
             });
 
-            if (response.status === 401) {
-                setShowLoginModal(true);
-                setCartItems([]);
-                setCartCount(0);
-                return;
-            }
-
             if (!response.ok) {
-                const text = await response.text();
-                throw new Error(`HTTP error! Status: ${response.status}. Message: ${text.slice(0, 100)}`);
-            }
-
-            const contentType = response.headers.get("content-type");
-            if (!contentType || !contentType.includes("application/json")) {
-                const text = await response.text();
-                throw new Error("Phản hồi không phải JSON! Server trả về: " + text.slice(0, 100));
+                console.log('Yêu cầu giỏ hàng thất bại:', response.status);
+                throw new Error(`Lỗi HTTP! Trạng thái: ${response.status}`);
             }
 
             const data = await response.json();
-            if (!Array.isArray(data) || data.length === 0) {
-                setCartItems([]);
-                setCartCount(0);
-                return;
-            }
-            // Chuẩn hóa dữ liệu đúng với CartItemDTO
-            let totalQty = 0;
-            const items = data.map(item => {
-                totalQty += item.quantity || 0;
-                return {
-                    productVariantId: item.productVariantId,
-                    name: item.productName,
-                    image: item.mainImageUrl || '/img/product/placeholder.jpg',
-                    price: item.price,
-                    quantity: item.quantity,
-                    total: (item.price || 0) * (item.quantity || 1),
-                    attribute: item.attribute,
-                    variant: item.variant,
-                    brandName: item.brandName,
-                    categoryName: item.categoryName,
-                };
-            });
-            setCartItems(items);
-            setCartCount(totalQty);
+            processCartData(data);
         } catch (err) {
-            setCartError('Không thể tải giỏ hàng. ' + err.message);
+            setCartError("Không thể tải giỏ hàng. Vui lòng thử lại sau.");
             setCartItems([]);
             setCartCount(0);
-            console.error('Error fetching cart:', err);
+            console.error('Lỗi khi tải giỏ hàng:', err);
         } finally {
             setCartLoading(false);
         }
-    }, []);
+    }, [user]);
+
+    const processCartData = (data) => {
+        if (!Array.isArray(data) || data.length === 0) {
+            setCartItems([]);
+            setCartCount(0);
+            return;
+        }
+
+        let totalQty = 0;
+        const items = data.map(item => {
+            const quantity = item.quantity || 0;
+            totalQty += quantity;
+            return {
+                productVariantId: item.productVariantId,
+                name: item.productName || 'Sản phẩm không tên',
+                image: item.mainImageUrl || '/img/product/placeholder.jpg',
+                price: item.price || 0,
+                quantity: quantity,
+                total: (item.price || 0) * quantity,
+                attribute: item.attribute || '',
+                variant: item.variant || '',
+                brandName: item.brandName || '',
+                categoryName: item.categoryName || '',
+            };
+        });
+        setCartItems(items);
+        setCartCount(totalQty);
+    };
 
     useEffect(() => {
-        if (user) fetchCart();
-    }, [user, fetchCart]);
+        if (user && !loading) {
+            fetchCart();
+        } else {
+            setCartItems([]);
+            setCartCount(0);
+        }
+    }, [user, loading, fetchCart]);
 
     const handleCartToggle = () => {
         if (!user) {
             setShowLoginModal(true);
             return;
         }
+        setShowCartDropdown(!showCartDropdown);
         if (!showCartDropdown) {
             fetchCart();
         }
-        setShowCartDropdown(!showCartDropdown);
     };
 
     const closeModal = () => setShowLoginModal(false);
 
     if (loading) {
-        return <div>Đang tải...</div>;
+        return <div className="text-center py-3">Đang tải...</div>;
     }
 
     return (
@@ -135,9 +139,9 @@ const Header = () => {
                                     aria-expanded="false"
                                     aria-label="Toggle navigation"
                                 >
-                                    <span className="menu_icon">
-                                        <i className="fas fa-bars" />
-                                    </span>
+                  <span className="menu_icon">
+                    <i className="fas fa-bars" />
+                  </span>
                                 </button>
                                 <div
                                     className="collapse navbar-collapse main-menu-item"
@@ -179,7 +183,7 @@ const Header = () => {
                                 <div className="hearer_icon d-flex align-items-center">
                                     {user ? (
                                         <div className="user-dropdown">
-                                            <span className="user-name">{user.username}</span>
+                                            <span className="user-name">{user?.username || user?.email?.split('@')[0] || 'Người dùng'}</span>
                                             <div className="dropdown-content">
                                                 <a
                                                     href="#"
@@ -190,9 +194,9 @@ const Header = () => {
                                                 >
                                                     Đăng xuất
                                                 </a>
-                                                <a href="#">Kho voucher</a>
-                                                <a href="#">Hỗ trợ</a>
-                                                <a href="#">Thông tin tài khoản</a>
+                                                <Link to="/vouchers">Kho voucher</Link>
+                                                <Link to="/support">Hỗ trợ</Link>
+                                                <Link to="/profile">Thông tin tài khoản</Link>
                                             </div>
                                         </div>
                                     ) : (
@@ -224,9 +228,10 @@ const Header = () => {
                                         >
                                             <i className="fas fa-shopping-cart" />
                                             {cartCount > 0 && (
-                                                <span className="badge badge-pill badge-danger" style={{ position: 'absolute', top: '-10px', right: '-10px' }}>
-                                                    {cartCount}
-                                                </span>
+                                                <span className="badge badge-pill badge-danger"
+                                                      style={{ position: 'absolute', top: '-10px', right: '-10px' }}>
+                          {cartCount}
+                        </span>
                                             )}
                                         </a>
                                         {user && (
@@ -263,7 +268,8 @@ const Header = () => {
                                                                 </div>
                                                             </div>
                                                         ))}
-                                                        <div className="d-flex justify-content-between align-items-center mt-3">
+                                                        <div
+                                                            className="d-flex justify-content-between align-items-center mt-3">
                                                             <strong>Tổng: </strong>
                                                             <strong>
                                                                 {cartItems.reduce((sum, item) => sum + item.total, 0).toLocaleString()}₫
@@ -288,7 +294,6 @@ const Header = () => {
                 </div>
             </header>
 
-            {/* Modal yêu cầu đăng nhập */}
             {showLoginModal && (
                 <div className="modal fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
