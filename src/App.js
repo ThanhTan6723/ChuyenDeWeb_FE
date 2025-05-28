@@ -10,6 +10,10 @@ import ForgotPassword from './auth/forgotpassword';
 import CartPage from './client/pages/cart';
 import ResetPassword from './auth/ResetPassword';
 
+import Dashboard from './admin/pages/Dashboard';
+import ManageUser from './admin/pages/ManageUser';
+import ManageProduct from './admin/pages/ManageProduct';
+import ManageCart from './admin/pages/ManageCart';
 function App() {
     return (
         <AuthProvider>
@@ -24,6 +28,10 @@ function App() {
                     <Route path="/forgotpassword" element={<ForgotPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/cart" element={<CartPage />} />
+                    <Route path="/admin" element={<Dashboard />} />
+                    <Route path="/admin/pages/manage-user" element={<ManageUser />} />
+                    <Route path="/admin/pages/manage-product" element={<ManageProduct /> } />
+                    <Route path="/admin/pages/manage-cart" element={<ManageCart /> } />
                 </Routes>
             </Router>
         </AuthProvider>
