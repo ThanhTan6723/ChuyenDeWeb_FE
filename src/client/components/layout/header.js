@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '../../../auth/authcontext';
 import { useCart } from '../../contexts/cartcontext';
@@ -7,8 +7,6 @@ const Header = () => {
     const { user, logout, loading } = useAuth();
     const { cartCount, fetchCart, setCartCount } = useCart();
     const navigate = useNavigate();
-
-    const [showLoginModal, setShowLoginModal] = useState(false);
 
     useEffect(() => {
         if (user && !loading) {
@@ -27,16 +25,14 @@ const Header = () => {
         }
     };
 
-
     const handleCartToggle = () => {
         if (!user) {
-            setShowLoginModal(true);
+            alert('Bạn cần đăng nhập để xem giỏ hàng')
+            navigate('/login', { state: { from: '/cart' } });
             return;
         }
         navigate('/cart');
     };
-
-    const closeModal = () => setShowLoginModal(false);
 
     if (loading) return <div className="text-center py-3">Đang tải...</div>;
 
@@ -76,7 +72,7 @@ const Header = () => {
                             <div className="hearer_icon d-flex align-items-center">
                                 {user ? (
                                     <div className="user-dropdown">
-                                        <span className="user-name">{user?.username || user?.email?.split('@')[0]}</span>
+                                        <span className="user-name" style={{color:'black'}}>{user?.username || user?.email?.split('@')[0]}</span>
                                         <div className="dropdown-content">
                                             <a href="#" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Đăng xuất</a>
                                             <Link to="/vouchers">Kho voucher</Link>
@@ -109,7 +105,6 @@ const Header = () => {
                                         >
                                             {cartCount}
                                         </span>
-
                                     </a>
                                 </div>
                             </div>

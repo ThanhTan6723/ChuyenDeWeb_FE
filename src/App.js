@@ -1,7 +1,6 @@
 import React from 'react';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import {AuthProvider} from './auth/authcontext';
-import {CartProvider} from './client/contexts/cartcontext';
 import Home from './client/pages/home';
 import Shop from './client/pages/shop';
 import ShopDetail from './client/pages/shop-detail';
@@ -11,6 +10,12 @@ import ForgotPassword from './auth/forgotpassword';
 import CartPage from './client/pages/cart';
 import ResetPassword from './auth/ResetPassword';
 import AccountInfo from "./auth/accountinfor";
+import {CartProvider} from "./client/contexts/cartcontext";
+
+import Dashboard from './admin/pages/Dashboard';
+import ManageUser from './admin/pages/ManageUser';
+import ManageProduct from './admin/pages/ManageProduct';
+import ManageCart from './admin/pages/ManageCart';
 
 function App() {
     return (
@@ -26,8 +31,12 @@ function App() {
                         <Route path="/signup" element={<Signup/>}/>
                         <Route path="/forgotpassword" element={<ForgotPassword/>}/>
                         <Route path="/reset-password" element={<ResetPassword/>}/>
-                        <Route path="/update-profile" element={<AccountInfo/>}/>
                         <Route path="/cart" element={<CartPage/>}/>
+                        <Route path="/update-profile" element={<AccountInfo/>}/>
+                        <Route path="/admin" element={<Dashboard/>}/>
+                        <Route path="/admin/pages/manage-user" element={<ManageUser/>}/>
+                        <Route path="/admin/pages/manage-product" element={<ManageProduct/>}/>
+                        <Route path="/admin/pages/manage-cart" element={<ManageCart/>}/>
                     </Routes>
                 </Router>
             </CartProvider>
