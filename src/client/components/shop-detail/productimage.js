@@ -6,7 +6,7 @@ const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dp2jfvmlh/image/upload/'
 const ProductImage = ({ variant }) => {
     const imageUrl = variant?.images?.length > 0
         ? `${CLOUDINARY_BASE_URL}${variant.images.find(img => img.main)?.publicId || variant.images[0].publicId}.png`
-        : '/img/product/single-product/product_1.png';
+        : 'Loading';
 
     return (
         <div className="product_slider_img">

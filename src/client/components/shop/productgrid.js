@@ -26,6 +26,7 @@ const ProductGrid = () => {
                 const response = await fetch(`${API_URL}?page=${currentPage - 1}&size=${itemsPerPage}`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                 });
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
