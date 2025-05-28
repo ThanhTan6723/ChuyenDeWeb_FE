@@ -1,7 +1,7 @@
 import React from 'react';
 import Layout from '../components/layout/layout';
 import Breadcrumb from '../components/cart/breadcrumb';
-import CartTable from "../components/cart/carttable";
+import CartTable from "../components/cart/cartitem";
 
 // Import CSS
 import '../../assets/css/bootstrap.min.css';
@@ -13,6 +13,7 @@ import '../../assets/css/themify-icons.css';
 import '../../assets/css/magnific-popup.css';
 import '../../assets/css/slick.css';
 import '../../assets/css/style.css';
+import '../../assets/css/cart.css';
 
 const CartPage = () => {
     return (

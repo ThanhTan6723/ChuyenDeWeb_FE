@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
+import { useCart } from '../../contexts/cartcontext'; // Import useCart
+import { useAuth } from '../../../auth/authcontext'; // Import useAuth để kiểm tra đăng nhập
 
 const CLOUDINARY_BASE_URL = 'https://localhost:8443/api/products/';
 const CART_API_URL = 'https://localhost:8443/api/cart';
 
-const ProductInfo = ({ productId = '1', onVariantChange, onCartUpdate }) => {
+const ProductInfo = ({ productId = '1', onVariantChange }) => {
+    const { user } = useAuth(); // Lấy user từ AuthContext
+    const { fetchCart } = useCart(); // Lấy fetchCart từ CartContext
     const [product, setProduct] = useState(null);
     const [selectedVariant, setSelectedVariant] = useState(null);
     const [quantity, setQuantity] = useState(1);
@@ -47,8 +51,7 @@ const ProductInfo = ({ productId = '1', onVariantChange, onCartUpdate }) => {
         };
 
         fetchProductDetails();
-        // eslint-disable-next-line
-    }, [productId]);
+    }, [productId, onVariantChange]);
 
     const handleVariantChange = (variant) => {
         setSelectedVariant(variant);
@@ -61,6 +64,11 @@ const ProductInfo = ({ productId = '1', onVariantChange, onCartUpdate }) => {
     };
 
     const handleAddToCart = async () => {
+        if (!user) {
+            setShowLoginModal(true);
+            return;
+        }
+
         try {
             const cartItem = {
                 productVariantId: selectedVariant.id,
@@ -75,16 +83,12 @@ const ProductInfo = ({ productId = '1', onVariantChange, onCartUpdate }) => {
                 body: JSON.stringify(cartItem),
                 credentials: 'include',
             });
-            if (response.status === 401) {
-                setShowLoginModal(true);
-                return;
-            }
             if (!response.ok) {
                 throw new Error('Thêm sản phẩm vào giỏ hàng thất bại!');
             }
-            const addedItem = await response.json();
+            await response.json();
             setSuccessMessage('Sản phẩm đã được thêm vào giỏ hàng!');
-            if (onCartUpdate) onCartUpdate(); // Gọi để cập nhật giỏ hàng trong Header
+            fetchCart(); // Gọi fetchCart để cập nhật giỏ hàng
             setTimeout(() => setSuccessMessage(null), 3000);
         } catch (err) {
             console.error('Lỗi khi thêm vào giỏ hàng:', err);
@@ -133,24 +137,22 @@ const ProductInfo = ({ productId = '1', onVariantChange, onCartUpdate }) => {
                 )}
             </div>
             {selectedVariant.quantity > 0 && (
-                <div className="quantity-cart flex flex-col sm:flex-row gap-4 mb-6">
-                    <div className="quantity-controls flex items-center gap-2">
+                <div className="quantity-cart">
+                    <div className="quantity-controls">
                         <button
-                            className="bg-gray-200 px-3 py-1 rounded"
                             onClick={() => handleQuantityChange(-1)}
                         >
                             -
                         </button>
-                        <span className="px-4">{quantity}</span>
+                        <span>{quantity}</span>
                         <button
-                            className="bg-gray-200 px-3 py-1 rounded"
                             onClick={() => handleQuantityChange(1)}
                         >
                             +
                         </button>
                     </div>
                     <button
-                        className="add-to-cart bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
+                        className="add-to-cart"
                         onClick={handleAddToCart}
                     >
                         Thêm vào giỏ
