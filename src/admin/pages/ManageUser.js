@@ -20,7 +20,7 @@ const ManageUser = () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    credentials: "include", // gửi cookie nếu có
+                    credentials: "include",
                 });
 
                 if (!response.ok) {
@@ -43,6 +43,62 @@ const ManageUser = () => {
         fetchUsers();
     }, [API_BASE_URL]);
 
+    const [showModal, setShowModal] = useState(false);
+    const [newUser, setNewUser] = useState({
+        username: '',
+        email: '',
+        password: '',
+        phoneNumber: '', // Thêm phoneNumber
+        roleName: 'ROLE_CLIENT'
+    });
+    const [formError, setFormError] = useState(null);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewUser({ ...newUser, [name]: value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setFormError(null);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify(newUser)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP ${response.status}`);
+            }
+
+            toast.success("Thêm người dùng thành công!");
+            setShowModal(false);
+            setNewUser({ username: '', email: '', password: '', phoneNumber: '', roleName: 'ROLE_CLIENT' });
+
+            const fetchResponse = await fetch(`${API_BASE_URL}/api/admin/list`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+            });
+
+            if (fetchResponse.ok) {
+                const data = await fetchResponse.json();
+                setUsers(data);
+            }
+        } catch (err) {
+            setFormError(`Lỗi khi thêm người dùng: ${err.message}`);
+            toast.error(`Lỗi khi thêm người dùng: ${err.message}`);
+        }
+    };
+
     return (
         <div className="layout-wrapper layout-content-navbar">
             <div className="layout-container">
@@ -53,8 +109,14 @@ const ManageUser = () => {
                         <div className="container-xxl flex-grow-1 container-p-y">
                             <h4 className="fw-bold py-3 mb-4">Quản lý Người dùng</h4>
                             <div className="card">
-                                <div className="card-header">
+                                <div className="card-header d-flex justify-content-between align-items-center">
                                     <h5 className="card-title">Danh sách Người dùng</h5>
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() => setShowModal(true)}
+                                    >
+                                        Thêm người dùng
+                                    </button>
                                 </div>
                                 <div className="card-body">
                                     {error && <div className="alert alert-danger">{error}</div>}
@@ -72,6 +134,7 @@ const ManageUser = () => {
                                                     <th>ID</th>
                                                     <th>Tên người dùng</th>
                                                     <th>Email</th>
+                                                    <th>Số điện thoại</th> {/* Thêm cột */}
                                                     <th>Vai trò</th>
                                                     <th>Số lần đăng nhập thất bại</th>
                                                     <th>Khóa</th>
@@ -86,6 +149,7 @@ const ManageUser = () => {
                                                             <td>{user.id}</td>
                                                             <td>{user.username}</td>
                                                             <td>{user.email}</td>
+                                                            <td>{user.phone || 'N/A'}</td> {/* Hiển thị phone */}
                                                             <td>{user.role?.roleName || "N/A"}</td>
                                                             <td>{user.failed ?? 0}</td>
                                                             <td>{user.locked ? "Có" : "Không"}</td>
@@ -102,7 +166,7 @@ const ManageUser = () => {
                                                     ))
                                                 ) : (
                                                     <tr>
-                                                        <td colSpan="8" className="text-center">
+                                                        <td colSpan="9" className="text-center">
                                                             Không có người dùng nào
                                                         </td>
                                                     </tr>
@@ -119,6 +183,91 @@ const ManageUser = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Modal thêm người dùng */}
+            {showModal && (
+                <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Thêm người dùng</h5>
+                                <button className="btn-close" onClick={() => setShowModal(false)}></button>
+                            </div>
+                            <form onSubmit={handleSubmit}>
+                                <div className="modal-body">
+                                    {formError && <div className="alert alert-danger">{formError}</div>}
+                                    <div className="mb-3">
+                                        <label className="form-label">Tên người dùng</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="username"
+                                            value={newUser.username}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Email</label>
+                                        <input
+                                            type="email"
+                                            className="form-control"
+                                            name="email"
+                                            value={newUser.email}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Số điện thoại</label>
+                                        <input
+                                            type="tel"
+                                            className="form-control"
+                                            name="phoneNumber"
+                                            value={newUser.phoneNumber}
+                                            onChange={handleInputChange}
+                                            placeholder="VD: 0123456789"
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Mật khẩu</label>
+                                        <input
+                                            type="password"
+                                            className="form-control"
+                                            name="password"
+                                            value={newUser.password}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Vai trò</label>
+                                        <select
+                                            className="form-select"
+                                            name="roleName"
+                                            value={newUser.roleName}
+                                            onChange={handleInputChange}
+                                        >
+                                            <option value="ROLE_CLIENT">Client</option>
+                                            <option value="ROLE_ADMIN">Admin</option>
+                                            <option value="ROLE_MANAGE_USER">Manage User</option>
+                                            <option value="ROLE_MANAGE_ORDER">Manage Order</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                                        Hủy
+                                    </button>
+                                    <button type="submit" className="btn btn-primary">
+                                        Thêm
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
