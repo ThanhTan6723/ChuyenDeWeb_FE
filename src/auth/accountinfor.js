@@ -1,6 +1,8 @@
 import { useAuth } from './authcontext';
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
+import "./auth.css";
 
 const AccountInfo = () => {
     const { user, loading, setUser } = useAuth();
@@ -95,56 +97,169 @@ const AccountInfo = () => {
         }
     };
 
+//     return (
+//         <div className="account-info-container">
+//             <h2>Thông tin tài khoản</h2>
+//             {isEditing ? (
+//                 <>
+//                     <p>
+//                         <strong>Tên người dùng:</strong>{" "}
+//                         <input
+//                             type="text"
+//                             name="username"
+//                             value={formData.username}
+//                             onChange={handleChange}
+//                             required
+//                         />
+//                     </p>
+//                     <p>
+//                         <strong>Email:</strong>{" "}
+//                         <input
+//                             type="email"
+//                             name="email"
+//                             value={formData.email}
+//                             onChange={handleChange}
+//                             required
+//                         />
+//                     </p>
+//                     <p>
+//                         <strong>Số điện thoại:</strong>{" "}
+//                         <input
+//                             type="text"
+//                             name="phone"
+//                             value={formData.phone}
+//                             onChange={handleChange}
+//                             required
+//                         />
+//                     </p>
+//                     <button disabled={saving} onClick={handleSave}>
+//                         {saving ? "Đang lưu..." : "Lưu"}
+//                     </button>
+//                     <button disabled={saving} onClick={() => setIsEditing(false)}>
+//                         Hủy
+//                     </button>
+//                 </>
+//             ) : (
+//                 <>
+//                     <p><strong>Tên người dùng:</strong> {user.username}</p>
+//                     <p><strong>Email:</strong> {user.email}</p>
+//                     <p><strong>Số điện thoại:</strong> {user.phone}</p>
+//                     <button onClick={() => setIsEditing(true)}>Cập nhật thông tin</button>
+//                 </>
+//             )}
+//         </div>
+//     );
+// };
     return (
-        <div className="account-info-container">
-            <h2>Thông tin tài khoản</h2>
-            {isEditing ? (
-                <>
-                    <p>
-                        <strong>Tên người dùng:</strong>{" "}
-                        <input
-                            type="text"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleChange}
-                            required
-                        />
+        <div className="container-fluid d-flex align-items-center justify-content-center min-vh-100 bg-light">
+            <div className="card shadow-sm p-4" style={{ maxWidth: "400px", width: "100%" }}>
+                <div className="card-body">
+                    <h4 className="card-title text-center mb-3">Thông tin tài khoản</h4>
+                    <p className="text-center text-muted mb-4">
+                        Xem và cập nhật thông tin cá nhân của bạn
                     </p>
-                    <p>
-                        <strong>Email:</strong>{" "}
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                        />
-                    </p>
-                    <p>
-                        <strong>Số điện thoại:</strong>{" "}
-                        <input
-                            type="text"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleChange}
-                            required
-                        />
-                    </p>
-                    <button disabled={saving} onClick={handleSave}>
-                        {saving ? "Đang lưu..." : "Lưu"}
-                    </button>
-                    <button disabled={saving} onClick={() => setIsEditing(false)}>
-                        Hủy
-                    </button>
-                </>
-            ) : (
-                <>
-                    <p><strong>Tên người dùng:</strong> {user.username}</p>
-                    <p><strong>Email:</strong> {user.email}</p>
-                    <p><strong>Số điện thoại:</strong> {user.phone}</p>
-                    <button onClick={() => setIsEditing(true)}>Cập nhật thông tin</button>
-                </>
-            )}
+                    {isEditing ? (
+                        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+                            <div className="mb-3">
+                                <label htmlFor="username" className="form-label">Tên người dùng</label>
+                                <div className="input-group">
+                                    <span className="input-group-text">
+                                        <i className="bx bx-user"></i>
+                                    </span>
+                                    <input
+                                        id="username"
+                                        type="text"
+                                        name="username"
+                                        placeholder="Nhập tên người dùng"
+                                        className="form-control"
+                                        value={formData.username}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="email" className="form-label">Email</label>
+                                <div className="input-group">
+                                    <span className="input-group-text">
+                                        <i className="bx bx-envelope"></i>
+                                    </span>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        name="email"
+                                        placeholder="Nhập email"
+                                        className="form-control"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="phone" className="form-label">Số điện thoại</label>
+                                <div className="input-group">
+                                    <span className="input-group-text">
+                                        <i className="bx bx-phone"></i>
+                                    </span>
+                                    <input
+                                        id="phone"
+                                        type="text"
+                                        name="phone"
+                                        placeholder="Nhập số điện thoại"
+                                        className="form-control"
+                                        value={formData.phone}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="d-flex gap-2">
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary w-100"
+                                    disabled={saving}
+                                >
+                                    {saving ? "Đang lưu..." : "Lưu"}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-secondary w-100"
+                                    onClick={() => setIsEditing(false)}
+                                    disabled={saving}
+                                >
+                                    Hủy
+                                </button>
+                            </div>
+                        </form>
+                    ) : (
+                        <div>
+                            <div className="mb-3">
+                                <strong>Tên người dùng: </strong> {user.username}
+                            </div>
+                            <div className="mb-3">
+                                <strong>Email: </strong> {user.email}
+                            </div>
+                            <div className="mb-3">
+                                <strong>Số điện thoại: </strong> {user.phone || "Chưa cung cấp"}
+                            </div>
+                            <div className="d-flex gap-2">
+                                <button
+                                    className="btn btn-primary w-100"
+                                    onClick={() => setIsEditing(true)}
+                                >
+                                    Cập nhật thông tin
+                                </button>
+                                <Link
+                                    to="/home"
+                                    className="btn btn-outline-secondary w-100"
+                                >
+                                    Trang chủ
+                                </Link>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 };

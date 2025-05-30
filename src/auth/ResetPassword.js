@@ -48,36 +48,58 @@ const ResetPassword = () => {
     };
 
     return (
-        <div className="container forms" style={{ paddingBottom: "150px" }}>
-            <div className="form login">
-                <div className="form-content">
-                    <header>Đặt lại mật khẩu</header>
+        <div className="container-fluid d-flex align-items-center justify-content-center min-vh-100 bg-light">
+            <div className="card shadow-sm p-4" style={{ maxWidth: "400px", width: "100%" }}>
+                <div className="card-body">
+                    <h4 className="card-title text-center mb-3">Đặt lại mật khẩu</h4>
+                    <p className="text-center text-muted mb-4">
+                        Nhập mật khẩu mới để tiếp tục
+                    </p>
                     <form onSubmit={handleSubmit}>
-                        <div className="field input-field">
-                            <input
-                                type="password"
-                                placeholder="Mật khẩu mới"
-                                className="input"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
+                        <div className="mb-3">
+                            <label htmlFor="password" className="form-label">Mật khẩu mới</label>
+                            <div className="input-group">
+                                <span className="input-group-text">
+                                    <i className="bx bx-lock-alt"></i>
+                                </span>
+                                <input
+                                    id="password"
+                                    type="password"
+                                    placeholder="Nhập mật khẩu mới"
+                                    className="form-control"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="mb-3">
+                            <label htmlFor="confirmPassword" className="form-label">Xác nhận mật khẩu</label>
+                            <div className="input-group">
+                                <span className="input-group-text">
+                                    <i className="bx bx-lock-alt"></i>
+                                </span>
+                                <input
+                                    id="confirmPassword"
+                                    type="password"
+                                    placeholder="Xác nhận mật khẩu"
+                                    className="form-control"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                />
+                            </div>
                         </div>
 
-                        <div className="field input-field">
-                            <input
-                                type="password"
-                                placeholder="Xác nhận mật khẩu"
-                                className="input"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                            />
-                        </div>
+                        {notify && <div className="alert alert-danger" role="alert">{notify}</div>}
+                        {success && <div className="alert alert-success" role="alert">{success}</div>}
 
-                        {notify && <p style={{ color: "red" }}>{notify}</p>}
-                        {success && <p style={{ color: "green" }}>{success}</p>}
+                        <div className="d-flex gap-2">
+                            <button
+                                type="submit"
+                                className="btn btn-primary w-100"
+                            >
+                                Đặt lại mật khẩu
+                            </button>
 
-                        <div className="field button-field">
-                            <button type="submit">Đặt lại mật khẩu</button>
                         </div>
                     </form>
                 </div>

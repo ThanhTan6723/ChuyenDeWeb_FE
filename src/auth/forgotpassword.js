@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./auth.css";
+import { Link } from "react-router-dom";
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState("");
@@ -48,29 +49,47 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="container forms" style={{ paddingBottom: "150px" }}>
-            <div className="form login">
-                <div className="form-content">
-                    <header>Quên mật khẩu</header>
-                    <p style={{ fontSize: "16px", color: "#3472ac" }}>
+        <div className="container-fluid d-flex align-items-center justify-content-center min-vh-100 bg-light">
+            <div className="card shadow-sm p-4" style={{ maxWidth: "400px", width: "100%" }}>
+                <div className="card-body">
+                    <h4 className="card-title text-center mb-3">Quên mật khẩu</h4>
+                    <p className="text-center text-muted mb-4">
                         Vui lòng nhập email để đặt lại mật khẩu
                     </p>
                     <form onSubmit={handleSubmit}>
-                        <div className="field input-field">
-                            <input
-                                type="email"
-                                placeholder="Email"
-                                className="input"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
+                        <div className="mb-3">
+                            <label htmlFor="email" className="form-label">Email</label>
+                            <div className="input-group">
+                                <span className="input-group-text">
+                                    <i className="bx bx-envelope"></i>
+                                </span>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    placeholder="Nhập email của bạn"
+                                    className="form-control"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
                         </div>
 
-                        {notify && <p style={{ color: "red" }}>{notify}</p>}
-                        {success && <p style={{ color: "green" }}>{success}</p>}
+                        {notify && <div className="alert alert-danger" role="alert">{notify}</div>}
+                        {success && <div className="alert alert-success" role="alert">{success}</div>}
 
-                        <div className="field button-field">
-                            <button type="submit">Gửi liên kết</button>
+                        <div className="d-flex gap-2">
+                            <button
+                                type="submit"
+                                className="btn btn-primary w-100"
+                            >
+                                Gửi liên kết
+                            </button>
+                            <Link
+                                to="/login"
+                                className="btn btn-outline-secondary w-100"
+                            >
+                                Quay lại đăng nhập
+                            </Link>
                         </div>
                     </form>
                 </div>

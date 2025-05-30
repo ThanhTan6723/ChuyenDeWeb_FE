@@ -78,6 +78,7 @@ const Header = () => {
                                             <Link to="/vouchers">Kho voucher</Link>
                                             <Link to="/support">Hỗ trợ</Link>
                                             <Link to="/update-profile">Thông tin tài khoản</Link>
+                                            <Link to="/admin">Admin</Link>
                                         </div>
                                     </div>
                                 ) : (
