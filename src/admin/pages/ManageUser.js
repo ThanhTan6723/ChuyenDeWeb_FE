@@ -1,9 +1,104 @@
-import React from 'react';
+import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { toast } from "react-toastify";
 
-export default function ManageUser() {
+const ManageUser = () => {
+    const [users, setUsers] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://localhost:8443";
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/list`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include",
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                setUsers(data);
+                setError(null);
+            } catch (err) {
+                console.error("Lỗi khi fetch người dùng:", err);
+                setError("Không thể tải danh sách người dùng. " + err.message);
+                toast.error("Lỗi tải danh sách người dùng.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUsers();
+    }, [API_BASE_URL]);
+
+    const [showModal, setShowModal] = useState(false);
+    const [newUser, setNewUser] = useState({
+        username: '',
+        email: '',
+        password: '',
+        phoneNumber: '', // Thêm phoneNumber
+        roleName: 'ROLE_CLIENT'
+    });
+    const [formError, setFormError] = useState(null);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewUser({ ...newUser, [name]: value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setFormError(null);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify(newUser)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP ${response.status}`);
+            }
+
+            toast.success("Thêm người dùng thành công!");
+            setShowModal(false);
+            setNewUser({ username: '', email: '', password: '', phoneNumber: '', roleName: 'ROLE_CLIENT' });
+
+            const fetchResponse = await fetch(`${API_BASE_URL}/api/admin/list`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+            });
+
+            if (fetchResponse.ok) {
+                const data = await fetchResponse.json();
+                setUsers(data);
+            }
+        } catch (err) {
+            setFormError(`Lỗi khi thêm người dùng: ${err.message}`);
+            toast.error(`Lỗi khi thêm người dùng: ${err.message}`);
+        }
+    };
+
     return (
         <div className="layout-wrapper layout-content-navbar">
             <div className="layout-container">
@@ -14,45 +109,72 @@ export default function ManageUser() {
                         <div className="container-xxl flex-grow-1 container-p-y">
                             <h4 className="fw-bold py-3 mb-4">Quản lý Người dùng</h4>
                             <div className="card">
-                                <div className="card-header">
+                                <div className="card-header d-flex justify-content-between align-items-center">
                                     <h5 className="card-title">Danh sách Người dùng</h5>
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() => setShowModal(true)}
+                                    >
+                                        Thêm người dùng
+                                    </button>
                                 </div>
                                 <div className="card-body">
-                                    <div className="table-responsive">
-                                        <table className="table">
-                                            <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Tên người dùng</th>
-                                                <th>Email</th>
-                                                <th>Vai trò</th>
-                                                <th>Hành động</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr>
-                                                <td>1</td>
-                                                <td>johndoe</td>
-                                                <td>johndoe@example.com</td>
-                                                <td>Admin</td>
-                                                <td>
-                                                    <button className="btn btn-sm btn-primary me-2">Sửa</button>
-                                                    <button className="btn btn-sm btn-danger">Xóa</button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>2</td>
-                                                <td>janedoe</td>
-                                                <td>janedoe@example.com</td>
-                                                <td>User</td>
-                                                <td>
-                                                    <button className="btn btn-sm btn-primary me-2">Sửa</button>
-                                                    <button className="btn btn-sm btn-danger">Xóa</button>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    {error && <div className="alert alert-danger">{error}</div>}
+                                    {loading ? (
+                                        <div className="text-center">
+                                            <div className="spinner-border" role="status">
+                                                <span className="visually-hidden">Đang tải...</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="table-responsive">
+                                            <table className="table table-striped table-bordered">
+                                                <thead className="table-dark">
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Tên người dùng</th>
+                                                    <th>Email</th>
+                                                    <th>Số điện thoại</th> {/* Thêm cột */}
+                                                    <th>Vai trò</th>
+                                                    <th>Số lần đăng nhập thất bại</th>
+                                                    <th>Khóa</th>
+                                                    <th>Thời gian khóa</th>
+                                                    <th>Hành động</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {users.length > 0 ? (
+                                                    users.map((user) => (
+                                                        <tr key={user.id}>
+                                                            <td>{user.id}</td>
+                                                            <td>{user.username}</td>
+                                                            <td>{user.email}</td>
+                                                            <td>{user.phone || 'N/A'}</td> {/* Hiển thị phone */}
+                                                            <td>{user.role?.roleName || "N/A"}</td>
+                                                            <td>{user.failed ?? 0}</td>
+                                                            <td>{user.locked ? "Có" : "Không"}</td>
+                                                            <td>
+                                                                {user.lockTime
+                                                                    ? new Date(user.lockTime).toLocaleString("vi-VN")
+                                                                    : "N/A"}
+                                                            </td>
+                                                            <td>
+                                                                <button className="btn btn-sm btn-primary me-2">Sửa</button>
+                                                                <button className="btn btn-sm btn-danger">Xóa</button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                ) : (
+                                                    <tr>
+                                                        <td colSpan="9" className="text-center">
+                                                            Không có người dùng nào
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -61,6 +183,93 @@ export default function ManageUser() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal thêm người dùng */}
+            {showModal && (
+                <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Thêm người dùng</h5>
+                                <button className="btn-close" onClick={() => setShowModal(false)}></button>
+                            </div>
+                            <form onSubmit={handleSubmit}>
+                                <div className="modal-body">
+                                    {formError && <div className="alert alert-danger">{formError}</div>}
+                                    <div className="mb-3">
+                                        <label className="form-label">Tên người dùng</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="username"
+                                            value={newUser.username}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Email</label>
+                                        <input
+                                            type="email"
+                                            className="form-control"
+                                            name="email"
+                                            value={newUser.email}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Số điện thoại</label>
+                                        <input
+                                            type="tel"
+                                            className="form-control"
+                                            name="phoneNumber"
+                                            value={newUser.phoneNumber}
+                                            onChange={handleInputChange}
+                                            placeholder="VD: 0123456789"
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Mật khẩu</label>
+                                        <input
+                                            type="password"
+                                            className="form-control"
+                                            name="password"
+                                            value={newUser.password}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Vai trò</label>
+                                        <select
+                                            className="form-select"
+                                            name="roleName"
+                                            value={newUser.roleName}
+                                            onChange={handleInputChange}
+                                        >
+                                            <option value="ROLE_CLIENT">Client</option>
+                                            <option value="ROLE_ADMIN">Admin</option>
+                                            <option value="ROLE_MANAGE_USER">Manage User</option>
+                                            <option value="ROLE_MANAGE_ORDER">Manage Order</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                                        Hủy
+                                    </button>
+                                    <button type="submit" className="btn btn-primary">
+                                        Thêm
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
-}
+};
+
+export default ManageUser;
