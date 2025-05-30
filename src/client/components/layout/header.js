@@ -98,7 +98,7 @@ const Header = () => {
                                         }}
                                         role="button"
                                     >
-                                        <img src="/img/cart-1.svg" style={{height:'26px',marginLeft:'20px'}}/>
+                                        <img src="/img/cart-3.svg" style={{height:'26px',marginLeft:'20px'}}/>
                                         <span
                                             className="badge badge-pill badge-danger"
                                             style={{ position: 'absolute', top: '-10px', right: '-10px' }}
