@@ -17,7 +17,7 @@ import ConfirmOrder from "./client/pages/confirm-order";
 import Dashboard from './admin/pages/Dashboard';
 import ManageUser from './admin/pages/ManageUser';
 import ManageProduct from './admin/pages/ManageProduct';
-import ManageCart from './admin/pages/ManageCart';
+import ManageOrder from './admin/pages/ManageOrder';
 
 function App() {
     return (
@@ -40,7 +40,7 @@ function App() {
                         <Route path="/admin" element={<Dashboard/>}/>
                         <Route path="/admin/pages/manage-user" element={<ManageUser/>}/>
                         <Route path="/admin/pages/manage-product" element={<ManageProduct/>}/>
-                        <Route path="/admin/pages/manage-cart" element={<ManageCart/>}/>
+                        <Route path="/admin/pages/manage-order" element={<ManageOrder/>}/>
                     </Routes>
                 </Router>
             </CartProvider>
