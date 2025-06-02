@@ -1,6 +1,6 @@
 import React from 'react';
 import Layout from '../components/layout/layout';
-import Breadcrumb from '../components/order/breadcrum';
+import Breadcrumb from '../components/layout/breadcrumb';
 import OrderInfo from "../components/order/orderinfor";
 
 // Import CSS

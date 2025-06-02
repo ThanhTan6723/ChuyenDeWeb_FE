@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import Breadcrumb from '../components/shop-detail/breadcrumb';
+import Breadcrumb from '../components/layout/breadcrumb';
 import ProductImage from '../components/shop-detail/productimage';
 import ProductInfo from '../components/shop-detail/productinfor';
 import Layout from '../components/layout/layout';
@@ -14,7 +14,7 @@ const ShopDetail = () => {
 
     return (
         <Layout>
-            <Breadcrumb title="Chi tiết sản phẩm" path="Trang chủ - Chi tiết sản phẩm" />
+            <Breadcrumb title="Chi tiết sản phẩm" subtitle="Trang chủ - Chi tiết sản phẩm" />
             <div className="product_image_area section_padding">
                 <div className="container">
                     <div className="row s_product_inner justify-content-between">

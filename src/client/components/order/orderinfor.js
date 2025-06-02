@@ -10,8 +10,6 @@ const OrderInfo = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const selectedCartItems = location.state?.selectedCartItems || [];
-    const currentDateTime = "2025-06-01 17:48:58";
-    const currentUser = "ThanhTan6723";
 
     // State Management
     const [provinces, setProvinces] = useState([]);
@@ -20,9 +18,9 @@ const OrderInfo = () => {
     const [selectedProvince, setSelectedProvince] = useState("");
     const [selectedDistrict, setSelectedDistrict] = useState("");
     const [selectedWard, setSelectedWard] = useState("");
-    const [shippingFee, setShippingFee] = useState(0); // Khởi tạo là số 0
+    const [shippingFee, setShippingFee] = useState(0);
     const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState("COD");
+    const [paymentMethod, setPaymentMethod] = useState("COD"); // Default to COD
     const [formData, setFormData] = useState({
         name: "",
         number: "",
@@ -117,12 +115,12 @@ const OrderInfo = () => {
         }
     }, [selectedDistrict]);
 
-    // Calculate shipping fee when address changes
+    // Calculate shipping fee
     useEffect(() => {
         const calculateShipping = async () => {
             if (selectedProvince && selectedDistrict && selectedWard && formData.address) {
                 setIsCalculatingShipping(true);
-                setShippingFee(0); // Reset phí vận chuyển khi tính lại
+                setShippingFee(0);
                 try {
                     const provinceName = provinces.find(p => p.code === parseInt(selectedProvince))?.name;
                     const districtName = districts.find(d => d.code === parseInt(selectedDistrict))?.name;
@@ -136,7 +134,7 @@ const OrderInfo = () => {
                                 district: districtName,
                                 ward: wardName,
                                 address: formData.address,
-                                weight: calculateTotalWeight() * 1000, // Chuyển sang gram
+                                weight: calculateTotalWeight() * 1000,
                                 value: calculateSubtotal()
                             },
                             {
@@ -146,25 +144,22 @@ const OrderInfo = () => {
                                 }
                             }
                         );
-
-                        // Lấy shipping_fee từ phản hồi
                         setShippingFee(response.data.shipping_fee || 0);
                     }
                 } catch (error) {
                     console.error('Error calculating shipping:', error);
                     setErrors(prev => ({
                         ...prev,
-                        shipping: error.response?.data?.message || 'Không thể tính phí vận chuyển. Vui lòng thử lại sau.'
+                        shipping: error.response?.data?.message || 'Không thể tính phí vận chuyển.'
                     }));
-                    setShippingFee(0); // Reset nếu lỗi
+                    setShippingFee(0);
                 } finally {
                     setIsCalculatingShipping(false);
                 }
             } else {
-                setShippingFee(0); // Reset nếu thiếu thông tin địa chỉ
+                setShippingFee(0);
             }
         };
-
         calculateShipping();
     }, [selectedProvince, selectedDistrict, selectedWard, formData.address, provinces, districts, wards]);
 
@@ -178,15 +173,13 @@ const OrderInfo = () => {
         const newErrors = {};
         if (!formData.name) newErrors.name = "Vui lòng nhập tên người nhận";
         if (!formData.number) newErrors.number = "Vui lòng nhập số điện thoại";
-        if (!/^[0-9]{10}$/.test(formData.number)) {
-            newErrors.number = "Số điện thoại phải có 10 chữ số";
+        if (!/^[0-9]{10,11}$/.test(formData.number)) {
+            newErrors.number = "Số điện thoại phải có 10 hoặc 11 chữ số";
         }
         if (!selectedProvince) newErrors.province = "Vui lòng chọn tỉnh/thành phố";
         if (!selectedDistrict) newErrors.district = "Vui lòng chọn quận/huyện";
         if (!selectedWard) newErrors.ward = "Vui lòng chọn phường/xã";
         if (!formData.address) newErrors.address = "Vui lòng nhập địa chỉ nhà";
-        if (!paymentMethod) newErrors.payment = "Vui lòng chọn phương thức thanh toán";
-
         return newErrors;
     };
 
@@ -200,24 +193,22 @@ const OrderInfo = () => {
         }
 
         try {
+            const provinceName = provinces.find(p => p.code === parseInt(selectedProvince))?.name;
+            const districtName = districts.find(d => d.code === parseInt(selectedDistrict))?.name;
+            const wardName = wards.find(w => w.code === parseInt(selectedWard))?.name;
+
             const orderData = {
-                recipientName: formData.name,
-                phoneNumber: formData.number,
-                address: {
-                    province: provinces.find(p => p.code === parseInt(selectedProvince))?.name,
-                    district: districts.find(d => d.code === parseInt(selectedDistrict))?.name,
-                    ward: wards.find(w => w.code === parseInt(selectedWard))?.name,
-                    street: formData.address
-                },
-                orderDateTime: currentDateTime,
-                userId: currentUser,
-                note: formData.message,
-                paymentMethod,
-                items: selectedCartItems,
-                totalWeight: calculateTotalWeight(),
-                subtotal: calculateSubtotal(),
-                shippingFee: shippingFee, // Gửi số
-                total: calculateTotal() // Tổng đã tính đúng
+                consigneeName: formData.name,
+                consigneePhone: formData.number,
+                address: `${formData.address}, ${wardName}, ${districtName}, ${provinceName}`,
+                orderNotes: formData.message,
+                ship: shippingFee,
+                discountValue: 0,
+                paymentId: paymentMethod === 'COD' ? 1 : paymentMethod === 'VNPAY' ? 2 : 3, // Assuming IDs: 1=COD, 2=VNPAY, 3=Paypal
+                orderDetails: selectedCartItems.map(item => ({
+                    productVariantId: item.productVariantId || item.id,
+                    quantity: item.quantity
+                }))
             };
 
             const response = await axios.post(ORDER_API_URL, orderData, {
@@ -225,10 +216,11 @@ const OrderInfo = () => {
                 withCredentials: true
             });
 
-            navigate('/order-success', {
+            navigate('/confirm-order', {
                 state: {
-                    order: response.data,
-                    orderDateTime: currentDateTime
+                    order: response.data.data,
+                    orderDateTime: new Date().toISOString(),
+                    selectedCartItems
                 }
             });
         } catch (error) {
@@ -396,7 +388,7 @@ const OrderInfo = () => {
                                                 {item.productName || item.name}
                                                 {item.variant && (
                                                     <small style={{ display: 'block', color: '#666' }}>
-                                                        {item.variant}
+                                                        {item.attribute} - {item.variant}
                                                     </small>
                                                 )}
                                                 <span className="middle">x {item.quantity}</span>
@@ -473,13 +465,18 @@ const OrderInfo = () => {
                                         <div className="check"></div>
                                     </div>
                                     <div className="radion_btn">
-                                            <input type="radio" id="f-option6" name="selector" />
-                                            <label htmlFor="f-option6">Paypal</label>
-                                            <img src="img/product/single-product/card.jpg" alt="Paypal" />
-                                            <div className="check"></div>
+                                        <input
+                                            type="radio"
+                                            id="f-option6"
+                                            name="payment"
+                                            value="Paypal"
+                                            checked={paymentMethod === 'Paypal'}
+                                            onChange={(e) => setPaymentMethod(e.target.value)}
+                                        />
+                                        <label htmlFor="f-option6">Paypal</label>
+                                        <img src="img/product/single-product/card.jpg" alt="Paypal" />
+                                        <div className="check"></div>
                                     </div>
-
-
                                 </div>
 
                                 <button
