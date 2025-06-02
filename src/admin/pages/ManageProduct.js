@@ -12,6 +12,7 @@ const ManageProduct = () => {
     const [currentPage, setCurrentPage] = useState(0);
 
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://localhost:8443";
+    const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dp2jfvmlh/image/upload/';
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -100,7 +101,10 @@ const ManageProduct = () => {
                                                             <td>{product.stock}</td>
                                                             <td>
                                                                 {product.mainImageUrl ? (
-                                                                    <img src={product.mainImageUrl} alt={product.name} width="50" />
+                                                                    <img src={product.mainImageUrl
+                                                                        ? `${CLOUDINARY_BASE_URL}${product.mainImageUrl}.png`
+                                                                        : '/img/product/default.png'}
+                                                                         alt={product.name} width="50" />
                                                                 ) : 'N/A'}
                                                             </td>
                                                             <td>
