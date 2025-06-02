@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Sidebar from "../components/layout/Sidebar";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 import { toast } from "react-toastify";
 
 const ManageProduct = () => {
@@ -60,10 +60,10 @@ const ManageProduct = () => {
                 <div className="layout-page">
                     <Navbar />
                     <div className="content-wrapper">
-                        <div className="container-xl flex-grow-1 container-p-y">
+                        <div className="container-xl flex-grow-1 container-p-y" style={{width:'100%'}}>
                             <h4 className="fw-bold py-3 mb-4">Quản lý Sản phẩm</h4>
                             <div className="card">
-                                <div className="card-header">
+                                <div className="card-header d-flex justify-content-between align-items-center">
                                     <h5 className="card-title">Danh sách Sản phẩm</h5>
                                 </div>
                                 <div className="card-body">
@@ -85,7 +85,7 @@ const ManageProduct = () => {
                                                     <th>Thương hiệu</th>
                                                     <th>Danh mục</th>
                                                     <th>Tồn kho</th>
-                                                    <th>Ảnh chính</th>
+                                                    <th>Hình ảnh</th>
                                                     <th>Hành động</th>
                                                 </tr>
                                                 </thead>

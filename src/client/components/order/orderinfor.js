@@ -378,9 +378,9 @@ const OrderInfo = () => {
                                 <h2>Đơn hàng của bạn</h2>
                                 <ul className="list">
                                     <li>
-                                        <a href="#">
+                                        <span href="#">
                                             Sản phẩm<span>Tổng</span>
-                                        </a>
+                                        </span>
                                     </li>
                                     {selectedCartItems.map((item) => (
                                         <li key={item.productVariantId || item.id}>
