@@ -4,15 +4,6 @@ import axios from "axios";
 import { useAuth } from "../../../auth/authcontext";
 
 const ORDER_API_URL = `${process.env.REACT_APP_API_BASE_URL || 'https://localhost:8443'}/api/orders`;
-const GHTK_API_URL = 'https://services.giaohangtietkiem.vn/services/shipment/fee';
-const GHTK_TOKEN = 'ee42b44d5c4e4824e2f7d0d1cc74af58d328ccee';
-
-const SHOP_INFO = {
-    pick_province: 'Hồ Chí Minh',
-    pick_district: 'Thủ Đức',
-    pick_ward: 'Phường Linh Trung',
-    pick_street: 'Khu phố 6'
-};
 
 const OrderInfo = () => {
     const { user } = useAuth();
@@ -29,7 +20,7 @@ const OrderInfo = () => {
     const [selectedProvince, setSelectedProvince] = useState("");
     const [selectedDistrict, setSelectedDistrict] = useState("");
     const [selectedWard, setSelectedWard] = useState("");
-    const [shippingFee, setShippingFee] = useState(0);
+    const [shippingFee, setShippingFee] = useState(0); // Khởi tạo là số 0
     const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState("COD");
     const [formData, setFormData] = useState({
@@ -65,6 +56,11 @@ const OrderInfo = () => {
             (total, item) => total + (item.price * item.quantity),
             0
         );
+    };
+
+    // Calculate total
+    const calculateTotal = () => {
+        return calculateSubtotal() + shippingFee;
     };
 
     // Fetch provinces
@@ -126,6 +122,7 @@ const OrderInfo = () => {
         const calculateShipping = async () => {
             if (selectedProvince && selectedDistrict && selectedWard && formData.address) {
                 setIsCalculatingShipping(true);
+                setShippingFee(0); // Reset phí vận chuyển khi tính lại
                 try {
                     const provinceName = provinces.find(p => p.code === parseInt(selectedProvince))?.name;
                     const districtName = districts.find(d => d.code === parseInt(selectedDistrict))?.name;
@@ -139,7 +136,7 @@ const OrderInfo = () => {
                                 district: districtName,
                                 ward: wardName,
                                 address: formData.address,
-                                weight: calculateTotalWeight(),
+                                weight: calculateTotalWeight() * 1000, // Chuyển sang gram
                                 value: calculateSubtotal()
                             },
                             {
@@ -150,22 +147,26 @@ const OrderInfo = () => {
                             }
                         );
 
-                        setShippingFee(response.data);
+                        // Lấy shipping_fee từ phản hồi
+                        setShippingFee(response.data.shipping_fee || 0);
                     }
                 } catch (error) {
                     console.error('Error calculating shipping:', error);
                     setErrors(prev => ({
                         ...prev,
-                        shipping: 'Không thể tính phí vận chuyển. Vui lòng thử lại sau.'
+                        shipping: error.response?.data?.message || 'Không thể tính phí vận chuyển. Vui lòng thử lại sau.'
                     }));
+                    setShippingFee(0); // Reset nếu lỗi
                 } finally {
                     setIsCalculatingShipping(false);
                 }
+            } else {
+                setShippingFee(0); // Reset nếu thiếu thông tin địa chỉ
             }
         };
 
         calculateShipping();
-    }, [selectedProvince, selectedDistrict, selectedWard, formData.address]);
+    }, [selectedProvince, selectedDistrict, selectedWard, formData.address, provinces, districts, wards]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -215,8 +216,8 @@ const OrderInfo = () => {
                 items: selectedCartItems,
                 totalWeight: calculateTotalWeight(),
                 subtotal: calculateSubtotal(),
-                shippingFee,
-                total: calculateSubtotal() + shippingFee
+                shippingFee: shippingFee, // Gửi số
+                total: calculateTotal() // Tổng đã tính đúng
             };
 
             const response = await axios.post(ORDER_API_URL, orderData, {
@@ -236,7 +237,7 @@ const OrderInfo = () => {
             } else {
                 setErrors(prev => ({
                     ...prev,
-                    submit: 'Đặt hàng thất bại. Vui lòng thử lại.'
+                    submit: error.response?.data?.message || 'Đặt hàng thất bại. Vui lòng thử lại.'
                 }));
             }
         }
@@ -380,7 +381,6 @@ const OrderInfo = () => {
                             </form>
                         </div>
 
-
                         <div className="col-lg-5">
                             <div className="order_box">
                                 <h2>Đơn hàng của bạn</h2>
@@ -424,12 +424,11 @@ const OrderInfo = () => {
                                         <a href="#">
                                             Phí vận chuyển
                                             <span>
-                                                {isCalculatingShipping ?
-                                                    'Đang tính...' :
-                                                    shippingFee > 0 ?
-                                                        `${shippingFee.toLocaleString('vi-VN')}₫` :
-                                                        'Vui lòng nhập đầy đủ địa chỉ'
-                                                }
+                                                {isCalculatingShipping
+                                                    ? 'Đang tính...'
+                                                    : shippingFee > 0
+                                                        ? `${shippingFee.toLocaleString('vi-VN')}₫`
+                                                        : 'Vui lòng nhập đầy đủ địa chỉ'}
                                             </span>
                                         </a>
                                         {errors.shipping && (
@@ -442,7 +441,7 @@ const OrderInfo = () => {
                                         <a href="#">
                                             <strong>Tổng tiền</strong>
                                             <span className="total-amount">
-                                                {(calculateSubtotal() + shippingFee).toLocaleString('vi-VN')}₫
+                                                {calculateTotal().toLocaleString('vi-VN')}₫
                                             </span>
                                         </a>
                                     </li>
@@ -452,27 +451,35 @@ const OrderInfo = () => {
                                     <div className="radion_btn">
                                         <input
                                             type="radio"
-                                            id="cod"
+                                            id="f-option4"
                                             name="payment"
                                             value="COD"
                                             checked={paymentMethod === 'COD'}
                                             onChange={(e) => setPaymentMethod(e.target.value)}
                                         />
-                                        <label htmlFor="cod">Thanh toán khi nhận hàng (COD)</label>
+                                        <label htmlFor="f-option4">Thanh toán khi nhận hàng (COD)</label>
                                         <div className="check"></div>
                                     </div>
                                     <div className="radion_btn">
                                         <input
                                             type="radio"
-                                            id="vnpay"
+                                            id="f-option5"
                                             name="payment"
                                             value="VNPAY"
                                             checked={paymentMethod === 'VNPAY'}
                                             onChange={(e) => setPaymentMethod(e.target.value)}
                                         />
-                                        <label htmlFor="vnpay">VN Pay</label>
+                                        <label htmlFor="f-option5">VN Pay</label>
                                         <div className="check"></div>
                                     </div>
+                                    <div className="radion_btn">
+                                            <input type="radio" id="f-option6" name="selector" />
+                                            <label htmlFor="f-option6">Paypal</label>
+                                            <img src="img/product/single-product/card.jpg" alt="Paypal" />
+                                            <div className="check"></div>
+                                    </div>
+
+
                                 </div>
 
                                 <button
