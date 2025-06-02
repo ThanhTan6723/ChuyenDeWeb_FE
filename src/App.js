@@ -12,6 +12,7 @@ import ResetPassword from './auth/resetpassword';
 import AccountInfo from "./auth/accountinfor";
 import {CartProvider} from "./client/contexts/cartcontext";
 import OrderPage from "./client/pages/order";
+import ConfirmOrder from "./client/pages/confirm-order";
 
 import Dashboard from './admin/pages/Dashboard';
 import ManageUser from './admin/pages/ManageUser';
@@ -34,6 +35,7 @@ function App() {
                         <Route path="/reset-password" element={<ResetPassword/>}/>
                         <Route path="/cart" element={<CartPage/>}/>
                         <Route path="/order" element={<OrderPage/>}/>
+                        <Route path="/confirm-order" element={<ConfirmOrder/>}/>
                         <Route path="/update-profile" element={<AccountInfo/>}/>
                         <Route path="/admin" element={<Dashboard/>}/>
                         <Route path="/admin/pages/manage-user" element={<ManageUser/>}/>

@@ -283,11 +283,7 @@ const CartItem = () => {
         <section className="cart_area padding_top">
             <div className="container">
                 <div className="cart_inner" style={{ marginBottom: '40px' }}>
-                    {error && (
-                        <div className="alert alert-danger">
-                            {error}
-                        </div>
-                    )}
+
                     <div className="table-responsive">
                         <table className="table">
                             <thead style={{ background: '#ecfdff' }}>
@@ -430,6 +426,11 @@ const CartItem = () => {
                             </tr>
                             </tbody>
                         </table>
+                        {error && (
+                            <div className="alert alert-danger" style={{textAlign:'center'}}>
+                                {error}
+                            </div>
+                        )}
                         <div
                             className="checkout_btn_inner float-right"
                             style={{
@@ -478,11 +479,12 @@ const CartItem = () => {
                                 </a>
                             </div>
                             <div className="buttonn" style={{ marginRight: '20px' }}>
+
                                 <Link className="btn_1" to="/shop">
                                     Tiếp tục mua sắm
                                 </Link>
-                                <button
-                                    className="btn_1 checkout_btn_1"
+                                <button style={{border:'none'}}
+                                    className="btn_1"
                                     onClick={handleCheckout}
                                     disabled={updateLoading}
                                 >
