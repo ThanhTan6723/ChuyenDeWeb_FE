@@ -13,6 +13,7 @@ export const AuthProvider = ({ children }) => {
         id: data.user.id,
         username: data.user.username || data.user.email.split('@')[0],
         email: data.user.email,
+        phone: data.user.phone
     });
 
     const setUserAndLogin = (userData) => {
@@ -132,6 +133,7 @@ export const AuthProvider = ({ children }) => {
         <AuthContext.Provider
             value={{
                 user,
+                setUser,
                 isLoggedIn,
                 loading,
                 login,
@@ -139,7 +141,8 @@ export const AuthProvider = ({ children }) => {
                 refreshToken,
             }}
         >
-            {children}
+
+        {children}
         </AuthContext.Provider>
     );
 };

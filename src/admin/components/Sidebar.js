@@ -13,9 +13,9 @@ export default function Sidebar() {
             <div className="app-brand demo">
                 <Link to="/" className="app-brand-link">
           <span className="app-brand-logo demo">
-            <img src="/assetsAdmin/img/logo.png" alt="Sneat Logo" />
+            <img src="/assetsAdmin/img/favicon/favicon.ico" alt="Skins Shop" />
           </span>
-                    <span className="app-brand-text demo menu-text fw-bolder ms-2">Sneat</span>
+                    <span className="app-brand-text demo menu-text fw-bolder ms-2">Aranoz.</span>
                 </Link>
                 <a href="#" className="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
                     <i className="bx bx-chevron-left bx-sm align-middle"></i>

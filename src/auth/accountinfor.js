@@ -1,5 +1,6 @@
 import { useAuth } from './authcontext';
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import "./auth.css";
@@ -13,6 +14,7 @@ const AccountInfo = () => {
         phone: user?.phone || "",
     });
     const [saving, setSaving] = useState(false);
+    const navigate = useNavigate();
 
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://localhost:8443";
 
@@ -65,6 +67,7 @@ const AccountInfo = () => {
                 });
                 setIsEditing(false);
                 toast.success("Cập nhật thông tin thành công!");
+                navigate("/home");
             } else {
                 const errorData = await response.json().catch(() => ({}));
                 let errorMessage;
@@ -97,62 +100,9 @@ const AccountInfo = () => {
         }
     };
 
-//     return (
-//         <div className="account-info-container">
-//             <h2>Thông tin tài khoản</h2>
-//             {isEditing ? (
-//                 <>
-//                     <p>
-//                         <strong>Tên người dùng:</strong>{" "}
-//                         <input
-//                             type="text"
-//                             name="username"
-//                             value={formData.username}
-//                             onChange={handleChange}
-//                             required
-//                         />
-//                     </p>
-//                     <p>
-//                         <strong>Email:</strong>{" "}
-//                         <input
-//                             type="email"
-//                             name="email"
-//                             value={formData.email}
-//                             onChange={handleChange}
-//                             required
-//                         />
-//                     </p>
-//                     <p>
-//                         <strong>Số điện thoại:</strong>{" "}
-//                         <input
-//                             type="text"
-//                             name="phone"
-//                             value={formData.phone}
-//                             onChange={handleChange}
-//                             required
-//                         />
-//                     </p>
-//                     <button disabled={saving} onClick={handleSave}>
-//                         {saving ? "Đang lưu..." : "Lưu"}
-//                     </button>
-//                     <button disabled={saving} onClick={() => setIsEditing(false)}>
-//                         Hủy
-//                     </button>
-//                 </>
-//             ) : (
-//                 <>
-//                     <p><strong>Tên người dùng:</strong> {user.username}</p>
-//                     <p><strong>Email:</strong> {user.email}</p>
-//                     <p><strong>Số điện thoại:</strong> {user.phone}</p>
-//                     <button onClick={() => setIsEditing(true)}>Cập nhật thông tin</button>
-//                 </>
-//             )}
-//         </div>
-//     );
-// };
     return (
         <div className="container-fluid d-flex align-items-center justify-content-center min-vh-100 bg-light">
-            <div className="card shadow-sm p-4" style={{ maxWidth: "400px", width: "100%" }}>
+            <div className="card shadow-sm p-4" style={{ maxWidth: '450px', width: '100%',borderRadius:'8px',boxShadow:'0 0 10px 1px rgb(192, 192, 192)' }}>
                 <div className="card-body">
                     <h4 className="card-title text-center mb-3">Thông tin tài khoản</h4>
                     <p className="text-center text-muted mb-4">
@@ -217,7 +167,7 @@ const AccountInfo = () => {
                                 <button
                                     type="submit"
                                     className="btn btn-primary w-100"
-                                    disabled={saving}
+                                    disabled={saving} style={{background:'#3472ac',border:'none'}}
                                 >
                                     {saving ? "Đang lưu..." : "Lưu"}
                                 </button>
@@ -245,7 +195,7 @@ const AccountInfo = () => {
                             <div className="d-flex gap-2">
                                 <button
                                     className="btn btn-primary w-100"
-                                    onClick={() => setIsEditing(true)}
+                                    onClick={() => setIsEditing(true)} style={{background:'#3472ac',border:'none'}}
                                 >
                                     Cập nhật thông tin
                                 </button>

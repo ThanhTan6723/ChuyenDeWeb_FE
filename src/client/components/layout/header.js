@@ -74,17 +74,19 @@ const Header = () => {
                                     <div className="user-dropdown">
                                         <span className="user-name" style={{color:'black'}}>{user?.username || user?.email?.split('@')[0]}</span>
                                         <div className="dropdown-content">
-                                            <a href="#" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Đăng xuất</a>
+                                            <a href="#" className="auth" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Đăng xuất</a>
                                             <Link to="/vouchers">Kho voucher</Link>
                                             <Link to="/support">Hỗ trợ</Link>
-                                            <Link to="/update-profile">Thông tin tài khoản</Link>
                                             <Link to="/admin">Admin</Link>
+                                            <Link to="/update-profile">Thông tin tài khoản</Link>
                                         </div>
                                     </div>
                                 ) : (
                                     <>
-                                        <img src="/img/login.png" alt="Login" style={{ marginRight: '5px' }} />
-                                        <Link className="auth" to="/login">Đăng nhập/Đăng ký</Link>
+                                        <div className="log">
+                                            <img src="/img/login.png" alt="Login" style={{ marginRight: '5px', color:'black' }} />
+                                            <Link to="/login">Đăng nhập/Đăng ký</Link>
+                                        </div>
                                     </>
                                 )}
                                 <a id="search_1" href="#"><i className="ti-search" /></a>
@@ -99,7 +101,7 @@ const Header = () => {
                                         }}
                                         role="button"
                                     >
-                                        <img src="/img/cart-1.svg" style={{height:'26px',marginLeft:'20px'}}/>
+                                        <img src="/img/cart-3.svg" style={{height:'26px',marginLeft:'20px'}}/>
                                         <span
                                             className="badge badge-pill badge-danger"
                                             style={{ position: 'absolute', top: '-10px', right: '-10px' }}

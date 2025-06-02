@@ -98,13 +98,26 @@ const Register = () => {
                     }),
                 });
 
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(errText);
-                }
-
                 const data = await response.json();
-                console.log("Đăng ký thành công:", data);
+
+                if (!response.ok) {
+                    // Nếu backend trả về nhiều lỗi
+                    if (data.errors) {
+                        // setErrors sẽ cập nhật đúng cho từng trường
+                        setErrors(prev => ({
+                            ...prev,
+                            // map lại key cho khớp với field của form
+                            name: data.errors.username,
+                            email: data.errors.email,
+                            phone: data.errors.phone,
+                        }));
+                    } else if (data.error) {
+                        alert("Đăng ký thất bại: " + data.error);
+                    } else {
+                        alert("Đăng ký thất bại: " + JSON.stringify(data));
+                    }
+                    return;
+                }
 
                 localStorage.setItem("accessToken", data.accessToken);
                 alert("Đăng ký thành công!");
@@ -113,8 +126,6 @@ const Register = () => {
                 console.error("Lỗi đăng ký:", error);
                 alert("Đăng ký thất bại: " + error.message);
             }
-        } else {
-            // alert("Vui lòng kiểm tra lại thông tin!");
         }
     };
 

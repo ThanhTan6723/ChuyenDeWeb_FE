@@ -5410,13 +5410,13 @@ textarea.form-control-lg {
 }
 
 .offcanvas-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1089;
-  width: 100vw;
-  height: 100vh;
-  background-color: #435971;
+  /*position: fixed;*/
+  /*top: 0;*/
+  /*left: 0;*/
+  /*z-index: 1089;*/
+  /*width: 100vw;*/
+  /*height: 100vh;*/
+  /*background-color: #435971;*/
 }
 .offcanvas-backdrop.fade {
   opacity: 0;
@@ -5489,12 +5489,12 @@ textarea.form-control-lg {
 }
 
 .placeholder {
-  display: inline-block;
-  min-height: 1em;
-  vertical-align: middle;
-  cursor: wait;
-  background-color: currentColor;
-  opacity: 0.5;
+  /*display: inline-block;*/
+  /*min-height: 1em;*/
+  /*vertical-align: middle;*/
+  /*cursor: wait;*/
+  /*!*background-color: currentColor;*!*/
+  /*opacity: 0.5;*/
 }
 .placeholder.btn::before {
   display: inline-block;
