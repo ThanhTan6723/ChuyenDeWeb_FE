@@ -4,6 +4,7 @@ import axios from "axios";
 import { useAuth } from "../../../auth/authcontext";
 
 const ORDER_API_URL = `${process.env.REACT_APP_API_BASE_URL || 'https://localhost:8443'}/api/orders`;
+const PAYMENT_API_URL = `${process.env.REACT_APP_API_BASE_URL || 'https://localhost:8443'}/api/payment`;
 
 const OrderInfo = () => {
     const { user } = useAuth();
@@ -20,7 +21,7 @@ const OrderInfo = () => {
     const [selectedWard, setSelectedWard] = useState("");
     const [shippingFee, setShippingFee] = useState(0);
     const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState("COD"); // Default to COD
+    const [paymentMethod, setPaymentMethod] = useState("COD");
     const [formData, setFormData] = useState({
         name: "",
         number: "",
@@ -32,15 +33,15 @@ const OrderInfo = () => {
     // Calculate total weight
     const calculateTotalWeight = () => {
         return selectedCartItems.reduce((total, item) => {
-            const match = item.variant.match(/(\d+)\s*(ml|g|kg|mg)/i);
+            const match = item.variant?.match(/(\d+)\s*(ml|g|kg|mg)/i);
             if (match) {
                 const [, value, unit] = match;
                 const numValue = parseFloat(value);
-                switch(unit.toLowerCase()) {
+                switch (unit.toLowerCase()) {
                     case 'kg': return total + numValue * item.quantity;
-                    case 'g': return total + (numValue/1000) * item.quantity;
-                    case 'mg': return total + (numValue/1000000) * item.quantity;
-                    case 'ml': return total + (numValue/1000) * item.quantity;
+                    case 'g': return total + (numValue / 1000) * item.quantity;
+                    case 'mg': return total + (numValue / 1000000) * item.quantity;
+                    case 'ml': return total + (numValue / 1000) * item.quantity;
                     default: return total;
                 }
             }
@@ -69,7 +70,7 @@ const OrderInfo = () => {
                 setProvinces(response.data);
             } catch (error) {
                 console.error("Error fetching provinces:", error);
-                setErrors(prev => ({...prev, api: "Không thể tải danh sách tỉnh/thành phố"}));
+                setErrors(prev => ({ ...prev, api: "Không thể tải danh sách tỉnh/thành phố" }));
             }
         };
         fetchProvinces();
@@ -89,7 +90,7 @@ const OrderInfo = () => {
                     setSelectedWard("");
                 } catch (error) {
                     console.error("Error fetching districts:", error);
-                    setErrors(prev => ({...prev, api: "Không thể tải danh sách quận/huyện"}));
+                    setErrors(prev => ({ ...prev, api: "Không thể tải danh sách quận/huyện" }));
                 }
             };
             fetchDistricts();
@@ -108,7 +109,7 @@ const OrderInfo = () => {
                     setSelectedWard("");
                 } catch (error) {
                     console.error("Error fetching wards:", error);
-                    setErrors(prev => ({...prev, api: "Không thể tải danh sách phường/xã"}));
+                    setErrors(prev => ({ ...prev, api: "Không thể tải danh sách phường/xã" }));
                 }
             };
             fetchWards();
@@ -204,25 +205,46 @@ const OrderInfo = () => {
                 orderNotes: formData.message,
                 ship: shippingFee,
                 discountValue: 0,
-                paymentId: paymentMethod === 'COD' ? 1 : paymentMethod === 'VNPAY' ? 2 : 3, // Assuming IDs: 1=COD, 2=VNPAY, 3=Paypal
+                paymentId: paymentMethod === 'COD' ? 1 : paymentMethod === 'VNPAY' ? 2 : 3,
                 orderDetails: selectedCartItems.map(item => ({
                     productVariantId: item.productVariantId || item.id,
                     quantity: item.quantity
                 }))
             };
 
-            const response = await axios.post(ORDER_API_URL, orderData, {
-                headers: { 'Content-Type': 'application/json' },
-                withCredentials: true
-            });
+            if (paymentMethod === 'VNPAY') {
+                // Store order data temporarily and get transaction reference
+                const response = await axios.post(`${PAYMENT_API_URL}/create-vnpay`, {
+                    amount: calculateTotal(),
+                    orderId: Date.now().toString(),
+                    orderData: orderData
+                }, {
+                    headers: { 'Content-Type': 'application/json' },
+                    withCredentials: true
+                });
 
-            navigate('/confirm-order', {
-                state: {
-                    order: response.data.data,
-                    orderDateTime: new Date().toISOString(),
-                    selectedCartItems
+                if (response.data.success) {
+                    window.location.href = response.data.data.paymentUrl;
+                } else {
+                    setErrors(prev => ({
+                        ...prev,
+                        submit: response.data.message || 'Không thể tạo thanh toán VNPay.'
+                    }));
                 }
-            });
+            } else {
+                const response = await axios.post(ORDER_API_URL, orderData, {
+                    headers: { 'Content-Type': 'application/json' },
+                    withCredentials: true
+                });
+
+                navigate('/confirm-order', {
+                    state: {
+                        order: response.data.data,
+                        orderDateTime: new Date().toISOString(),
+                        selectedCartItems
+                    }
+                });
+            }
         } catch (error) {
             if (error.response?.status === 401) {
                 navigate('/login', { state: { from: '/checkout' } });

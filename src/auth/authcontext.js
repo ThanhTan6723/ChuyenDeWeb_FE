@@ -3,7 +3,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null); // Khởi tạo user là null
+    const [user, setUser] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -31,6 +31,11 @@ export const AuthProvider = ({ children }) => {
     const restoreSession = async () => {
         setLoading(true);
         try {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                setUser(JSON.parse(storedUser)); // Tạm thời khôi phục từ localStorage
+            }
+
             const res = await fetch(`${API_BASE_URL}/api/auth/refresh-token`, {
                 method: 'POST',
                 credentials: 'include',
@@ -54,7 +59,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        restoreSession(); // Luôn gọi restoreSession khi mount
+        restoreSession();
     }, []);
 
     useEffect(() => {
@@ -141,8 +146,7 @@ export const AuthProvider = ({ children }) => {
                 refreshToken,
             }}
         >
-
-        {children}
+            {children}
         </AuthContext.Provider>
     );
 };
