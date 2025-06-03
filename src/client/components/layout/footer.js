@@ -1,8 +1,39 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from "./header";
-// import Socialicons from '../common/socialicons';
 
 const Footer = () => {
+    // Tải và khởi tạo TuDongChat
+    useEffect(() => {
+        const loadTuDongChatScript = () => {
+            // Kiểm tra xem TuDongChat đã được tải chưa
+            if (!window.TuDongChat) {
+                const script = document.createElement("script");
+                script.src = "https://app.tudongchat.com/js/chatbox.js";
+                script.async = true;
+                script.onload = () => {
+                    // Khởi tạo TuDongChat sau khi script được tải
+                    if (window.TuDongChat) {
+                        const tudong_chatbox = new window.TuDongChat('uji6UjKEV-IRGqmCxmIpn');
+                        tudong_chatbox.initial();
+                    }
+                };
+                document.body.appendChild(script);
+            } else {
+                // Nếu TuDongChat đã được tải, khởi tạo ngay
+                const tudong_chatbox = new window.TuDongChat('uji6UjKEV-IRGqmCxmIpn');
+                tudong_chatbox.initial();
+            }
+        };
+
+        loadTuDongChatScript();
+
+        // Dọn dẹp script khi component bị hủy
+        return () => {
+            const scripts = document.querySelectorAll('script[src*="tudongchat.com"]');
+            scripts.forEach(script => script.remove());
+        };
+    }, []);
+
     return (
         <footer className="footer_part">
             <div className="container">
@@ -166,4 +197,5 @@ const Footer = () => {
         </footer>
     );
 };
+
 export default Footer;
