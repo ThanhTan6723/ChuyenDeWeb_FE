@@ -15,6 +15,7 @@ import '../../assets/css/magnific-popup.css';
 import '../../assets/css/slick.css';
 import '../../assets/css/price_rangs.css';
 import '../../assets/css/style.css';
+import '../../assets/css/modal.css';
 
 const OrderPage = () => {
     return (
