@@ -1,6 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-const Sidebar = () => {
+const Sidebar = ({ onFilterChange }) => {
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedBrand, setSelectedBrand] = useState('');
+
+    const categories = [
+        'Tẩy trang',
+        'Sữa rửa mặt',
+        'Toner',
+        'Kem chống nắng',
+        'Kem dưỡng',
+        'Mặt nạ',
+        'Serum',
+    ];
+
+    const brands = [
+        'CeraVe',
+        'Bioderma',
+        'La Roche-Posay',
+        'Cetaphil',
+        'SVR',
+        'Loreal',
+        'Eucerin',
+        'cocoon',
+        'Good Skin',
+        'klairs',
+    ];
+
+    const handleCategoryClick = (category) => {
+        const newCategory = selectedCategory === category ? '' : category;
+        setSelectedCategory(newCategory);
+        onFilterChange({ category: newCategory, brand: selectedBrand });
+    };
+
+    const handleBrandClick = (brand) => {
+        const newBrand = selectedBrand === brand ? '' : brand;
+        setSelectedBrand(newBrand);
+        onFilterChange({ category: selectedCategory, brand: newBrand });
+    };
+
     return (
         <div className="left_sidebar_area">
             <aside className="left_widgets p_filter_widgets">
@@ -9,27 +47,15 @@ const Sidebar = () => {
                 </div>
                 <div className="widgets_inner">
                     <ul className="list">
-                        <li>
-                            <a href="#">Tẩy trang</a>
-                        </li>
-                        <li>
-                            <a href="#">Sữa rửa mặt</a>
-                        </li>
-                        <li>
-                            <a href="#">Toner</a>
-                        </li>
-                        <li>
-                            <a href="#">Kem chống nắng</a>
-                        </li>
-                        <li>
-                            <a href="#">Kem dưỡng</a>
-                        </li>
-                        <li>
-                            <a href="#">Mặt nạ</a>
-                        </li>
-                        <li>
-                            <a href="#">Serum</a>
-                        </li>
+                        {categories.map((category) => (
+                            <li
+                                key={category}
+                                className={selectedCategory === category ? 'active' : ''}
+                                onClick={() => handleCategoryClick(category)}
+                            >
+                                <a href="#">{category}</a>
+                            </li>
+                        ))}
                     </ul>
                 </div>
             </aside>
@@ -39,38 +65,15 @@ const Sidebar = () => {
                 </div>
                 <div className="widgets_inner">
                     <ul className="list">
-                        <li>
-                            <a href="#">CeraVe</a>
-                        </li>
-                        <li>
-                            <a href="#">Bioderma</a>
-                        </li>
-                        <li className="active">
-                            <a href="#">La Roche-Posay</a>
-                        </li>
-                        <li>
-                            <a href="#">Cetaphil</a>
-                        </li>
-                        <li>
-                            <a href="#">SVR</a>
-                        </li>
-                    </ul>
-                    <ul className="list">
-                        <li>
-                            <a href="#">Loreal</a>
-                        </li>
-                        <li>
-                            <a href="#">Eucerin</a>
-                        </li>
-                        <li className="active">
-                            <a href="#">cocoon</a>
-                        </li>
-                        <li>
-                            <a href="#">Good Skin</a>
-                        </li>
-                        <li>
-                            <a href="#">klairs</a>
-                        </li>
+                        {brands.map((brand) => (
+                            <li
+                                key={brand}
+                                className={selectedBrand === brand ? 'active' : ''}
+                                onClick={() => handleBrandClick(brand)}
+                            >
+                                <a href="#">{brand}</a>
+                            </li>
+                        ))}
                     </ul>
                 </div>
             </aside>

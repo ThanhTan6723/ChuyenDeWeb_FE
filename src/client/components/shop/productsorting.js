@@ -28,10 +28,10 @@ const ProductSorting = ({ onSearch, onSort }) => {
             <div className="sort-menu">
                 <h5>Sắp xếp theo</h5>
                 <select value={sortOption} onChange={handleSortChange}>
-                    <option value="name-asc">Tên A đến Z</option>
-                    <option value="name-desc">Tên Z đến A</option>
-                    <option value="price-asc">Giá Thấp đến Cao</option>
-                    <option value="price-desc">Giá Cao đến Thấp</option>
+                    <option value="name-asc">Tên: A đến Z</option>
+                    <option value="name-desc">Tên: Z đến A</option>
+                    <option value="price-asc">Giá: Thấp đến Cao</option>
+                    <option value="price-desc">Giá: Cao đến Thấp</option>
                 </select>
             </div>
             <div className="single_product_menu d-flex">
@@ -46,9 +46,9 @@ const ProductSorting = ({ onSearch, onSort }) => {
                         onKeyPress={handleSearchSubmit}
                     />
                     <div className="input-group-prepend">
-                        <span className="input-group-text" id="inputGroupPrepend">
-                            <i className="ti-search" />
-                        </span>
+            <span className="input-group-text" id="inputGroupPrepend">
+              <i className="ti-search" />
+            </span>
                     </div>
                 </div>
             </div>

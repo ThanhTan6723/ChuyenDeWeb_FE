@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/cartcontext';
 import { useAuth } from '../../../auth/authcontext';
 
@@ -8,14 +8,14 @@ const API_URL = 'https://localhost:8443/api/products';
 const DETAIL_API_URL = 'https://localhost:8443/api/products/';
 const CART_API_URL = 'https://localhost:8443/api/cart';
 
-const ProductGrid = ({ searchTerm, sortBy, sortOrder }) => {
+const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
     const { user } = useAuth();
     const { fetchCart } = useCart();
     const navigate = useNavigate();
 
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
@@ -33,14 +33,13 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder }) => {
             setError(null);
             try {
                 let url;
-                if (sortBy !== 'name' || sortOrder !== 'asc') {
-                    // Use sorted endpoint when sorting is applied
+                if (category || brand) {
+                    url = `${API_URL}/filter?keyword=${encodeURIComponent(searchTerm || '')}&category=${encodeURIComponent(category || '')}&brand=${encodeURIComponent(brand || '')}&page=${currentPage - 1}&size=${itemsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+                } else if (sortBy !== 'name' || sortOrder !== 'asc') {
                     url = `${API_URL}/sorted?keyword=${encodeURIComponent(searchTerm || '')}&page=${currentPage - 1}&size=${itemsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
                 } else if (searchTerm.trim()) {
-                    // Use search endpoint when searching without custom sorting
                     url = `${API_URL}/search?keyword=${encodeURIComponent(searchTerm)}&page=${currentPage - 1}&size=${itemsPerPage}`;
                 } else {
-                    // Use grid endpoint when no search or sorting
                     url = `${API_URL}/grid?page=${currentPage - 1}&size=${itemsPerPage}`;
                 }
 
@@ -55,7 +54,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder }) => {
                 const data = await response.json();
                 if (!data.products || data.products.length === 0) {
                     setProducts([]);
-                    setTotalPages(1);
+                    setTotalPages(0);
                     return;
                 }
 
@@ -70,7 +69,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder }) => {
         };
 
         fetchProducts();
-    }, [currentPage, searchTerm, sortBy, sortOrder]);
+    }, [currentPage, searchTerm, sortBy, sortOrder, category, brand]);
 
     useEffect(() => {
         if (modalOpen || successModalOpen) {
@@ -86,7 +85,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder }) => {
 
     useEffect(() => {
         if (selectedVariant?.images?.length > 0) {
-            setSelectedImage(selectedVariant.images.find(img => img.main)?.publicId || selectedVariant.images[0].publicId);
+            setSelectedImage(selectedVariant.images.find(img => img.mainImage)?.publicId || selectedVariant.images[0].publicId);
         }
     }, [selectedVariant]);
 
@@ -109,7 +108,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder }) => {
             }
 
             const defaultVariant = data.variants.find(variant =>
-                variant.images.some(img => img.main)
+                variant.images.some(img => img.mainImage)
             ) || data.variants[0];
 
             setSelectedProduct(data);
@@ -135,12 +134,10 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder }) => {
     };
 
     const handleAddToCart = (product) => {
-        console.log('Đang tải sản phẩm với ID:', product.id);
         fetchProductDetails(product.id);
     };
 
     const handleVariantChange = (variant) => {
-        console.log('Đã chọn biến thể:', variant);
         setSelectedVariant(variant);
         setQuantity(1);
     };
@@ -193,10 +190,14 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder }) => {
         setSuccessModalOpen(false);
     };
 
+    const closeLoginModal = () => {
+        setShowLoginModal(false);
+    };
+
     const allImages = selectedProduct?.variants?.flatMap(variant =>
         variant.images?.map(image => ({
             publicId: image.publicId,
-            main: image.main,
+            mainImage: image.mainImage,
             variantId: variant.id
         })) || []
     ) || [];
@@ -322,7 +323,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder }) => {
                                 </h2>
                                 <p className="modal-category">Danh mục: {selectedProduct.category}</p>
                                 <p className="modal-description">{selectedProduct.description}</p>
-                                <p className="modal-price" style={{color:'red',fontWeight:'bold'}}>
+                                <p className="modal-price modal-price-highlight">
                                     {selectedVariant.price ? `${selectedVariant.price.toLocaleString()}₫` : 'Liên hệ'}
                                 </p>
                                 <div className="modal-variants">
@@ -338,8 +339,8 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder }) => {
                                                         onChange={() => handleVariantChange(variant)}
                                                     />
                                                     <span>
-                                                        {variant.attribute} - {variant.variant}
-                                                    </span>
+                            {variant.attribute} - {variant.variant}
+                          </span>
                                                 </label>
                                             ))}
                                         </div>
@@ -363,6 +364,24 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder }) => {
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showLoginModal && (
+                <div className="modal-overlay" onClick={closeLoginModal}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button className="modal-close" onClick={closeLoginModal}>×</button>
+                        <div className="modal-body">
+                            <h2>Vui lòng đăng nhập</h2>
+                            <p>Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.</p>
+                            <button
+                                className="login-button"
+                                onClick={() => navigate('/login')}
+                            >
+                                Đăng nhập
+                            </button>
                         </div>
                     </div>
                 </div>

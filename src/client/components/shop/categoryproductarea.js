@@ -4,17 +4,24 @@ import ProductSorting from './productsorting';
 import ProductGrid from './productgrid';
 
 const CategoryProductArea = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [sortBy, setSortBy] = useState('name');
-    const [sortOrder, setSortOrder] = useState('asc');
+    const [filters, setFilters] = useState({
+        searchTerm: '',
+        sortBy: 'name',
+        sortOrder: 'asc',
+        category: '',
+        brand: '',
+    });
 
-    const handleSearch = (term) => {
-        setSearchTerm(term);
+    const handleSearch = (searchTerm) => {
+        setFilters((prev) => ({ ...prev, searchTerm }));
     };
 
-    const handleSort = (newSortBy, newSortOrder) => {
-        setSortBy(newSortBy);
-        setSortOrder(newSortOrder);
+    const handleSort = (sortBy, sortOrder) => {
+        setFilters((prev) => ({ ...prev, sortBy, sortOrder }));
+    };
+
+    const handleFilterChange = ({ category, brand }) => {
+        setFilters((prev) => ({ ...prev, category, brand }));
     };
 
     return (
@@ -22,7 +29,7 @@ const CategoryProductArea = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-lg-3">
-                        <Sidebar />
+                        <Sidebar onFilterChange={handleFilterChange} />
                     </div>
                     <div className="col-lg-9">
                         <div className="row">
@@ -30,7 +37,13 @@ const CategoryProductArea = () => {
                                 <ProductSorting onSearch={handleSearch} onSort={handleSort} />
                             </div>
                         </div>
-                        <ProductGrid searchTerm={searchTerm} sortBy={sortBy} sortOrder={sortOrder} />
+                        <ProductGrid
+                            searchTerm={filters.searchTerm}
+                            sortBy={filters.sortBy}
+                            sortOrder={filters.sortOrder}
+                            category={filters.category}
+                            brand={filters.brand}
+                        />
                     </div>
                 </div>
             </div>
