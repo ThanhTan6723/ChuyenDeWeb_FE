@@ -15,6 +15,7 @@ import '../../assets/css/magnific-popup.css';
 import '../../assets/css/slick.css';
 import '../../assets/css/style.css';
 import '../../assets/css/productgrid.css';
+import '../../assets/css/success.css';
 
 const Shop = () => {
     return (

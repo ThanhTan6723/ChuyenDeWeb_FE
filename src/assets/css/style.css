@@ -3846,7 +3846,7 @@ ul {
 
 /* line 454, ../../01 cl html template/03_jun 2019/188_Aranoz shop_html/sass/_product.scss */
 .product_top_bar .single_product_menu .input-group {
-    width: 150px;
+    width: 400px;
 }
 
 /* line 457, ../../01 cl html template/03_jun 2019/188_Aranoz shop_html/sass/_product.scss */
@@ -3854,7 +3854,7 @@ ul {
     border: 0px solid transparent;
     border-bottom: 1px solid #ddd;
     border-radius: 0;
-    text-align: center;
+    text-align: left;
     text-transform: capitalize;
 }
 
@@ -4521,7 +4521,7 @@ ul {
 .cart_inner .table tbody tr td .product_count input {
     width: 100px;
     padding-left: 30px;
-    height: 40px;
+    height: 46px;
     outline: none;
     box-shadow: none;
 }
