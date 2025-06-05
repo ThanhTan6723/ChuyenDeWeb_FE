@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
-import { useCart } from '../../contexts/cartcontext'; // Import useCart
-import { useAuth } from '../../../auth/authcontext'; // Import useAuth để kiểm tra đăng nhập
+import { useCart } from '../../contexts/cartcontext';
+import { useAuth } from '../../../auth/authcontext';
 
 const CLOUDINARY_BASE_URL = 'https://localhost:8443/api/products/';
 const CART_API_URL = 'https://localhost:8443/api/cart';
 
 const ProductInfo = ({ productId = '1', onVariantChange }) => {
-    const { user } = useAuth(); // Lấy user từ AuthContext
-    const { fetchCart } = useCart(); // Lấy fetchCart từ CartContext
+    const { user } = useAuth();
+    const { fetchCart } = useCart();
     const [product, setProduct] = useState(null);
     const [selectedVariant, setSelectedVariant] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [successMessage, setSuccessMessage] = useState(null);
+    const [successModalOpen, setSuccessModalOpen] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
 
     useEffect(() => {
@@ -53,6 +53,19 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
         fetchProductDetails();
     }, [productId, onVariantChange]);
 
+    useEffect(() => {
+        if (successModalOpen) {
+            document.body.classList.add('modal-active');
+            const timer = setTimeout(() => setSuccessModalOpen(false), 1500);
+            return () => clearTimeout(timer);
+        } else {
+            document.body.classList.remove('modal-active');
+        }
+        return () => {
+            document.body.classList.remove('modal-active');
+        };
+    }, [successModalOpen]);
+
     const handleVariantChange = (variant) => {
         setSelectedVariant(variant);
         setQuantity(1);
@@ -87,9 +100,8 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
                 throw new Error('Thêm sản phẩm vào giỏ hàng thất bại!');
             }
             await response.json();
-            setSuccessMessage('Sản phẩm đã được thêm vào giỏ hàng!');
-            fetchCart(); // Gọi fetchCart để cập nhật giỏ hàng
-            setTimeout(() => setSuccessMessage(null), 3000);
+            setSuccessModalOpen(true);
+            fetchCart();
         } catch (err) {
             console.error('Lỗi khi thêm vào giỏ hàng:', err);
             alert(err.message);
@@ -97,6 +109,7 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
     };
 
     const closeModal = () => setShowLoginModal(false);
+    const closeSuccessModal = () => setSuccessModalOpen(false);
 
     if (loading) return <div className="loading text-center py-6 text-gray-500">Đang tải...</div>;
     if (error) return <div className="error text-center py-6 text-red-600 font-medium">Lỗi: {error}</div>;
@@ -159,9 +172,6 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
                     </button>
                 </div>
             )}
-            {successMessage && (
-                <div className="success-message text-green-600 text-center mb-4">{successMessage}</div>
-            )}
 
             {showLoginModal && (
                 <div className="modal fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
@@ -171,6 +181,20 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
                         <div className="flex justify-end gap-4">
                             <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400" onClick={closeModal}>Đóng</button>
                             <Link to="/login" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700" onClick={closeModal}>Đăng nhập</Link>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {successModalOpen && (
+                <div className={`success-overlay ${successModalOpen ? 'active' : ''}`} onClick={closeSuccessModal}>
+                    <div className="success-container" onClick={(e) => e.stopPropagation()}>
+                        <div className="success-body">
+                            <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                                <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+                                <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+                            </svg>
+                            <p className="success-text">Sản phẩm đã được thêm vào giỏ hàng!</p>
                         </div>
                     </div>
                 </div>

@@ -15,6 +15,7 @@ const CartItem = () => {
     const [loading, setLoading] = useState(true);
     const [updateLoading, setUpdateLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [isExpanded, setIsExpanded] = useState(false); // Trạng thái để kiểm soát thu gọn/mở rộng
 
     const fetchCartItems = useCallback(async () => {
         if (!user) {
@@ -228,6 +229,10 @@ const CartItem = () => {
         navigate('/order', { state: { selectedCartItems } });
     };
 
+    const toggleExpand = () => {
+        setIsExpanded(!isExpanded);
+    };
+
     if (loading) {
         return (
             <section className="cart_area padding_top">
@@ -279,11 +284,13 @@ const CartItem = () => {
         );
     }
 
+    // Xác định số lượng sản phẩm hiển thị dựa trên trạng thái isExpanded
+    const displayedItems = isExpanded ? cartItems : cartItems.slice(0, 5);
+
     return (
         <section className="cart_area padding_top">
             <div className="container">
                 <div className="cart_inner" style={{ marginBottom: '40px' }}>
-
                     <div className="table-responsive">
                         <table className="table">
                             <thead style={{ background: '#ecfdff' }}>
@@ -297,7 +304,7 @@ const CartItem = () => {
                             </tr>
                             </thead>
                             <tbody>
-                            {cartItems.map((item, index) => (
+                            {displayedItems.map((item, index) => (
                                 <tr key={item.productVariantId || item.id}>
                                     <td>
                                         <input
@@ -340,21 +347,21 @@ const CartItem = () => {
                                     </td>
                                     <td>
                                         <div className="product_count">
-                                                <span
-                                                    className={`input-number-decrement ${
-                                                        item.quantity <= 1 || updateLoading ? 'disabled' : ''
-                                                    }`}
-                                                    onClick={() => !updateLoading && decrementQuantity(index)}
-                                                    style={{
-                                                        cursor:
-                                                            item.quantity <= 1 || updateLoading
-                                                                ? 'not-allowed'
-                                                                : 'pointer',
-                                                        opacity: item.quantity <= 1 || updateLoading ? 0.5 : 1,
-                                                    }}
-                                                >
-                                                    <i className="ti-angle-down"></i>
-                                                </span>
+                                            <span
+                                                className={`input-number-decrement ${
+                                                    item.quantity <= 1 || updateLoading ? 'disabled' : ''
+                                                }`}
+                                                onClick={() => !updateLoading && decrementQuantity(index)}
+                                                style={{
+                                                    cursor:
+                                                        item.quantity <= 1 || updateLoading
+                                                            ? 'not-allowed'
+                                                            : 'pointer',
+                                                    opacity: item.quantity <= 1 || updateLoading ? 0.5 : 1,
+                                                }}
+                                            >
+                                                <i className="ti-angle-down"></i>
+                                            </span>
                                             <input
                                                 className="input-number"
                                                 type="text"
@@ -376,8 +383,8 @@ const CartItem = () => {
                                                     opacity: item.quantity >= 10 || updateLoading ? 0.5 : 1,
                                                 }}
                                             >
-                                                    <i className="ti-angle-up"></i>
-                                                </span>
+                                                <i className="ti-angle-up"></i>
+                                            </span>
                                         </div>
                                     </td>
                                     <td style={{width:'110px'}}>
@@ -406,13 +413,44 @@ const CartItem = () => {
                                     </td>
                                 </tr>
                             ))}
+                            {cartItems.length > 5 && (
+                                <tr style={{border:'none'}}>
+                                    <td colSpan="6" style={{ textAlign: 'center',border:'none',borderBottomWidth:'0px'}}>
+                                        <button
+                                            onClick={toggleExpand}
+                                            style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                color: '#007bff',
+                                                cursor: 'pointer',
+                                                fontSize: '16px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                margin: '10px auto',
+                                            }}
+                                        >
+                                            {isExpanded ? (
+                                                <>
+                                                    Thu gọn <i className="ti-angle-up" style={{ marginLeft: '5px' }}></i>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Xem thêm {cartItems.length - 5} sản phẩm{' '}
+                                                    <i className="ti-angle-down" style={{ marginLeft: '5px' }}></i>
+                                                </>
+                                            )}
+                                        </button>
+                                    </td>
+                                </tr>
+                            )}
                             <tr>
                                 <td></td>
                                 <td></td>
                                 <td></td>
                                 <td>
                                     <div className="cupon_text float-right">
-                                        <a className="btn_1" href="#" >
+                                        <a className="btn_1" href="#">
                                             Voucher
                                         </a>
                                     </div>
@@ -479,11 +517,11 @@ const CartItem = () => {
                                 </a>
                             </div>
                             <div className="buttonn" style={{ marginRight: '20px' }}>
-
                                 <Link className="btn_1" to="/shop">
                                     Tiếp tục mua sắm
                                 </Link>
-                                <button style={{border:'none'}}
+                                <button
+                                    style={{border:'none'}}
                                     className="btn_1"
                                     onClick={handleCheckout}
                                     disabled={updateLoading}

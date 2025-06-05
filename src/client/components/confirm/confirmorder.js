@@ -4,6 +4,7 @@ import axios from "axios";
 import { useAuth } from "../../../auth/authcontext";
 
 const PAYMENT_API_URL = `${process.env.REACT_APP_API_BASE_URL || 'https://localhost:8443'}/api/payment`;
+const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dp2jfvmlh/image/upload/';
 
 const Confirmation = () => {
     const { user, loading: authLoading } = useAuth();
@@ -241,19 +242,19 @@ const Confirmation = () => {
                     <div className="row">
                         <div className="col-lg-12">
                             <div className="order_details_iner">
-                                <h3>Sản phẩm đã đặt</h3>
+                                {/*<h3>Sản phẩm đã đặt</h3>*/}
                                 <table className="table table-borderless">
                                     <thead>
                                     <tr>
-                                        <th scope="col" colSpan="2">Sản phẩm</th>
-                                        <th scope="col">Số lượng</th>
-                                        <th scope="col">Tổng</th>
+                                        <th scope="col" colSpan="2" style={{color:'black',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none',}}>Sản phẩm</th>
+                                        <th scope="col" style={{color:'black',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>Số lượng</th>
+                                        <th scope="col" style={{color:'black',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>Tổng</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {selectedCartItems.map((item) => (
                                         <tr key={item.productVariantId}>
-                                            <th colSpan="2">
+                                            <th colSpan="2" style={{color:'black',fontSize:'15px', textTransform:'none'}}>
                                                 <span>
                                                     {item.productName}
                                                     {item.variant && (
@@ -263,37 +264,37 @@ const Confirmation = () => {
                                                     )}
                                                 </span>
                                             </th>
-                                            <th style={{color:'#212529', fontWeight:'bold', textTransform:'none'}}>
+                                            <th style={{color:'#505050',fontSize:'15px', fontWeight:'bold',fontFamily:'Poppins, sans-serif', textTransform:'none', }}>
                                                 x{item.quantity}
                                             </th>
                                             <th>
-                                                <span>{(item.price * item.quantity).toLocaleString('vi-VN')}₫</span>
+                                                <span style={{color:'#505050',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>{(item.price * item.quantity).toLocaleString('vi-VN')}₫</span>
                                             </th>
                                         </tr>
                                     ))}
                                     <tr>
-                                        <th colSpan="3" style={{color:'#212529', fontWeight:'bold', textTransform:'none'}}>
+                                        <th colSpan="3" style={{color:'black',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>
                                             Tạm tính
                                         </th>
                                         <th>
-                                            <span>{calculateSubtotal().toLocaleString('vi-VN')}₫</span>
+                                            <span style={{color:'red',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>{calculateSubtotal().toLocaleString('vi-VN')}₫</span>
                                         </th>
                                     </tr>
                                     <tr>
-                                        <th colSpan="3" style={{color:'#212529', fontWeight:'bold', textTransform:'none'}}>
+                                        <th colSpan="3" style={{color:'black',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>
                                             Phí vận chuyển
                                         </th>
                                         <th>
-                                            <span>{order.ship.toLocaleString('vi-VN')}₫</span>
+                                            <span style={{color:'red',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>{order.ship.toLocaleString('vi-VN')}₫</span>
                                         </th>
                                     </tr>
                                     </tbody>
                                     <tfoot>
                                     <tr>
-                                        <th scope="col" colSpan="3" style={{color:'#212529', fontWeight:'bold', textTransform:'none'}}>
+                                        <th scope="col" colSpan="3" style={{color:'black',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>
                                             Tổng tiền
                                         </th>
-                                        <th scope="col" style={{color:'red'}}>
+                                        <th scope="col" style={{color:'red',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>
                                             {order.totalMoney.toLocaleString('vi-VN')}₫
                                         </th>
                                     </tr>

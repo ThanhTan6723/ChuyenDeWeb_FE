@@ -1,68 +1,86 @@
 import React, { useState, useEffect } from 'react';
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useCart } from '../../contexts/cartcontext';
+import { useAuth } from '../../../auth/authcontext';
 
 const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dp2jfvmlh/image/upload/';
-const API_URL = 'https://localhost:8443/api/products/grid';
+const API_URL = 'https://localhost:8443/api/products';
 const DETAIL_API_URL = 'https://localhost:8443/api/products/';
+const CART_API_URL = 'https://localhost:8443/api/cart';
 
-const ProductGrid = () => {
+const ProductGrid = ({ searchTerm }) => {
+    const { user } = useAuth();
+    const { fetchCart } = useCart();
+    const navigate = useNavigate();
+
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedVariant, setSelectedVariant] = useState(null);
+    const [selectedImage, setSelectedImage] = useState(null);
     const [quantity, setQuantity] = useState(1);
+    const [successModalOpen, setSuccessModalOpen] = useState(false);
     const itemsPerPage = 6;
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchProducts = async () => {
             setLoading(true);
             setError(null);
             try {
-                const response = await fetch(`${API_URL}?page=${currentPage - 1}&size=${itemsPerPage}`, {
+                const url = searchTerm.trim()
+                    ? `${API_URL}/search?keyword=${encodeURIComponent(searchTerm)}&page=${currentPage - 1}&size=${itemsPerPage}`
+                    : `${API_URL}/grid?page=${currentPage - 1}&size=${itemsPerPage}`;
+
+                const response = await fetch(url, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                 });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
+
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
                 const data = await response.json();
                 if (!data.products || data.products.length === 0) {
                     setProducts([]);
                     setTotalPages(1);
                     return;
                 }
-                console.log('Data:', JSON.stringify(data, null, 2));
+
                 setProducts(data.products);
                 setTotalPages(data.totalPages);
             } catch (err) {
-                setError(`Failed to fetch products: ${err.message}`);
-                console.error('Error fetching products:', err);
+                setError(`Lỗi khi tải sản phẩm: ${err.message}`);
+                console.error('Lỗi khi tải sản phẩm:', err);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchProducts();
-    }, [currentPage]);
+    }, [currentPage, searchTerm]);
 
-    // Effect to toggle modal-active class on body
     useEffect(() => {
-        if (modalOpen) {
+        if (modalOpen || successModalOpen) {
             document.body.classList.add('modal-active');
         } else {
             document.body.classList.remove('modal-active');
         }
-        // Cleanup on component unmount
+
         return () => {
             document.body.classList.remove('modal-active');
         };
-    }, [modalOpen]);
+    }, [modalOpen, successModalOpen]);
+
+    useEffect(() => {
+        if (selectedVariant?.images?.length > 0) {
+            setSelectedImage(selectedVariant.images.find(img => img.main)?.publicId || selectedVariant.images[0].publicId);
+        }
+    }, [selectedVariant]);
 
     const fetchProductDetails = async (productId) => {
         setLoading(true);
@@ -74,33 +92,25 @@ const ProductGrid = () => {
                     'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`,
                 },
             });
-            if (!response.ok) {
-                const contentType = response.headers.get('content-type');
-                let errorMessage = `HTTP error! Status: ${response.status}`;
-                if (contentType && contentType.includes('text/html')) {
-                    const text = await response.text();
-                    errorMessage += ` - Server returned HTML: ${text.substring(0, 50)}...`;
-                } else {
-                    errorMessage += ` - ${await response.text()}`;
-                }
-                throw new Error(errorMessage);
-            }
+
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
             const data = await response.json();
-            console.log('Product Details:', JSON.stringify(data, null, 2));
             if (!data || !data.variants || data.variants.length === 0) {
-                throw new Error('Product has no variants or invalid data');
+                throw new Error('Sản phẩm không có biến thể hoặc dữ liệu không hợp lệ');
             }
-            // Chọn biến thể có ảnh chính (main: true) làm mặc định
+
             const defaultVariant = data.variants.find(variant =>
                 variant.images.some(img => img.main)
-            ) || data.variants[0] || null;
+            ) || data.variants[0];
+
             setSelectedProduct(data);
             setSelectedVariant(defaultVariant);
             setQuantity(1);
             setModalOpen(true);
         } catch (err) {
-            setError(`Failed to fetch product details: ${err.message}`);
-            console.error('Error fetching product details:', err);
+            setError(`Lỗi khi tải chi tiết sản phẩm: ${err.message}`);
+            console.error('Lỗi khi tải chi tiết sản phẩm:', err);
         } finally {
             setLoading(false);
         }
@@ -117,26 +127,79 @@ const ProductGrid = () => {
     };
 
     const handleAddToCart = (product) => {
-        console.log('Fetching product with ID:', product.id);
+        console.log('Đang tải sản phẩm với ID:', product.id);
         fetchProductDetails(product.id);
     };
 
     const handleVariantChange = (variant) => {
-        console.log('Selected variant:', JSON.stringify(variant, null, 2));
+        console.log('Đã chọn biến thể:', variant);
         setSelectedVariant(variant);
         setQuantity(1);
     };
 
-    const handleAddToCartFromModal = () => {
-        console.log(`Added to cart: ${selectedProduct.name}, Variant: ${selectedVariant.attribute} - ${selectedVariant.variant}, Quantity: ${quantity}`);
-        setModalOpen(false);
+    const handleAddToCartFromModal = async () => {
+        if (!user) {
+            setModalOpen(false);
+            setShowLoginModal(true);
+            return;
+        }
+
+        try {
+            const cartItem = {
+                productVariantId: selectedVariant.id,
+                quantity: quantity,
+            };
+
+            const response = await fetch(CART_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`,
+                },
+                body: JSON.stringify(cartItem),
+                credentials: 'include',
+            });
+
+            if (!response.ok) throw new Error('Thêm sản phẩm vào giỏ hàng thất bại!');
+
+            await response.json();
+            setModalOpen(false);
+            setSuccessModalOpen(true);
+            fetchCart();
+            setTimeout(() => setSuccessModalOpen(false), 1500);
+        } catch (err) {
+            console.error('Lỗi khi thêm vào giỏ hàng:', err);
+            alert(err.message);
+        }
     };
 
     const closeModal = () => {
         setModalOpen(false);
         setSelectedProduct(null);
         setSelectedVariant(null);
+        setSelectedImage(null);
         setQuantity(1);
+    };
+
+    const closeSuccessModal = () => {
+        setSuccessModalOpen(false);
+    };
+
+    const allImages = selectedProduct?.variants?.flatMap(variant =>
+        variant.images?.map(image => ({
+            publicId: image.publicId,
+            main: image.main,
+            variantId: variant.id
+        })) || []
+    ) || [];
+
+    const handleImageClick = (image) => {
+        setSelectedImage(image.publicId);
+        const variant = selectedProduct.variants.find(v => v.id === image.variantId);
+        if (variant) {
+            setSelectedVariant(variant);
+            setQuantity(1);
+        }
     };
 
     return (
@@ -146,6 +209,7 @@ const ProductGrid = () => {
             {!loading && !error && products.length === 0 && (
                 <p>Không có sản phẩm nào để hiển thị.</p>
             )}
+
             <div className="product-grid">
                 {products.map((product) => (
                     <div
@@ -182,6 +246,7 @@ const ProductGrid = () => {
                     </div>
                 ))}
             </div>
+
             {totalPages > 1 && (
                 <div className="pagination">
                     <button
@@ -213,6 +278,7 @@ const ProductGrid = () => {
                     </button>
                 </div>
             )}
+
             {modalOpen && selectedProduct && selectedVariant && (
                 <div className="modal-overlay" onClick={closeModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -221,20 +287,35 @@ const ProductGrid = () => {
                             <div className="modal-image">
                                 <img
                                     src={
-                                        selectedVariant.images?.length > 0
-                                            ? `${CLOUDINARY_BASE_URL}${selectedVariant.images[0].publicId}.png`
-                                            : '/img/product/default.png'
+                                        selectedImage
+                                            ? `${CLOUDINARY_BASE_URL}${selectedImage}.png`
+                                            : selectedVariant.images?.length > 0
+                                                ? `${CLOUDINARY_BASE_URL}${selectedVariant.images[0].publicId}.png`
+                                                : '/img/product/default.png'
                                     }
                                     alt={selectedProduct.name}
                                     className="product-image"
                                 />
+                                <div className="thumbnail-container">
+                                    {allImages.map((image, index) => (
+                                        <img
+                                            key={index}
+                                            src={`${CLOUDINARY_BASE_URL}${image.publicId}.png`}
+                                            alt={`${selectedProduct.name} thumbnail ${index + 1}`}
+                                            className={`thumbnail ${selectedImage === image.publicId ? 'active' : ''}`}
+                                            onClick={() => handleImageClick(image)}
+                                        />
+                                    ))}
+                                </div>
                             </div>
                             <div className="modal-details">
-                                <h2 className="modal-title"><i>{selectedProduct.brand}</i> - {selectedProduct.name}</h2>
+                                <h2 className="modal-title">
+                                    <i>{selectedProduct.brand}</i> - {selectedProduct.name}
+                                </h2>
                                 <p className="modal-category">Danh mục: {selectedProduct.category}</p>
                                 <p className="modal-description">{selectedProduct.description}</p>
                                 <p className="modal-price" style={{color:'red',fontWeight:'bold'}}>
-                                   {selectedVariant.price ? `${selectedVariant.price.toLocaleString()}₫` : 'Liên hệ'}
+                                    {selectedVariant.price ? `${selectedVariant.price.toLocaleString()}₫` : 'Liên hệ'}
                                 </p>
                                 <div className="modal-variants">
                                     <h3>Tùy chọn</h3>
@@ -274,6 +355,20 @@ const ProductGrid = () => {
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {successModalOpen && (
+                <div className={`success-overlay ${successModalOpen ? 'active' : ''}`} onClick={closeSuccessModal}>
+                    <div className="success-container" onClick={(e) => e.stopPropagation()}>
+                        <div className="success-body">
+                            <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                                <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+                                <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+                            </svg>
+                            <p className="success-text">Sản phẩm đã được thêm vào giỏ hàng!</p>
                         </div>
                     </div>
                 </div>

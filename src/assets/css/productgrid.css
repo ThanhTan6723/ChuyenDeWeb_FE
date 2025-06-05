@@ -14,7 +14,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: 300px; /* Ensure consistent height for all cards */
+    min-height: 300px;
 }
 
 .discount-badge {
@@ -29,13 +29,13 @@
     border-radius: 8px;
 }
 
-.wishlist-icon {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    font-size: 20px;
-    cursor: pointer;
-}
+/*.w Individ: .wishlist-icon {*/
+/*    position: absolute;*/
+/*    top: 12px;*/
+/*    right: 12px;*/
+/*    font-size: 20px;*/
+/*    cursor: pointer;*/
+/*}*/
 
 .product-image {
     height: 150px;
@@ -47,14 +47,14 @@
     font-size: 16px;
     font-weight: 600;
     margin: 10px 0 4px;
-    text-align: left; /* Left-align product name */
+    text-align: left;
 }
 
 .product-brand {
     font-size: 14px;
     color: #666;
     margin: 0 0 10px;
-    text-align: left; /* Center-align product brand */
+    text-align: left;
 }
 
 .product-price {
@@ -67,10 +67,10 @@
 
 .quantity-cart {
     display: flex;
-    flex-direction: column; /* Stack quantity controls and add-to-cart button vertically */
-    align-items: center; /* Center-align items */
+    flex-direction: column;
+    align-items: center;
     gap: 10px;
-    margin-top: auto; /* Push to the bottom of the card */
+    margin-top: auto;
 }
 
 .quantity-cart .quantity-controls {
@@ -91,8 +91,8 @@
 }
 
 .quantity-cart .add-to-cart {
-    width: 90%; /* Make the button full-width */
-    margin-left: 0; /* Remove left margin */
+    width: 90%;
+    margin-left: 0;
     padding: 10px;
     background: #4ce9d1;
     color: white;
@@ -100,15 +100,15 @@
     border-radius: 4px;
     font-size: 14px;
     cursor: pointer;
-    display: flex; /* Use flexbox for centering */
-    justify-content: center; /* Center text horizontally */
-    align-items: center; /* Center text vertically */
-    text-align: center; /* Fallback for horizontal centering */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     margin-bottom: 10px;
 }
 
 .quantity-cart .add-to-cart:hover {
-    background: #4ae1cb; /* Màu đậm hơn khi hover */
+    background: #4ae1cb;
 }
 
 .quantity-cart span {
@@ -136,7 +136,6 @@
     color: white;
 }
 
-/* Modal Styles */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -180,11 +179,35 @@
 
 .modal-image {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .modal-image .product-image {
-    height: 460px;
+    height: 400px;
     width: 100%;
+    object-fit: contain;
+}
+
+.thumbnail-container {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.thumbnail {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 4px;
+}
+
+.thumbnail.active {
+    border-color: #32dabb;
 }
 
 .modal-details {

@@ -7,6 +7,7 @@ import Layout from '../components/layout/layout';
 
 import '../../assets/css/style.css';
 import '../../assets/css/product-info.css';
+import '../../assets/css/success.css';
 
 const ShopDetail = () => {
     const { productId } = useParams();
