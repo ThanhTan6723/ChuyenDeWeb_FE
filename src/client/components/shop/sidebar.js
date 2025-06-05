@@ -1,83 +1,79 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-const Sidebar = () => {
+const Sidebar = ({ onFilterChange }) => {
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedBrand, setSelectedBrand] = useState('');
+
+    const categories = [
+        'Tẩy trang',
+        'Sữa rửa mặt',
+        'Toner',
+        'Kem chống nắng',
+        'Kem dưỡng',
+        'Mặt nạ',
+        'Serum',
+    ];
+
+    const brands = [
+        'CeraVe',
+        'Bioderma',
+        'La Roche-Posay',
+        'Cetaphil',
+        'SVR',
+        'Loreal',
+        'Eucerin',
+        'cocoon',
+        'Good Skin',
+        'klairs',
+    ];
+
+    const handleCategoryClick = (category) => {
+        const newCategory = selectedCategory === category ? '' : category;
+        setSelectedCategory(newCategory);
+        onFilterChange({ category: newCategory, brand: selectedBrand });
+    };
+
+    const handleBrandClick = (brand) => {
+        const newBrand = selectedBrand === brand ? '' : brand;
+        setSelectedBrand(newBrand);
+        onFilterChange({ category: selectedCategory, brand: newBrand });
+    };
+
     return (
         <div className="left_sidebar_area">
             <aside className="left_widgets p_filter_widgets">
                 <div className="l_w_title">
-                    <h3>Browse Categories</h3>
+                    <h3>Danh mục</h3>
                 </div>
                 <div className="widgets_inner">
                     <ul className="list">
-                        <li>
-                            <a href="#">Frozen Fish</a>
-                            <span>(250)</span>
-                        </li>
-                        <li>
-                            <a href="#">Dried Fish</a>
-                            <span>(250)</span>
-                        </li>
-                        <li>
-                            <a href="#">Fresh Fish</a>
-                            <span>(250)</span>
-                        </li>
-                        <li>
-                            <a href="#">Meat Alternatives</a>
-                            <span>(250)</span>
-                        </li>
-                        <li>
-                            <a href="#">Fresh Fish</a>
-                            <span>(250)</span>
-                        </li>
-                        <li>
-                            <a href="#">Meat Alternatives</a>
-                            <span>(250)</span>
-                        </li>
-                        <li>
-                            <a href="#">Meat</a>
-                            <span>(250)</span>
-                        </li>
+                        {categories.map((category) => (
+                            <li
+                                key={category}
+                                className={selectedCategory === category ? 'active' : ''}
+                                onClick={() => handleCategoryClick(category)}
+                            >
+                                <a href="#">{category}</a>
+                            </li>
+                        ))}
                     </ul>
                 </div>
             </aside>
             <aside className="left_widgets p_filter_widgets">
                 <div className="l_w_title">
-                    <h3>Product filters</h3>
+                    <h3>Thương hiệu</h3>
                 </div>
                 <div className="widgets_inner">
                     <ul className="list">
-                        <li>
-                            <a href="#">Apple</a>
-                        </li>
-                        <li>
-                            <a href="#">Asus</a>
-                        </li>
-                        <li className="active">
-                            <a href="#">Gionee</a>
-                        </li>
-                        <li>
-                            <a href="#">Micromax</a>
-                        </li>
-                        <li>
-                            <a href="#">Samsung</a>
-                        </li>
-                    </ul>
-                    <ul className="list">
-                        <li>
-                            <a href="#">Apple</a>
-                        </li>
-                        <li>
-                            <a href="#">Asus</a>
-                        </li>
-                        <li className="active">
-                            <a href="#">Gionee</a>
-                        </li>
-                        <li>
-                            <a href="#">Micromax</a>
-                        </li>
-                        <li>
-                            <a href="#">Samsung</a>
-                        </li>
+                        {brands.map((brand) => (
+                            <li
+                                key={brand}
+                                className={selectedBrand === brand ? 'active' : ''}
+                                onClick={() => handleBrandClick(brand)}
+                            >
+                                <a href="#">{brand}</a>
+                            </li>
+                        ))}
                     </ul>
                 </div>
             </aside>

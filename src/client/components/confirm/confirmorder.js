@@ -277,7 +277,7 @@ const Confirmation = () => {
                                             Tạm tính
                                         </th>
                                         <th>
-                                            <span style={{color:'red',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>{calculateSubtotal().toLocaleString('vi-VN')}₫</span>
+                                            <span style={{color:'red',fontSize:'15px', fontWeight:'bold',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>{calculateSubtotal().toLocaleString('vi-VN')}₫</span>
                                         </th>
                                     </tr>
                                     <tr>
@@ -285,7 +285,7 @@ const Confirmation = () => {
                                             Phí vận chuyển
                                         </th>
                                         <th>
-                                            <span style={{color:'red',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>{order.ship.toLocaleString('vi-VN')}₫</span>
+                                            <span style={{color:'red',fontSize:'15px', fontWeight:'bold',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>{order.ship.toLocaleString('vi-VN')}₫</span>
                                         </th>
                                     </tr>
                                     </tbody>
@@ -294,7 +294,7 @@ const Confirmation = () => {
                                         <th scope="col" colSpan="3" style={{color:'black',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>
                                             Tổng tiền
                                         </th>
-                                        <th scope="col" style={{color:'red',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>
+                                        <th scope="col" style={{color:'red',fontSize:'15px', fontWeight:'bold',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>
                                             {order.totalMoney.toLocaleString('vi-VN')}₫
                                         </th>
                                     </tr>
