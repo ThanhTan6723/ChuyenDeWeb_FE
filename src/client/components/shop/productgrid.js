@@ -8,7 +8,7 @@ const API_URL = 'https://localhost:8443/api/products';
 const DETAIL_API_URL = 'https://localhost:8443/api/products/';
 const CART_API_URL = 'https://localhost:8443/api/cart';
 
-const ProductGrid = ({ searchTerm }) => {
+const ProductGrid = ({ searchTerm, sortBy, sortOrder }) => {
     const { user } = useAuth();
     const { fetchCart } = useCart();
     const navigate = useNavigate();
@@ -32,9 +32,17 @@ const ProductGrid = ({ searchTerm }) => {
             setLoading(true);
             setError(null);
             try {
-                const url = searchTerm.trim()
-                    ? `${API_URL}/search?keyword=${encodeURIComponent(searchTerm)}&page=${currentPage - 1}&size=${itemsPerPage}`
-                    : `${API_URL}/grid?page=${currentPage - 1}&size=${itemsPerPage}`;
+                let url;
+                if (sortBy !== 'name' || sortOrder !== 'asc') {
+                    // Use sorted endpoint when sorting is applied
+                    url = `${API_URL}/sorted?keyword=${encodeURIComponent(searchTerm || '')}&page=${currentPage - 1}&size=${itemsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+                } else if (searchTerm.trim()) {
+                    // Use search endpoint when searching without custom sorting
+                    url = `${API_URL}/search?keyword=${encodeURIComponent(searchTerm)}&page=${currentPage - 1}&size=${itemsPerPage}`;
+                } else {
+                    // Use grid endpoint when no search or sorting
+                    url = `${API_URL}/grid?page=${currentPage - 1}&size=${itemsPerPage}`;
+                }
 
                 const response = await fetch(url, {
                     method: 'GET',
@@ -62,7 +70,7 @@ const ProductGrid = ({ searchTerm }) => {
         };
 
         fetchProducts();
-    }, [currentPage, searchTerm]);
+    }, [currentPage, searchTerm, sortBy, sortOrder]);
 
     useEffect(() => {
         if (modalOpen || successModalOpen) {

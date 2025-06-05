@@ -5,78 +5,71 @@ const Sidebar = () => {
         <div className="left_sidebar_area">
             <aside className="left_widgets p_filter_widgets">
                 <div className="l_w_title">
-                    <h3>Browse Categories</h3>
+                    <h3>Danh mục</h3>
                 </div>
                 <div className="widgets_inner">
                     <ul className="list">
                         <li>
-                            <a href="#">Frozen Fish</a>
-                            <span>(250)</span>
+                            <a href="#">Tẩy trang</a>
                         </li>
                         <li>
-                            <a href="#">Dried Fish</a>
-                            <span>(250)</span>
+                            <a href="#">Sữa rửa mặt</a>
                         </li>
                         <li>
-                            <a href="#">Fresh Fish</a>
-                            <span>(250)</span>
+                            <a href="#">Toner</a>
                         </li>
                         <li>
-                            <a href="#">Meat Alternatives</a>
-                            <span>(250)</span>
+                            <a href="#">Kem chống nắng</a>
                         </li>
                         <li>
-                            <a href="#">Fresh Fish</a>
-                            <span>(250)</span>
+                            <a href="#">Kem dưỡng</a>
                         </li>
                         <li>
-                            <a href="#">Meat Alternatives</a>
-                            <span>(250)</span>
+                            <a href="#">Mặt nạ</a>
                         </li>
                         <li>
-                            <a href="#">Meat</a>
-                            <span>(250)</span>
+                            <a href="#">Serum</a>
                         </li>
                     </ul>
                 </div>
             </aside>
             <aside className="left_widgets p_filter_widgets">
                 <div className="l_w_title">
-                    <h3>Product filters</h3>
+                    <h3>Thương hiệu</h3>
                 </div>
                 <div className="widgets_inner">
                     <ul className="list">
                         <li>
-                            <a href="#">Apple</a>
+                            <a href="#">CeraVe</a>
                         </li>
                         <li>
-                            <a href="#">Asus</a>
+                            <a href="#">Bioderma</a>
                         </li>
                         <li className="active">
-                            <a href="#">Gionee</a>
+                            <a href="#">La Roche-Posay</a>
                         </li>
                         <li>
-                            <a href="#">Micromax</a>
+                            <a href="#">Cetaphil</a>
                         </li>
                         <li>
-                            <a href="#">Samsung</a>
+                            <a href="#">SVR</a>
                         </li>
                     </ul>
                     <ul className="list">
                         <li>
-                            <a href="#">Apple</a>
+                            <a href="#">Loreal</a>
                         </li>
                         <li>
-                            <a href="#">Asus</a>
+                            <a href="#">Eucerin</a>
                         </li>
                         <li className="active">
-                            <a href="#">Gionee</a>
+                            <a href="#">cocoon</a>
                         </li>
                         <li>
-                            <a href="#">Micromax</a>
+                            <a href="#">Good Skin</a>
                         </li>
                         <li>
-                            <a href="#">Samsung</a>
+                            <a href="#">klairs</a>
                         </li>
                     </ul>
                 </div>
