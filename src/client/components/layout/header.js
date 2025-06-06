@@ -76,7 +76,7 @@ const Header = () => {
                                         <div className="dropdown-content">
                                             <a href="#" className="auth" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Đăng xuất</a>
                                             <Link to="/vouchers">Kho voucher</Link>
-                                            <Link to="/support">Đơn đã đặt</Link>
+                                            <Link to="/order-history">Đơn đã đặt</Link>
                                             <Link to="/admin">Admin</Link>
                                             <Link to="/update-profile">Thông tin tài khoản</Link>
                                         </div>
