@@ -19,7 +19,7 @@ import Dashboard from './admin/pages/Dashboard';
 import ManageUser from './admin/pages/ManageUser';
 import ManageProduct from './admin/pages/ManageProduct';
 import ManageOrder from './admin/pages/ManageOrder';
-
+import i18n from "./i18n";
 function App() {
     return (
         <AuthProvider>

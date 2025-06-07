@@ -7,7 +7,7 @@ import WeeklyOffer from '../components/home/weeklyoffer';
 import BestSellers from '../components/home/bestsellers';
 import Newsletter from '../components/home/newsletter';
 import ClientLogos from '../components/home/clientlogos';
-
+import { useTranslation } from 'react-i18next';
 // Import CSS
 import '../../assets/css/bootstrap.min.css';
 import '../../assets/css/animate.css';
@@ -20,6 +20,8 @@ import '../../assets/css/slick.css';
 import '../../assets/css/style.css';
 
 const Home = () => {
+    const { t } = useTranslation();
+
     return (
         <Layout>
             <Banner />
