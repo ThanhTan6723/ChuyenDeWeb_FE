@@ -446,15 +446,15 @@ const CartItem = () => {
                             )}
                             <tr>
                                 <td></td>
-                                <td></td>
-                                <td></td>
                                 <td>
-                                    <div className="cupon_text float-right">
-                                        <a className="btn_1" href="#">
+                                    <div className="cupon_text" >
+                                        <a className="btn_1" style={{background:'#728295', color:'white'}}>
                                             Voucher
                                         </a>
                                     </div>
                                 </td>
+                                <td></td>
+                                <td></td>
                                 <td><h5 style={{ fontWeight: 'bold' }}>Tổng tiền</h5></td>
                                 <td style={{width:'110px'}}>
                                     <h5 style={{ fontWeight: 'bold', color: 'red' }}>
