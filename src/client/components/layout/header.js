@@ -2,8 +2,10 @@ import React, { useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '../../../auth/authcontext';
 import { useCart } from '../../contexts/cartcontext';
+import { useTranslation } from 'react-i18next';  // import hook i18n
 
 const Header = () => {
+    const { t, i18n } = useTranslation();  // lấy hàm t và i18n
     const { user, logout, loading } = useAuth();
     const { cartCount, fetchCart, setCartCount } = useCart();
     const navigate = useNavigate();
@@ -21,20 +23,24 @@ const Header = () => {
                 setCartCount(0);
             }
         } catch (err) {
-            console.error("Lỗi khi đăng xuất:", err);
+            console.error(t('logout_error'), err);
         }
     };
 
     const handleCartToggle = () => {
         if (!user) {
-            alert('Bạn cần đăng nhập để xem giỏ hàng')
+            alert(t('login_to_view_cart'));
             navigate('/login', { state: { from: '/cart' } });
             return;
         }
         navigate('/cart');
     };
 
-    if (loading) return <div className="text-center py-3">Đang tải...</div>;
+    const changeLanguage = (lng) => {
+        i18n.changeLanguage(lng);
+    };
+
+    if (loading) return <div className="text-center py-3">{t('loading')}...</div>;
 
     return (
         <header className="main_menu home_menu">
@@ -57,37 +63,49 @@ const Header = () => {
                             </button>
                             <div className="collapse navbar-collapse main-menu-item" id="navbarSupportedContent">
                                 <ul className="navbar-nav">
-                                    <li className="nav-item"><Link className="nav-link" to="/home">Trang chủ</Link></li>
-                                    <li className="nav-item"><Link className="nav-link" to="/shop">Sản phẩm</Link></li>
-                                    <li className="nav-item"><a className="nav-link" href="#">Voucher</a></li>
-                                    <li className="nav-item"><Link className="nav-link" to="/shop-detail">Blog</Link></li>
-                                    <li className="nav-item"><a className="nav-link" href="/contact">Liên hệ</a></li>
+                                    <li className="nav-item"><Link className="nav-link" to="/home">{t('home')}</Link></li>
+                                    <li className="nav-item"><Link className="nav-link" to="/shop">{t('shop')}</Link></li>
+                                    <li className="nav-item"><a className="nav-link" href="#">{t('voucher')}</a></li>
+                                    <li className="nav-item"><Link className="nav-link" to="/shop-detail">{t('blog')}</Link></li>
+                                    <li className="nav-item"><a className="nav-link" href="/contact">{t('contact')}</a></li>
                                 </ul>
                             </div>
-                            <div className="language" style={{ marginRight: '20px' }}>
-                                <img src="/img/usa.png" style={{ marginRight: '5px' }} alt="USA" />
-                                <img src="/img/vietnam.png" alt="Vietnam" />
+
+                            {/* Language switcher */}
+                            <div className="language" style={{ marginRight: '20px', cursor: 'pointer' }}>
+                                <img
+                                    src="/img/usa.png"
+                                    alt="English"
+                                    style={{ marginRight: '5px', border: i18n.language === 'en' ? '2px solid #000' : 'none' }}
+                                    onClick={() => changeLanguage('en')}
+                                />
+                                <img
+                                    src="/img/vietnam.png"
+                                    alt="Vietnamese"
+                                    style={{ border: i18n.language === 'vi' ? '2px solid #000' : 'none' }}
+                                    onClick={() => changeLanguage('vi')}
+                                />
                             </div>
 
                             <div className="hearer_icon d-flex align-items-center">
                                 {user ? (
                                     <div className="user-dropdown">
-                                        <span className="user-name" style={{color:'black'}}>{user?.username || user?.email?.split('@')[0]}</span>
+                                        <span className="user-name" style={{color:'black'}}>
+                                            {user?.username || user?.email?.split('@')[0]}
+                                        </span>
                                         <div className="dropdown-content">
-                                            <a href="#" className="auth" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Đăng xuất</a>
-                                            <Link to="/vouchers">Kho voucher</Link>
-                                            <Link to="/order-history">Đơn đã đặt</Link>
+                                            <a href="#" className="auth" onClick={(e) => { e.preventDefault(); handleLogout(); }}>{t('logout')}</a>
+                                            <Link to="/vouchers">{t('voucher_store')}</Link>
+                                            <Link to="/order-history">{t('order_history')}</Link>
                                             <Link to="/admin">Admin</Link>
-                                            <Link to="/update-profile">Thông tin tài khoản</Link>
+                                            <Link to="/update-profile">{t('account_info')}</Link>
                                         </div>
                                     </div>
                                 ) : (
-                                    <>
-                                        <div className="log">
-                                            <img src="/img/login.png" alt="Login" style={{ marginRight: '5px', color:'black' }} />
-                                            <Link to="/login">Đăng nhập/Đăng ký</Link>
-                                        </div>
-                                    </>
+                                    <div className="log">
+                                        <img src="/img/login.png" alt="Login" style={{ marginRight: '5px', color:'black' }} />
+                                        <Link to="/login">{t('login_signup')}</Link>
+                                    </div>
                                 )}
                                 <a id="search_1" href="#"><i className="ti-search" /></a>
                                 <a href="#"><i className="ti-heart" /></a>

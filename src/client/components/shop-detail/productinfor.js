@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '../../contexts/cartcontext';
 import { useAuth } from '../../../auth/authcontext';
 
@@ -7,6 +8,7 @@ const CLOUDINARY_BASE_URL = 'https://localhost:8443/api/products/';
 const CART_API_URL = 'https://localhost:8443/api/cart';
 
 const ProductInfo = ({ productId = '1', onVariantChange }) => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { fetchCart } = useCart();
     const [product, setProduct] = useState(null);
@@ -33,7 +35,7 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
                 }
                 const data = await response.json();
                 if (!data || !data.variants || data.variants.length === 0) {
-                    throw new Error('Sản phẩm không có biến thể hoặc dữ liệu không hợp lệ');
+                    throw new Error(t('error_loading_product'));
                 }
                 const defaultVariant = data.variants.find(variant =>
                     variant.images.some(img => img.main)
@@ -43,15 +45,15 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
                 setQuantity(1);
                 if (onVariantChange) onVariantChange(defaultVariant);
             } catch (err) {
-                setError(`Không thể tải chi tiết sản phẩm: ${err.message}`);
-                console.error('Lỗi khi tải chi tiết sản phẩm:', err);
+                setError(`${t('error_loading_product')}: ${err.message}`);
+                console.error(t('error_loading_product'), err);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchProductDetails();
-    }, [productId, onVariantChange]);
+    }, [productId, onVariantChange, t]);
 
     useEffect(() => {
         if (successModalOpen) {
@@ -97,13 +99,13 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
                 credentials: 'include',
             });
             if (!response.ok) {
-                throw new Error('Thêm sản phẩm vào giỏ hàng thất bại!');
+                throw new Error(t('error_loading_product'));
             }
             await response.json();
             setSuccessModalOpen(true);
             fetchCart();
         } catch (err) {
-            console.error('Lỗi khi thêm vào giỏ hàng:', err);
+            console.error(t('error_loading_product'), err);
             alert(err.message);
         }
     };
@@ -111,20 +113,20 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
     const closeModal = () => setShowLoginModal(false);
     const closeSuccessModal = () => setSuccessModalOpen(false);
 
-    if (loading) return <div className="loading text-center py-6 text-gray-500">Đang tải...</div>;
-    if (error) return <div className="error text-center py-6 text-red-600 font-medium">Lỗi: {error}</div>;
+    if (loading) return <div className="loading text-center py-6 text-gray-500">{t('loading')}...</div>;
+    if (error) return <div className="error text-center py-6 text-red-600 font-medium">{t('error_loading_product')}: {error}</div>;
     if (!product || !selectedVariant) return null;
 
     return (
         <div className="product-info bg-white p-6 rounded-lg shadow-sm max-w-lg mx-auto">
             <h3 className="product-title text-2xl font-semibold text-gray-800 mb-2"><i>{product.brand}</i> - {product.name}</h3>
-            <p className="product-category text-sm text-gray-500 mb-4">Danh mục: {product.category}</p>
+            <p className="product-category text-sm text-gray-500 mb-4">{t('product_category')}: {product.category}</p>
             <h2 className="product-price text-xl font-bold text-teal-600 mb-4">
-                {selectedVariant.price ? `${selectedVariant.price.toLocaleString()}₫` : 'Liên hệ'}
+                {selectedVariant.price ? `${selectedVariant.price.toLocaleString()}₫` : t('contact_price')}
             </h2>
-            <p className="product-description text-gray-600 text-sm leading-relaxed mb-6">{product.description}</p>
+            <p className="product-description text-gray-600 text-sm leading-relaxed mb-6">{t('product_description')}: {product.description}</p>
             <div className="variant-selector mb-6">
-                <h4 className="variant-title text-base font-medium text-gray-700 mb-3">Công dụng</h4>
+                <h4 className="variant-title text-base font-medium text-gray-700 mb-3">{t('variant_title')}</h4>
                 {product.variants.length > 0 ? (
                     <div className="variant-options flex flex-wrap gap-2">
                         {product.variants.map((variant) => (
@@ -146,46 +148,37 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
                         ))}
                     </div>
                 ) : (
-                    <p className="text-gray-500 text-sm">Không có biến thể.</p>
+                    <p className="text-gray-500 text-sm">{t('no_variants')}</p>
                 )}
             </div>
             {selectedVariant.quantity > 0 && (
                 <div className="quantity-cart">
                     <div className="quantity-controls">
-                        <button
-                            onClick={() => handleQuantityChange(-1)}
-                        >
-                            -
-                        </button>
-                        <span>{quantity}</span>
-                        <button
-                            onClick={() => handleQuantityChange(1)}
-                        >
-                            +
-                        </button>
+                        <button onClick={() => handleQuantityChange(-1)}>-</button>
+                        <span>{t('quantity')}: {quantity}</span>
+                        <button onClick={() => handleQuantityChange(1)}>+</button>
                     </div>
-                    <button
-                        className="add-to-cart"
-                        onClick={handleAddToCart}
-                    >
-                        Thêm vào giỏ
+                    <button className="add-to-cart" onClick={handleAddToCart}>
+                        {t('add_to_cart')}
                     </button>
                 </div>
             )}
-
             {showLoginModal && (
                 <div className="modal fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-                        <h3 className="text-lg font-semibold mb-4">Yêu cầu đăng nhập</h3>
-                        <p className="text-gray-600 mb-6">Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!</p>
+                        <h3 className="text-lg font-semibold mb-4">{t('login_required')}</h3>
+                        <p className="text-gray-600 mb-6">{t('login_prompt')}</p>
                         <div className="flex justify-end gap-4">
-                            <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400" onClick={closeModal}>Đóng</button>
-                            <Link to="/login" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700" onClick={closeModal}>Đăng nhập</Link>
+                            <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400" onClick={closeModal}>
+                                {t('close')}
+                            </button>
+                            <Link to="/login" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700" onClick={closeModal}>
+                                {t('login')}
+                            </Link>
                         </div>
                     </div>
                 </div>
             )}
-
             {successModalOpen && (
                 <div className={`success-overlay ${successModalOpen ? 'active' : ''}`} onClick={closeSuccessModal}>
                     <div className="success-container" onClick={(e) => e.stopPropagation()}>
@@ -194,7 +187,7 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
                                 <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
                                 <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
                             </svg>
-                            <p className="success-text">Sản phẩm đã được thêm vào giỏ hàng!</p>
+                            <p className="success-text">{t('success_add_to_cart')}</p>
                         </div>
                     </div>
                 </div>

@@ -134,7 +134,7 @@ const ManageUser = () => {
                                                     <th>ID</th>
                                                     <th>Tên người dùng</th>
                                                     <th>Email</th>
-                                                    <th>Số điện thoại</th> {/* Thêm cột */}
+                                                    <th>Số điện thoại</th>
                                                     <th>Vai trò</th>
                                                     <th>Số lần đăng nhập thất bại</th>
                                                     <th>Khóa</th>
@@ -149,7 +149,7 @@ const ManageUser = () => {
                                                             <td>{user.id}</td>
                                                             <td>{user.username}</td>
                                                             <td>{user.email}</td>
-                                                            <td>{user.phone || 'N/A'}</td> {/* Hiển thị phone */}
+                                                            <td>{user.phone || 'N/A'}</td>
                                                             <td>{user.role?.roleName || "N/A"}</td>
                                                             <td>{user.failed ?? 0}</td>
                                                             <td>{user.locked ? "Có" : "Không"}</td>
@@ -187,79 +187,105 @@ const ManageUser = () => {
             {/* Modal thêm người dùng */}
             {showModal && (
                 <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Thêm người dùng</h5>
-                                <button className="btn-close" onClick={() => setShowModal(false)}></button>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content rounded-lg shadow-xl">
+                            <div className="modal-header bg-gray-100 border-b border-gray-200">
+                                <h5 className="modal-title text-xl font-semibold text-gray-800">Thêm người dùng mới</h5>
+                                <button
+                                    className="btn-close hover:bg-gray-200 rounded-full p-2 transition-colors"
+                                    onClick={() => setShowModal(false)}
+                                ></button>
                             </div>
                             <form onSubmit={handleSubmit}>
-                                <div className="modal-body">
-                                    {formError && <div className="alert alert-danger">{formError}</div>}
-                                    <div className="mb-3">
-                                        <label className="form-label">Tên người dùng</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="username"
-                                            value={newUser.username}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Email</label>
-                                        <input
-                                            type="email"
-                                            className="form-control"
-                                            name="email"
-                                            value={newUser.email}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Số điện thoại</label>
-                                        <input
-                                            type="tel"
-                                            className="form-control"
-                                            name="phoneNumber"
-                                            value={newUser.phoneNumber}
-                                            onChange={handleInputChange}
-                                            placeholder="VD: 0123456789"
-                                        />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Mật khẩu</label>
-                                        <input
-                                            type="password"
-                                            className="form-control"
-                                            name="password"
-                                            value={newUser.password}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Vai trò</label>
-                                        <select
-                                            className="form-select"
-                                            name="roleName"
-                                            value={newUser.roleName}
-                                            onChange={handleInputChange}
-                                        >
-                                            <option value="ROLE_CLIENT">Client</option>
-                                            <option value="ROLE_ADMIN">Admin</option>
-                                            <option value="ROLE_MANAGE_USER">Manage User</option>
-                                            <option value="ROLE_MANAGE_ORDER">Manage Order</option>
-                                        </select>
+                                <div className="modal-body p-6">
+                                    {formError && (
+                                        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+                                            {formError}
+                                        </div>
+                                    )}
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="form-label block text-sm font-medium text-gray-700 mb-1">
+                                                Tên người dùng
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                name="username"
+                                                value={newUser.username}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="form-label block text-sm font-medium text-gray-700 mb-1">
+                                                Email
+                                            </label>
+                                            <input
+                                                type="email"
+                                                className="form-control w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                name="email"
+                                                value={newUser.email}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="form-label block text-sm font-medium text-gray-700 mb-1">
+                                                Số điện thoại
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                className="form-control w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                name="phoneNumber"
+                                                value={newUser.phoneNumber}
+                                                onChange={handleInputChange}
+                                                placeholder="VD: 0123456789"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="form-label block text-sm font-medium text-gray-700 mb-1">
+                                                Mật khẩu
+                                            </label>
+                                            <input
+                                                type="password"
+                                                className="form-control w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                name="password"
+                                                value={newUser.password}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="form-label block text-sm font-medium text-gray-700 mb-1">
+                                                Vai trò
+                                            </label>
+                                            <select
+                                                className="form-select w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                name="roleName"
+                                                value={newUser.roleName}
+                                                onChange={handleInputChange}
+                                            >
+                                                <option value="ROLE_CLIENT">Client</option>
+                                                <option value="ROLE_ADMIN">Admin</option>
+                                                <option value="ROLE_MANAGE_USER">Manage User</option>
+                                                <option value="ROLE_MANAGE_ORDER">Manage Order</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                                <div className="modal-footer bg-gray-100 border-t border-gray-200 flex justify-end space-x-2 p-4">
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                                        onClick={() => setShowModal(false)}
+                                    >
                                         Hủy
                                     </button>
-                                    <button type="submit" className="btn btn-primary">
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                                    >
                                         Thêm
                                     </button>
                                 </div>

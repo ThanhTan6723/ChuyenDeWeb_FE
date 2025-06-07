@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Breadcrumb from '../components/layout/breadcrumb';
 import ProductImage from '../components/shop-detail/productimage';
 import ProductInfo from '../components/shop-detail/productinfor';
@@ -10,12 +11,16 @@ import '../../assets/css/product-info.css';
 import '../../assets/css/success.css';
 
 const ShopDetail = () => {
+    const { t } = useTranslation();
     const { productId } = useParams();
     const [selectedVariant, setSelectedVariant] = useState(null);
 
     return (
         <Layout>
-            <Breadcrumb title="Chi tiết sản phẩm" subtitle="Trang chủ - Chi tiết sản phẩm" />
+            <Breadcrumb
+                title={t('product_detail_title')}
+                subtitle={t('product_detail_subtitle')}
+            />
             <div className="product_image_area section_padding">
                 <div className="container">
                     <div className="row s_product_inner justify-content-between">

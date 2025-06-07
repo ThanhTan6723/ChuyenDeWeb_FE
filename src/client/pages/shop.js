@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Layout from '../components/layout/layout';
 import BestSellers from '../components/home/bestsellers';
 import Breadcrumb from '../components/layout/breadcrumb';
@@ -18,9 +19,11 @@ import '../../assets/css/productgrid.css';
 import '../../assets/css/success.css';
 
 const Shop = () => {
+    const { t } = useTranslation();
+
     return (
         <Layout>
-            <Breadcrumb title="Sản phẩm" subtitle="Trang chủ - Sản phẩm" />
+            <Breadcrumb title={t('shop_title')} subtitle={t('shop_subtitle')} />
             <CategoryProductArea />
             <BestSellers />
         </Layout>

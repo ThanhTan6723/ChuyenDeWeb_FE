@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-
+import { useTranslation } from 'react-i18next';
 const Sidebar = ({ onFilterChange }) => {
+    const { t } = useTranslation();
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedBrand, setSelectedBrand] = useState('');
 
@@ -43,7 +44,7 @@ const Sidebar = ({ onFilterChange }) => {
         <div className="left_sidebar_area">
             <aside className="left_widgets p_filter_widgets">
                 <div className="l_w_title">
-                    <h3>Danh mục</h3>
+                    <h3>{t('category')}</h3>
                 </div>
                 <div className="widgets_inner">
                     <ul className="list">
@@ -61,7 +62,7 @@ const Sidebar = ({ onFilterChange }) => {
             </aside>
             <aside className="left_widgets p_filter_widgets">
                 <div className="l_w_title">
-                    <h3>Thương hiệu</h3>
+                    <h3>{t('brand')}</h3>
                 </div>
                 <div className="widgets_inner">
                     <ul className="list">

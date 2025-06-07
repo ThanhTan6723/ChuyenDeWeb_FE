@@ -60,7 +60,7 @@ const ManageProduct = () => {
                 <div className="layout-page">
                     <Navbar />
                     <div className="content-wrapper">
-                        <div className="container-xl flex-grow-1 container-p-y" style={{width:'100%'}}>
+                        <div className="container-xxl flex-grow-1 container-p-y">
                             <h4 className="fw-bold py-3 mb-4">Quản lý Sản phẩm</h4>
                             <div className="card">
                                 <div className="card-header d-flex justify-content-between align-items-center">
