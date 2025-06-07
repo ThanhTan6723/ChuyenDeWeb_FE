@@ -124,7 +124,7 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
             <h2 className="product-price text-xl font-bold text-teal-600 mb-4">
                 {selectedVariant.price ? `${selectedVariant.price.toLocaleString()}₫` : t('contact_price')}
             </h2>
-            <p className="product-description text-gray-600 text-sm leading-relaxed mb-6">{t('product_description')}: {product.description}</p>
+            <p className="product-description text-gray-600 text-sm leading-relaxed mb-6">{product.description}</p>
             <div className="variant-selector mb-6">
                 <h4 className="variant-title text-base font-medium text-gray-700 mb-3">{t('variant_title')}</h4>
                 {product.variants.length > 0 ? (
@@ -155,7 +155,7 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
                 <div className="quantity-cart">
                     <div className="quantity-controls">
                         <button onClick={() => handleQuantityChange(-1)}>-</button>
-                        <span>{t('quantity')}: {quantity}</span>
+                        <span>{quantity}</span>
                         <button onClick={() => handleQuantityChange(1)}>+</button>
                     </div>
                     <button className="add-to-cart" onClick={handleAddToCart}>

@@ -53,7 +53,7 @@ const resources = {
         translation: {
             add_to_cart: "Thêm vào giỏ hàng",
             welcome: "Chào mừng",
-            shop: "Cửa hàng",
+            shop: "Sản phẩm",
             login: "Đăng nhập",
             logout: "Đăng xuất",
             home: "Trang chủ",
@@ -102,8 +102,8 @@ i18n
     .use(initReactI18next)
     .init({
         resources,
-        lng: "en",
-        fallbackLng: "en",
+        lng: "vi",
+        fallbackLng: "vi",
         interpolation: {
             escapeValue: false
         }

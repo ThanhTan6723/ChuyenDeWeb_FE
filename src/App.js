@@ -14,11 +14,13 @@ import {CartProvider} from "./client/contexts/cartcontext";
 import OrderPage from "./client/pages/order";
 import ConfirmOrder from "./client/pages/confirm-order";
 import OrderHist from "./client/pages/order-history";
+import Voucher from "./client/pages/voucher";
 
 import Dashboard from './admin/pages/Dashboard';
 import ManageUser from './admin/pages/ManageUser';
 import ManageProduct from './admin/pages/ManageProduct';
 import ManageOrder from './admin/pages/ManageOrder';
+import ManageVoucher from './admin/pages/ManageVoucher';
 import i18n from "./i18n";
 function App() {
     return (
@@ -39,10 +41,12 @@ function App() {
                         <Route path="/confirm-order" element={<ConfirmOrder/>}/>
                         <Route path="//order-history" element={<OrderHist/>}/>
                         <Route path="/update-profile" element={<AccountInfo/>}/>
+                        <Route path="/voucher" element={<Voucher/>}/>
                         <Route path="/admin" element={<Dashboard/>}/>
                         <Route path="/admin/pages/manage-user" element={<ManageUser/>}/>
                         <Route path="/admin/pages/manage-product" element={<ManageProduct/>}/>
                         <Route path="/admin/pages/manage-order" element={<ManageOrder/>}/>
+                        <Route path="/admin/pages/manage-voucher" element={<ManageVoucher/>}/>
                     </Routes>
                 </Router>
             </CartProvider>

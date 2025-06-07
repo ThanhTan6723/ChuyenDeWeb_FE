@@ -65,24 +65,24 @@ const Header = () => {
                                 <ul className="navbar-nav">
                                     <li className="nav-item"><Link className="nav-link" to="/home">{t('home')}</Link></li>
                                     <li className="nav-item"><Link className="nav-link" to="/shop">{t('shop')}</Link></li>
-                                    <li className="nav-item"><a className="nav-link" href="#">{t('voucher')}</a></li>
+                                    <li className="nav-item"><a className="nav-link" href="/voucher">{t('voucher')}</a></li>
                                     <li className="nav-item"><Link className="nav-link" to="/shop-detail">{t('blog')}</Link></li>
                                     <li className="nav-item"><a className="nav-link" href="/contact">{t('contact')}</a></li>
                                 </ul>
                             </div>
 
                             {/* Language switcher */}
-                            <div className="language" style={{ marginRight: '20px', cursor: 'pointer' }}>
+                            <div className="language" style={{ marginRight: '20px',}}>
                                 <img
                                     src="/img/usa.png"
                                     alt="English"
-                                    style={{ marginRight: '5px', border: i18n.language === 'en' ? '2px solid #000' : 'none' }}
+                                    style={{ marginRight: '5px',}}
                                     onClick={() => changeLanguage('en')}
                                 />
                                 <img
                                     src="/img/vietnam.png"
                                     alt="Vietnamese"
-                                    style={{ border: i18n.language === 'vi' ? '2px solid #000' : 'none' }}
+                                    style={{ }}
                                     onClick={() => changeLanguage('vi')}
                                 />
                             </div>

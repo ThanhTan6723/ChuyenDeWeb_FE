@@ -54,7 +54,7 @@ const Sidebar = ({ onFilterChange }) => {
                                 className={selectedCategory === category ? 'active' : ''}
                                 onClick={() => handleCategoryClick(category)}
                             >
-                                <a href="#">{category}</a>
+                                <span>{category}</span>
                             </li>
                         ))}
                     </ul>
@@ -72,7 +72,7 @@ const Sidebar = ({ onFilterChange }) => {
                                 className={selectedBrand === brand ? 'active' : ''}
                                 onClick={() => handleBrandClick(brand)}
                             >
-                                <a href="#">{brand}</a>
+                                <span>{brand}</span>
                             </li>
                         ))}
                     </ul>

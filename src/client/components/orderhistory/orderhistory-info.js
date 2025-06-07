@@ -16,26 +16,28 @@ const OrderHistory = () => {
     const [activeTab, setActiveTab] = useState("ALL");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const ordersPerPage = 5; // Số đơn hàng mỗi trang
+    const ordersPerPage = 5;
 
     const statusTabs = [
         { key: "ALL", label: "Tất cả" },
         { key: "PENDING", label: "Đang chờ xác nhận" },
         { key: "CONFIRMED", label: "Đã xác nhận" },
-        { key: "DELIVERING", label: "Đang giao" },
+        { key: "ON_DELIVERY", label: "Đang giao" },
         { key: "DELIVERED", label: "Đã giao" },
         { key: "CANCELLED", label: "Đã hủy" },
     ];
 
     useEffect(() => {
+        if (authLoading) return; // Chờ kiểm tra trạng thái đăng nhập
+        if (!user) {
+            // Chuyển hướng ngay lập tức nếu chưa đăng nhập
+            navigate('/login', { state: { from: '/order-history' } });
+            return;
+        }
+
         const fetchOrders = async () => {
             try {
-                if (authLoading) return;
-                if (!user) {
-                    navigate('/login', { state: { from: '/order-history' } });
-                    return;
-                }
-
+                setLoading(true);
                 const endpoint = activeTab === "ALL"
                     ? `${ORDER_API_URL}`
                     : `${ORDER_API_URL}/status/${activeTab}`;
@@ -43,7 +45,7 @@ const OrderHistory = () => {
                 const response = await axios.get(endpoint, {
                     withCredentials: true,
                     params: {
-                        page: currentPage - 1, // API thường bắt đầu từ 0
+                        page: currentPage - 1,
                         size: ordersPerPage,
                     },
                 });
@@ -51,7 +53,7 @@ const OrderHistory = () => {
                 if (response.data.success) {
                     setOrders(response.data.data.content || response.data.data);
                     setTotalPages(response.data.data.totalPages || Math.ceil(response.data.data.length / ordersPerPage));
-                    // Fetch details for each order
+
                     const detailsPromises = response.data.data.content.map(order =>
                         axios.get(`${ORDER_API_URL}/${order.id}/details`, {
                             withCredentials: true,
@@ -85,6 +87,7 @@ const OrderHistory = () => {
         }
     };
 
+    // Hiển thị loading khi kiểm tra trạng thái đăng nhập
     if (authLoading) {
         return (
             <section className="order_history_part padding_top" style={{ paddingTop: '80px' }}>
@@ -97,6 +100,7 @@ const OrderHistory = () => {
         );
     }
 
+    // Không render gì nếu chưa đăng nhập (chuyển hướng đã được xử lý trong useEffect)
     if (!user) {
         return null;
     }
@@ -146,7 +150,7 @@ const OrderHistory = () => {
                                             className={`nav-link ${activeTab === tab.key ? 'active' : ''}`}
                                             onClick={() => {
                                                 setActiveTab(tab.key);
-                                                setCurrentPage(1); // Reset về trang 1 khi đổi tab
+                                                setCurrentPage(1);
                                             }}
                                         >
                                             {tab.label}
@@ -169,19 +173,7 @@ const OrderHistory = () => {
                                 <div className="row">
                                     <div className="col-lg-12">
                                         <div className="confirmation_tittle">
-                                            {/*<span>*/}
-                                            {/*    {order.orderStatus === 'CONFIRMED'*/}
-                                            {/*        ? 'Đơn hàng đã được xác nhận!'*/}
-                                            {/*        : order.orderStatus === 'PENDING'*/}
-                                            {/*            ? 'Đơn hàng đang chờ xác nhận thanh toán.'*/}
-                                            {/*            : order.orderStatus === 'DELIVERING'*/}
-                                            {/*                ? 'Đơn hàng đang được giao.'*/}
-                                            {/*                : order.orderStatus === 'DELIVERED'*/}
-                                            {/*                    ? 'Đơn hàng đã giao thành công.'*/}
-                                            {/*                    : order.orderStatus === 'CANCELLED'*/}
-                                            {/*                        ? 'Đơn hàng đã bị hủy.'*/}
-                                            {/*                        : 'Cảm ơn bạn đã đặt hàng.'}*/}
-                                            {/*</span>*/}
+                                            {/* Có thể thêm thông báo trạng thái đơn hàng nếu cần */}
                                         </div>
                                     </div>
 
