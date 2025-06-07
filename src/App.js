@@ -19,6 +19,7 @@ import Dashboard from './admin/pages/Dashboard';
 import ManageUser from './admin/pages/ManageUser';
 import ManageProduct from './admin/pages/ManageProduct';
 import ManageOrder from './admin/pages/ManageOrder';
+import ManageVoucher from './admin/pages/ManageVoucher';
 import i18n from "./i18n";
 function App() {
     return (
@@ -43,6 +44,7 @@ function App() {
                         <Route path="/admin/pages/manage-user" element={<ManageUser/>}/>
                         <Route path="/admin/pages/manage-product" element={<ManageProduct/>}/>
                         <Route path="/admin/pages/manage-order" element={<ManageOrder/>}/>
+                        <Route path="/admin/pages/manage-voucher" element={<ManageVoucher/>}/>
                     </Routes>
                 </Router>
             </CartProvider>

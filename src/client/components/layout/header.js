@@ -72,17 +72,17 @@ const Header = () => {
                             </div>
 
                             {/* Language switcher */}
-                            <div className="language" style={{ marginRight: '20px', cursor: 'pointer' }}>
+                            <div className="language" style={{ marginRight: '20px',}}>
                                 <img
                                     src="/img/usa.png"
                                     alt="English"
-                                    style={{ marginRight: '5px', border: i18n.language === 'en' ? '2px solid #000' : 'none' }}
+                                    style={{ marginRight: '5px',}}
                                     onClick={() => changeLanguage('en')}
                                 />
                                 <img
                                     src="/img/vietnam.png"
                                     alt="Vietnamese"
-                                    style={{ border: i18n.language === 'vi' ? '2px solid #000' : 'none' }}
+                                    style={{ }}
                                     onClick={() => changeLanguage('vi')}
                                 />
                             </div>

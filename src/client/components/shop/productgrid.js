@@ -324,7 +324,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
                                     <i>{selectedProduct.brand}</i> - {selectedProduct.name}
                                 </h2>
                                 <p className="modal-category">{t('product_category')}: {selectedProduct.category}</p>
-                                <p className="modal-description">{t('product_description')}: {selectedProduct.description}</p>
+                                <p className="modal-description">{selectedProduct.description}</p>
                                 <p className="modal-price modal-price-highlight">
                                     {selectedVariant.price ? `${selectedVariant.price.toLocaleString()}₫` : t('contact_price')}
                                 </p>
@@ -352,7 +352,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
                                     <div className="quantity-cart">
                                         <div className="quantity-controls">
                                             <button onClick={() => handleQuantityChange(-1)}>-</button>
-                                            <span>{t('quantity')}: {quantity}</span>
+                                            <span>{quantity}</span>
                                             <button onClick={() => handleQuantityChange(1)}>+</button>
                                         </div>
                                         <button

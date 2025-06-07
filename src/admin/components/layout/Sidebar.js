@@ -32,6 +32,12 @@ export default function Sidebar() {
                 <li className="menu-item">
                     <Link to="/admin/pages/manage-order" className="menu-link">Manage Order</Link>
                 </li>
+                <li className="menu-item">
+                    <Link to="/admin/pages/manage-voucher" className="menu-link">Manage Voucher</Link>
+                </li>
+                <li className="menu-item">
+                    <Link to="/admin/pages/manage-review" className="menu-link">Manage Review</Link>
+                </li>
                 {/*<li className={`menu-item ${isOpen ? 'active open' : ''}`}>*/}
                 {/*    <a href="#" className="menu-link" onClick={toggleMenu}>*/}
                 {/*        <i className="menu-icon tf-icons bx bx-home-circle"></i>*/}
