@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react';
 
 const Breadcrumb = ({ title, subtitle }) => (
-    <section className="breadcrumb" style={{maxHeight:'400px', background:'#ECFDFF'}}>
+    <section className="breadcrumb" style={{ maxHeight: '400px', background: '#ECFDFF' }}>
         <div className="container">
             <div className="row justify-content-center">
                 <div className="col-lg-4">

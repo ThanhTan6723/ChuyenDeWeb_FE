@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '../../contexts/cartcontext';
 import { useAuth } from '../../../auth/authcontext';
 
@@ -9,6 +10,7 @@ const DETAIL_API_URL = 'https://localhost:8443/api/products/';
 const CART_API_URL = 'https://localhost:8443/api/cart';
 
 const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { fetchCart } = useCart();
     const navigate = useNavigate();
@@ -61,15 +63,15 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
                 setProducts(data.products);
                 setTotalPages(data.totalPages);
             } catch (err) {
-                setError(`Lỗi khi tải sản phẩm: ${err.message}`);
-                console.error('Lỗi khi tải sản phẩm:', err);
+                setError(`${t('error_loading_product')}: ${err.message}`);
+                console.error(t('error_loading_product'), err);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchProducts();
-    }, [currentPage, searchTerm, sortBy, sortOrder, category, brand]);
+    }, [currentPage, searchTerm, sortBy, sortOrder, category, brand, t]);
 
     useEffect(() => {
         if (modalOpen || successModalOpen) {
@@ -104,7 +106,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
 
             const data = await response.json();
             if (!data || !data.variants || data.variants.length === 0) {
-                throw new Error('Sản phẩm không có biến thể hoặc dữ liệu không hợp lệ');
+                throw new Error(t('error_loading_product'));
             }
 
             const defaultVariant = data.variants.find(variant =>
@@ -116,8 +118,8 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
             setQuantity(1);
             setModalOpen(true);
         } catch (err) {
-            setError(`Lỗi khi tải chi tiết sản phẩm: ${err.message}`);
-            console.error('Lỗi khi tải chi tiết sản phẩm:', err);
+            setError(`${t('error_loading_product')}: ${err.message}`);
+            console.error(t('error_loading_product'), err);
         } finally {
             setLoading(false);
         }
@@ -165,7 +167,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
                 credentials: 'include',
             });
 
-            if (!response.ok) throw new Error('Thêm sản phẩm vào giỏ hàng thất bại!');
+            if (!response.ok) throw new Error(t('error_loading_product'));
 
             await response.json();
             setModalOpen(false);
@@ -173,7 +175,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
             fetchCart();
             setTimeout(() => setSuccessModalOpen(false), 1500);
         } catch (err) {
-            console.error('Lỗi khi thêm vào giỏ hàng:', err);
+            console.error(t('error_loading_product'), err);
             alert(err.message);
         }
     };
@@ -213,10 +215,10 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
 
     return (
         <div className="product-grid-container">
-            {loading && <div className="loading">Đang tải...</div>}
-            {error && <div className="error">Lỗi: {error}</div>}
+            {loading && <div className="loading">{t('loading')}...</div>}
+            {error && <div className="error">{t('error_loading_product')}: {error}</div>}
             {!loading && !error && products.length === 0 && (
-                <p>Không có sản phẩm nào để hiển thị.</p>
+                <p>{t('no_products')}</p>
             )}
 
             <div className="product-grid">
@@ -235,7 +237,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
                             className="product-image"
                         />
                         <div className="product-price">
-                            {product.price ? `${product.price.toLocaleString()}₫` : 'Liên hệ'}
+                            {product.price ? `${product.price.toLocaleString()}₫` : t('contact_price')}
                         </div>
                         <h3 className="product-name">{product.brand}</h3>
                         <p className="product-brand">{product.name}</p>
@@ -248,7 +250,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
                                         handleAddToCart(product);
                                     }}
                                 >
-                                    Thêm vào giỏ
+                                    {t('add_to_cart')}
                                 </button>
                             </div>
                         )}
@@ -262,7 +264,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
                     >
-                        Trước
+                        {t('previous')}
                     </button>
                     {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                         const pageNum = i + 1 + Math.max(0, currentPage - 3);
@@ -283,7 +285,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
                     >
-                        Tiếp
+                        {t('next')}
                     </button>
                 </div>
             )}
@@ -321,13 +323,13 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
                                 <h2 className="modal-title">
                                     <i>{selectedProduct.brand}</i> - {selectedProduct.name}
                                 </h2>
-                                <p className="modal-category">Danh mục: {selectedProduct.category}</p>
-                                <p className="modal-description">{selectedProduct.description}</p>
+                                <p className="modal-category">{t('product_category')}: {selectedProduct.category}</p>
+                                <p className="modal-description">{t('product_description')}: {selectedProduct.description}</p>
                                 <p className="modal-price modal-price-highlight">
-                                    {selectedVariant.price ? `${selectedVariant.price.toLocaleString()}₫` : 'Liên hệ'}
+                                    {selectedVariant.price ? `${selectedVariant.price.toLocaleString()}₫` : t('contact_price')}
                                 </p>
                                 <div className="modal-variants">
-                                    <h3>Tùy chọn</h3>
+                                    <h3>{t('variants')}</h3>
                                     {selectedProduct.variants?.length > 0 ? (
                                         <div className="variant-list">
                                             {selectedProduct.variants.map((variant) => (
@@ -338,28 +340,26 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
                                                         checked={selectedVariant?.id === variant.id}
                                                         onChange={() => handleVariantChange(variant)}
                                                     />
-                                                    <span>
-                            {variant.attribute} - {variant.variant}
-                          </span>
+                                                    <span>{variant.attribute} - {variant.variant}</span>
                                                 </label>
                                             ))}
                                         </div>
                                     ) : (
-                                        <p>Không có biến thể.</p>
+                                        <p>{t('no_variants')}</p>
                                     )}
                                 </div>
                                 {selectedVariant?.quantity > 0 && (
                                     <div className="quantity-cart">
                                         <div className="quantity-controls">
                                             <button onClick={() => handleQuantityChange(-1)}>-</button>
-                                            <span>{quantity}</span>
+                                            <span>{t('quantity')}: {quantity}</span>
                                             <button onClick={() => handleQuantityChange(1)}>+</button>
                                         </div>
                                         <button
                                             className="add-to-cart"
                                             onClick={handleAddToCartFromModal}
                                         >
-                                            Thêm vào giỏ
+                                            {t('add_to_cart')}
                                         </button>
                                     </div>
                                 )}
@@ -374,13 +374,13 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <button className="modal-close" onClick={closeLoginModal}>×</button>
                         <div className="modal-body">
-                            <h2>Vui lòng đăng nhập</h2>
-                            <p>Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.</p>
+                            <h2>{t('login_required')}</h2>
+                            <p>{t('login_prompt')}</p>
                             <button
                                 className="login-button"
                                 onClick={() => navigate('/login')}
                             >
-                                Đăng nhập
+                                {t('login')}
                             </button>
                         </div>
                     </div>
@@ -395,7 +395,7 @@ const ProductGrid = ({ searchTerm, sortBy, sortOrder, category, brand }) => {
                                 <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
                                 <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
                             </svg>
-                            <p className="success-text">Sản phẩm đã được thêm vào giỏ hàng!</p>
+                            <p className="success-text">{t('success_add_to_cart')}</p>
                         </div>
                     </div>
                 </div>
