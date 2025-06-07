@@ -161,6 +161,7 @@ const ManageVoucher = () => {
                 productVariantDTO: selectedProduct
                     ? {
                         id: selectedProduct.id,
+                        productName: selectedProduct.productName,
                         attribute: selectedProduct.attribute,
                         variant: selectedProduct.variant,
                         price: selectedProduct.price,
@@ -300,7 +301,7 @@ const ManageVoucher = () => {
                                                     <th>ID</th>
                                                     <th>Mã</th>
                                                     <th>Loại Giảm Giá</th>
-                                                    <th>Sản Phẩm</th>
+                                                    <th>Sản Phẩm/Loại</th>
                                                     <th>Phần Trăm Giảm</th>
                                                     <th>Số Lượng</th>
                                                     <th>Ngày Bắt Đầu</th>
@@ -313,29 +314,36 @@ const ManageVoucher = () => {
                                                 </thead>
                                                 <tbody>
                                                 {vouchers.length > 0 ? (
-                                                    vouchers.map((voucher) => (
-                                                        <tr key={voucher.id}>
-                                                            <td>{voucher.id}</td>
-                                                            <td>{voucher.code}</td>
-                                                            <td>{voucher.discountType.type}</td>
-                                                            <td>
-                                                                {voucher.discountType.id === 3 && voucher.productVariantDTO
-                                                                    ? voucher.productVariantDTO.productName || "Không xác định"
-                                                                    : "-"}
-                                                            </td>
-                                                            <td>{voucher.discountPercentage}%</td>
-                                                            <td>{voucher.quantity}</td>
-                                                            <td>{voucher.startDate}</td>
-                                                            <td>{voucher.endDate}</td>
-                                                            <td>{voucher.minimumOrderValue.toLocaleString("vi-VN")} VNĐ</td>
-                                                            <td>{voucher.maximumDiscount.toLocaleString("vi-VN")} VNĐ</td>
-                                                            <td>{voucher.isActive ? "Hoạt động" : "Không hoạt động"}</td>
-                                                            <td className="voucher-action-cell">
-                                                                <button className="voucher-btn voucher-btn-small voucher-btn-primary">Sửa</button>
-                                                                <button className="voucher-btn voucher-btn-small voucher-btn-danger">Xóa</button>
-                                                            </td>
-                                                        </tr>
-                                                    ))
+                                                    vouchers.map((voucher) => {
+                                                        const productVariant = voucher.discountType.id === 3 && voucher.productVariantDTO
+                                                            ? productVariants.find(pv => pv.id === voucher.productVariantDTO.id)
+                                                            : null;
+                                                        return (
+                                                            <tr key={voucher.id}>
+                                                                <td>{voucher.id}</td>
+                                                                <td>{voucher.code}</td>
+                                                                <td>{voucher.discountType.type}</td>
+                                                                <td>
+                                                                    {voucher.discountType.id === 3 && voucher.productVariantDTO && productVariant
+                                                                        ? `${productVariant.productName || "Không xác định"} - ${voucher.productVariantDTO.variant} (${voucher.productVariantDTO.attribute})`
+                                                                        : voucher.discountType.id === 2 && voucher.category
+                                                                            ? voucher.category.name || "Không xác định"
+                                                                            : "N/A"}
+                                                                </td>
+                                                                <td>{voucher.discountPercentage}%</td>
+                                                                <td>{voucher.quantity}</td>
+                                                                <td>{voucher.startDate}</td>
+                                                                <td>{voucher.endDate}</td>
+                                                                <td>{voucher.minimumOrderValue.toLocaleString("vi-VN")} VNĐ</td>
+                                                                <td>{voucher.maximumDiscount.toLocaleString("vi-VN")} VNĐ</td>
+                                                                <td>{voucher.isActive ? "Hoạt động" : "Không hoạt động"}</td>
+                                                                <td className="voucher-action-cell">
+                                                                    <button className="voucher-btn voucher-btn-small voucher-btn-primary">Sửa</button>
+                                                                    <button className="voucher-btn voucher-btn-small voucher-btn-danger">Xóa</button>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })
                                                 ) : (
                                                     <tr>
                                                         <td colSpan="12" className="voucher-table-empty">

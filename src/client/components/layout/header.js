@@ -65,7 +65,7 @@ const Header = () => {
                                 <ul className="navbar-nav">
                                     <li className="nav-item"><Link className="nav-link" to="/home">{t('home')}</Link></li>
                                     <li className="nav-item"><Link className="nav-link" to="/shop">{t('shop')}</Link></li>
-                                    <li className="nav-item"><a className="nav-link" href="#">{t('voucher')}</a></li>
+                                    <li className="nav-item"><a className="nav-link" href="/voucher">{t('voucher')}</a></li>
                                     <li className="nav-item"><Link className="nav-link" to="/shop-detail">{t('blog')}</Link></li>
                                     <li className="nav-item"><a className="nav-link" href="/contact">{t('contact')}</a></li>
                                 </ul>
