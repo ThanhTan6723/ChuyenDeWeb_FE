@@ -1,7 +1,7 @@
 import React from 'react';
 import Layout from '../components/layout/layout';
 import Breadcrumb from '../components/layout/breadcrumb';
-import VoucherList from '../components/voucher/listvoucher';
+import SavedVoucherList from '../components/evoucher/list-evoucher';
 
 // Import CSS
 import '../../assets/css/bootstrap.min.css';
@@ -15,13 +15,13 @@ import '../../assets/css/slick.css';
 import '../../assets/css/style.css';
 import '../../assets/css/uvoucher.css';
 
-const Voucher = () => {
+const EVoucher = () => {
     return (
         <Layout>
-            <Breadcrumb title="Voucher" subtitle="Voucher - Trang chủ" />
-            <VoucherList />
+            <Breadcrumb title="Kho voucher" subtitle="Kho voucher - Trang chủ" />
+            <SavedVoucherList />
         </Layout>
     );
 };
 
-export default Voucher;
+export default EVoucher;

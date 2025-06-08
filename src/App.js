@@ -15,6 +15,7 @@ import OrderPage from "./client/pages/order";
 import ConfirmOrder from "./client/pages/confirm-order";
 import OrderHist from "./client/pages/order-history";
 import Voucher from "./client/pages/voucher";
+import EVoucher from "./client/pages/evoucher";
 
 import Dashboard from './admin/pages/Dashboard';
 import ManageUser from './admin/pages/ManageUser';
@@ -42,6 +43,7 @@ function App() {
                         <Route path="//order-history" element={<OrderHist/>}/>
                         <Route path="/update-profile" element={<AccountInfo/>}/>
                         <Route path="/voucher" element={<Voucher/>}/>
+                        <Route path="/evoucher" element={<EVoucher/>}/>
                         <Route path="/admin" element={<Dashboard/>}/>
                         <Route path="/admin/pages/manage-user" element={<ManageUser/>}/>
                         <Route path="/admin/pages/manage-product" element={<ManageProduct/>}/>

@@ -95,7 +95,7 @@ const Header = () => {
                                         </span>
                                         <div className="dropdown-content">
                                             <a href="#" className="auth" onClick={(e) => { e.preventDefault(); handleLogout(); }}>{t('logout')}</a>
-                                            <Link to="/vouchers">{t('voucher_store')}</Link>
+                                            <Link to="/evoucher">{t('voucher_store')}</Link>
                                             <Link to="/order-history">{t('order_history')}</Link>
                                             <Link to="/admin">Admin</Link>
                                             <Link to="/update-profile">{t('account_info')}</Link>
