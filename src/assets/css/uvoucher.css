@@ -1,3 +1,35 @@
+.voucher-quantity-bar-wrap {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0 0 0;
+}
+.voucher-quantity-bar-bg {
+    flex: 1;
+    height: 11px;
+    border-radius: 8px;
+    background: #f2f2f2;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 1.5px 4px rgba(0,0,0,0.04);
+}
+.voucher-quantity-bar-fg {
+    height: 100%;
+    background: linear-gradient(90deg, #f08588 0%, #f8be5a 100%);
+    border-radius: 8px 0 0 8px;
+    transition: width 0.25s cubic-bezier(.5,1.5,.7,1);
+}
+.voucher-quantity-bar-text {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f08588;
+    min-width: 32px;
+    text-align: right;
+    letter-spacing: 1px;
+}
+
+/* --- phần còn lại giữ nguyên --- */
 .voucher-container {
     padding: 80px 0;
     /*min-height: 100vh;*/
@@ -26,23 +58,20 @@
     gap: 18px;
     justify-content: center;
     align-items: center;
-    width: 100%;
+    /*width: 100%;*/
 }
-
-/* Make voucher card longer */
-.voucher-card {
-    min-width: 360px;
-    max-width: 450px;
-    width: 100%;
-    margin-bottom: 16px;
-    position: relative;
-    transition: box-shadow 0.2s;
-    border: none;
-    background: transparent;
-    display: flex;
-    justify-content: center;
-}
-
+/*.voucher-card {*/
+/*    min-width: 360px;*/
+/*    max-width: 450px;*/
+/*    width: 100%;*/
+/*    margin-bottom: 16px;*/
+/*    position: relative;*/
+/*    transition: box-shadow 0.2s;*/
+/*    border: none;*/
+/*    background: transparent;*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*}*/
 .voucher-ticket-uniform {
     display: flex;
     border-radius: 18px;
@@ -53,25 +82,23 @@
     --ticket-pink: #ff7678;
     --ticket-dark: #fafafa;
     box-shadow: 0 2px 12px rgba(50,56,68,0.06);
-    border: 1.5px solid #ededed;   /* Viền xung quanh */
+    border: 1.5px solid #ededed;
     overflow: hidden;
 }
-
 .voucher-ticket-left-part {
     width: 54%;
-    background: #ffe9bc;
+    background: rgb(255, 63, 118);
     border-top-left-radius: 18px;
     border-bottom-left-radius: 18px;
-    border-right: 2px dashed #ededed;  /* Viền ngăn cách gạch đứt */
+    border-right: 2px dashed #ededed;
     padding: 0 8px 0 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Center content vertically */
+    justify-content: center;
     position: relative;
     min-height: 110px;
 }
-
 .voucher-left-content {
     display: flex;
     flex-direction: column;
@@ -80,7 +107,6 @@
     height: 100%;
     width: 100%;
 }
-
 .voucher-ticket-right-part {
     width: 49%;
     background: var(--ticket-dark);
@@ -93,11 +119,10 @@
     position: relative;
     min-height: 110px;
 }
-
 .voucher-company {
     font-size: 0.95rem;
-    color: #323844;
-    font-weight: 500;
+    color: #ececec;
+    font-weight: bold;
     margin-bottom: 7px;
     letter-spacing: 1px;
     text-align: center;
@@ -126,14 +151,13 @@
 }
 .voucher-coupon-label {
     font-size: 1.05rem;
-    color: #323844;
-    font-weight: 700;
+    color: #f3f3f3;
+    font-weight: bold;
     margin-top: 4px;
     font-family: 'Pacifico', cursive, Arial, sans-serif;
     letter-spacing: 0.5px;
     text-align: center;
 }
-
 .voucher-info-list {
     font-size: 0.93rem;
     color: #5a636a;
@@ -148,15 +172,12 @@
 .voucher-status {
     display: none;
 }
-
-/* Wrapper for button to control its position */
 .voucher-button-wrapper {
     width: 100%;
     display: flex;
     justify-content: center;
     margin-top: 8px;
 }
-
 .voucher-button {
     padding: 4px 16px;
     border-radius: 30px;
@@ -168,7 +189,6 @@
     min-width: 98px;
     transition: background 0.2s, color 0.2s;
 }
-
 .voucher-card .voucher-button.enabled {
     background: #fff;
     color: #f08588;
@@ -180,7 +200,6 @@
     border: 2px solid #b7b7b7;
     cursor: not-allowed;
 }
-
 .voucher-empty {
     color: #555;
     text-align: center;

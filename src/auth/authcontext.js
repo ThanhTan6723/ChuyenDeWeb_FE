@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
-                setUser(JSON.parse(storedUser)); // Tạm thời khôi phục từ localStorage
+                setUser(JSON.parse(storedUser));
             }
 
             const res = await fetch(`${API_BASE_URL}/api/auth/refresh-token`, {
@@ -79,18 +79,27 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify({ email, password, phone }),
             });
 
+            const data = await res.json();
+
             if (res.ok) {
-                const data = await res.json();
                 if (data.user) {
                     setUserAndLogin(extractUserInfo(data));
                     navigate('/home');
-                    return true;
+                    return { success: true };
                 }
             }
-            return false;
+            return {
+                success: false,
+                locked: data.locked || false,
+                failedAttempts: data.failedAttempts || 0
+            };
         } catch (err) {
             console.error('Lỗi đăng nhập:', err);
-            return false;
+            return {
+                success: false,
+                locked: false,
+                failedAttempts: 0
+            };
         }
     };
 

@@ -28,9 +28,8 @@ const OrderHistory = () => {
     ];
 
     useEffect(() => {
-        if (authLoading) return; // Chờ kiểm tra trạng thái đăng nhập
+        if (authLoading) return;
         if (!user) {
-            // Chuyển hướng ngay lập tức nếu chưa đăng nhập
             navigate('/login', { state: { from: '/order-history' } });
             return;
         }
@@ -51,10 +50,11 @@ const OrderHistory = () => {
                 });
 
                 if (response.data.success) {
-                    setOrders(response.data.data.content || response.data.data);
-                    setTotalPages(response.data.data.totalPages || Math.ceil(response.data.data.length / ordersPerPage));
+                    const data = response.data.data;
+                    setOrders(data.content || []);
+                    setTotalPages(data.totalPages || 1);
 
-                    const detailsPromises = response.data.data.content.map(order =>
+                    const detailsPromises = data.content.map(order =>
                         axios.get(`${ORDER_API_URL}/${order.id}/details`, {
                             withCredentials: true,
                         })
@@ -63,7 +63,7 @@ const OrderHistory = () => {
                     const detailsMap = {};
                     detailsResponses.forEach((res, index) => {
                         if (res.data.success) {
-                            detailsMap[response.data.data.content[index].id] = res.data.data;
+                            detailsMap[data.content[index].id] = res.data.data;
                         }
                     });
                     setOrderDetails(detailsMap);
@@ -87,7 +87,6 @@ const OrderHistory = () => {
         }
     };
 
-    // Hiển thị loading khi kiểm tra trạng thái đăng nhập
     if (authLoading) {
         return (
             <section className="order_history_part padding_top" style={{ paddingTop: '80px' }}>
@@ -100,22 +99,21 @@ const OrderHistory = () => {
         );
     }
 
-    // Không render gì nếu chưa đăng nhập (chuyển hướng đã được xử lý trong useEffect)
     if (!user) {
         return null;
     }
 
-    if (loading) {
-        return (
-            <section className="order_history_part padding_top" style={{ paddingTop: '80px' }}>
-                <div className="container">
-                    <div className="text-center">
-                        <h2>Đang tải lịch sử đơn hàng...</h2>
-                    </div>
-                </div>
-            </section>
-        );
-    }
+    // if (loading) {
+    //     return (
+    //         <section className="order_history_part padding_top" style={{ paddingTop: '80px' }}>
+    //             <div className="container">
+    //                 <div className="text-center">
+    //                     <h2>Đang tải lịch sử đơn hàng...</h2>
+    //                 </div>
+    //             </div>
+    //         </section>
+    //     );
+    // }
 
     if (error) {
         return (
@@ -234,13 +232,13 @@ const OrderHistory = () => {
                                                     <span style={{
                                                         color: order.orderStatus === 'CONFIRMED' ? 'green' :
                                                             order.orderStatus === 'PENDING' ? 'orange' :
-                                                                order.orderStatus === 'DELIVERING' ? 'blue' :
+                                                                order.orderStatus === 'ON_DELIVERY' ? 'blue' :
                                                                     order.orderStatus === 'DELIVERED' ? 'darkgreen' :
                                                                         order.orderStatus === 'CANCELLED' ? 'red' : 'inherit'
                                                     }}>
                                                         {order.orderStatus === 'CONFIRMED' ? 'Đã xác nhận' :
                                                             order.orderStatus === 'PENDING' ? 'Đang chờ xác nhận' :
-                                                                order.orderStatus === 'DELIVERING' ? 'Đang giao' :
+                                                                order.orderStatus === 'ON_DELIVERY' ? 'Đang giao' :
                                                                     order.orderStatus === 'DELIVERED' ? 'Đã giao' :
                                                                         order.orderStatus === 'CANCELLED' ? 'Đã hủy' :
                                                                             order.orderStatus}

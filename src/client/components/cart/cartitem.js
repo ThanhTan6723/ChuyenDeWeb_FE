@@ -448,8 +448,8 @@ const CartItem = () => {
                                 <td></td>
                                 <td>
                                     <div className="cupon_text" >
-                                        <a className="btn_1" style={{background:'#728295', color:'white'}}>
-                                            Voucher
+                                        <a className="btn_1" style={{background:'#ff3368', color:'white'}}>
+                                            Áp voucher
                                         </a>
                                     </div>
                                 </td>

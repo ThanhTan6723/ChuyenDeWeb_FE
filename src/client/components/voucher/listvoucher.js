@@ -3,6 +3,8 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from '../../../auth/authcontext';
 
+const MAX_QUANTITY = 100; // hoặc bạn có thể lấy giá trị lớn nhất của quantity từ voucher list
+
 const VoucherList = () => {
     const [vouchers, setVouchers] = useState([]);
     const [savedVouchers, setSavedVouchers] = useState([]);
@@ -128,6 +130,10 @@ const VoucherList = () => {
         ...vouchers.filter((voucher) => voucher.discountType?.id === 3 && voucher.productVariantDTO)
     ];
 
+    // Tìm số lượng lớn nhất để làm max cho thanh progress (hoặc bạn đặt MAX_QUANTITY cố định)
+    const getMaxQuantity = () =>
+        Math.max(...allVoucherList.map(v => v.quantity || 0), MAX_QUANTITY);
+
     return (
         <div className="voucher-container">
             {loading ? (
@@ -144,6 +150,10 @@ const VoucherList = () => {
                                 const isOutOfStock = voucher.quantity <= 0;
                                 const buttonText = isSaved ? "Đã lưu" : isOutOfStock ? "Đã hết mã" : "Lưu mã";
                                 const isDisabled = isOutOfStock || isSaved;
+                                const percent =
+                                    getMaxQuantity() > 0
+                                        ? Math.min(100, Math.round((voucher.quantity / getMaxQuantity()) * 100))
+                                        : 0;
                                 return (
                                     <div key={voucher.id} className="voucher-cardd voucher-ticket-uniform">
                                         <div className="voucher-ticket-left-part">
@@ -173,24 +183,18 @@ const VoucherList = () => {
                                                 <div className="voucher-info-row">
                                                     <span>Ngày kết thúc: {voucher.endDate}</span>
                                                 </div>
-                                                <div className="voucher-info-row">
-                                                    <span>Số lượng: {voucher.quantity}</span>
+                                            </div>
+                                            {/* Thanh số lượng */}
+                                            <div className="voucher-quantity-bar-wrap">
+                                                <div className="voucher-quantity-bar-bg">
+                                                    <div
+                                                        className="voucher-quantity-bar-fg"
+                                                        style={{ width: `${percent}%` }}
+                                                    />
                                                 </div>
-                                                {/*{voucher.discountType?.id === 1 && (*/}
-                                                {/*    <div className="voucher-info-row">*/}
-                                                {/*        <span>Áp dụng cho tất cả sản phẩm</span>*/}
-                                                {/*    </div>*/}
-                                                {/*)}*/}
-                                                {/*{voucher.discountType?.id === 2 && voucher.category && (*/}
-                                                {/*    <div className="voucher-info-row">*/}
-                                                {/*        <span>Danh mục: {voucher.category.name}</span>*/}
-                                                {/*    </div>*/}
-                                                {/*)}*/}
-                                                {/*{voucher.discountType?.id === 3 && voucher.productVariantDTO && (*/}
-                                                {/*    <div className="voucher-info-row">*/}
-                                                {/*        <span>Sản phẩm: {voucher.productVariantDTO.variant} ({voucher.productVariantDTO.attribute})</span>*/}
-                                                {/*    </div>*/}
-                                                {/*)}*/}
+                                                <span className="voucher-quantity-bar-text">
+                                                    {voucher.quantity}
+                                                </span>
                                             </div>
                                             <span className="voucher-status">
                                                 {isOutOfStock ? "Đã hết mã" : isSaved ? "Đã lưu" : "Có thể sử dụng"}
