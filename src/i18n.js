@@ -46,7 +46,18 @@ const resources = {
             price_desc: "Price: High to Low",
             search_placeholder: "Search",
             category: "Category",
-            brand: "Brand"
+            brand: "Brand",
+            "wishlist_title": "Your Wishlist",
+            "wishlist_subtitle": "Wishlist",
+            "wishlist_empty": "Your wishlist is empty",
+            "wishlist_fetch_error": "Failed to load wishlist",
+            "wishlist_remove_error": "Failed to remove from wishlist",
+            "login_to_view_wishlist": "Please login to view your wishlist",
+            "login_to_add_wishlist": "Please login to add to wishlist",
+            "add_wishlist": "Add to Wishlist",
+            "remove_wishlist": "Remove",
+            "wishlist_error": "An error occurred",
+            "success_remove_wishlist": "success remove form wishlist"
         }
     },
     vi: {
@@ -93,7 +104,18 @@ const resources = {
             price_desc: "Giá: Cao đến Thấp",
             search_placeholder: "Tìm kiếm",
             category: "Danh mục",
-            brand: "Thương hiệu"
+            brand: "Thương hiệu",
+            "wishlist_title": "Danh sách yêu thích",
+            "wishlist_subtitle": "Danh sách yêu thích",
+            "wishlist_empty": "Danh sách yêu thích của bạn đang trống",
+            "wishlist_fetch_error": "Không thể tải danh sách yêu thích",
+            "wishlist_remove_error": "Không thể xóa khỏi danh sách yêu thích",
+            "login_to_view_wishlist": "Vui lòng đăng nhập để xem danh sách yêu thích",
+            "login_to_add_wishlist": "Vui lòng đăng nhập để thêm vào danh sách yêu thích",
+            "add_wishlist": "Thêm vào danh sách yêu thích",
+            "remove_wishlist": "Xóa",
+            "wishlist_error": "Đã xảy ra lỗi",
+            "success_remove_wishlist": "Đã xóa khỏi danh sách"
         }
     }
 };

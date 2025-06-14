@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '../../../auth/authcontext';
 import { useCart } from '../../contexts/cartcontext';
-import { useTranslation } from 'react-i18next';  // import hook i18n
+import { useTranslation } from 'react-i18next';
 
 const Header = () => {
-    const { t, i18n } = useTranslation();  // lấy hàm t và i18n
+    const { t, i18n } = useTranslation();
     const { user, logout, loading } = useAuth();
     const { cartCount, fetchCart, setCartCount } = useCart();
     const navigate = useNavigate();
@@ -27,18 +27,6 @@ const Header = () => {
         }
     };
 
-    // Chat box
-    (function(d, w, c) {
-        w.ChatraID = 'o7fGkejJ6jz2WZT2s';
-        var s = d.createElement('script');
-        w[c] = w[c] || function() {
-            (w[c].q = w[c].q || []).push(arguments);
-        };
-        s.async = true;
-        s.src = 'https://call.chatra.io/chatra.js';
-        if (d.head) d.head.appendChild(s);
-    })(document, window, 'Chatra');
-
     const handleCartToggle = () => {
         if (!user) {
             alert(t('login_to_view_cart'));
@@ -46,6 +34,15 @@ const Header = () => {
             return;
         }
         navigate('/cart');
+    };
+
+    const handleWishlistToggle = () => {
+        if (!user) {
+            alert(t('login_to_view_wishlist'));
+            navigate('/login', { state: { from: '/wishlist' } });
+            return;
+        }
+        navigate('/wishlist');
     };
 
     const changeLanguage = (lng) => {
@@ -83,12 +80,11 @@ const Header = () => {
                                 </ul>
                             </div>
 
-                            {/* Language switcher */}
-                            <div className="language" style={{ marginRight: '20px',}}>
+                            <div className="language" style={{ marginRight: '20px' }}>
                                 <img
                                     src="/img/usa.png"
                                     alt="English"
-                                    style={{ marginRight: '5px',}}
+                                    style={{ marginRight: '5px' }}
                                     onClick={() => changeLanguage('en')}
                                 />
                                 <img
@@ -120,7 +116,9 @@ const Header = () => {
                                     </div>
                                 )}
                                 <a id="search_1" href="#"><i className="ti-search" /></a>
-                                <a href="#"><i className="ti-heart" /></a>
+                                <a href="#" onClick={(e) => { e.preventDefault(); handleWishlistToggle(); }}>
+                                    <i className="ti-heart" />
+                                </a>
                                 <div className="cart position-relative">
                                     <a
                                         className="cart-icon"
