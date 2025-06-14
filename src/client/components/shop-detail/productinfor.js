@@ -6,6 +6,7 @@ import { useAuth } from '../../../auth/authcontext';
 
 const CLOUDINARY_BASE_URL = 'https://localhost:8443/api/products/';
 const CART_API_URL = 'https://localhost:8443/api/cart';
+const WISHLIST_API_URL = 'https://localhost:8443/api/wishlist';
 
 const ProductInfo = ({ productId = '1', onVariantChange }) => {
     const { t } = useTranslation();
@@ -18,6 +19,8 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
     const [error, setError] = useState(null);
     const [successModalOpen, setSuccessModalOpen] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
+    const [isInWishlist, setIsInWishlist] = useState(false);
+    const [wishlistLoading, setWishlistLoading] = useState(false);
 
     useEffect(() => {
         const fetchProductDetails = async () => {
@@ -29,6 +32,7 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`,
                     },
+                    credentials: 'include',
                 });
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -52,8 +56,29 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
             }
         };
 
+        const checkWishlist = async () => {
+            if (user) {
+                try {
+                    const response = await fetch(`${WISHLIST_API_URL}/${user.id}`, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`,
+                        },
+                        credentials: 'include',
+                    });
+                    if (response.ok) {
+                        const wishlist = await response.json();
+                        setIsInWishlist(wishlist.some(item => item.productId === parseInt(productId)));
+                    }
+                } catch (err) {
+                    console.error(t('wishlist_fetch_error'), err);
+                }
+            }
+        };
+
         fetchProductDetails();
-    }, [productId, onVariantChange, t]);
+        checkWishlist();
+    }, [productId, user, onVariantChange, t]);
 
     useEffect(() => {
         if (successModalOpen) {
@@ -110,6 +135,54 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
         }
     };
 
+    const handleWishlistToggle = async () => {
+        if (!user) {
+            setShowLoginModal(true);
+            return;
+        }
+
+        setWishlistLoading(true);
+        try {
+            console.log(`Toggling wishlist for product ID ${productId} and user ID ${user.id}`);
+            if (isInWishlist) {
+                const response = await fetch(`${WISHLIST_API_URL}/${user.id}/${productId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`,
+                    },
+                    credentials: 'include',
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to remove from wishlist');
+                }
+                console.log('Remove response:', await response.json());
+                setIsInWishlist(false);
+            } else {
+                const response = await fetch(`${WISHLIST_API_URL}/${user.id}/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`,
+                    },
+                    credentials: 'include',
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to add to wishlist');
+                }
+                console.log('Add response:', await response.json());
+                setIsInWishlist(true);
+            }
+        } catch (err) {
+            console.error('Wishlist error:', err);
+            alert(`${t('wishlist_error')}: ${err.message}`);
+        } finally {
+            setWishlistLoading(false);
+        }
+    };
+
     const closeModal = () => setShowLoginModal(false);
     const closeSuccessModal = () => setSuccessModalOpen(false);
 
@@ -152,15 +225,38 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
                 )}
             </div>
             {selectedVariant.quantity > 0 && (
-                <div className="quantity-cart">
-                    <div className="quantity-controls">
-                        <button onClick={() => handleQuantityChange(-1)}>-</button>
-                        <span>{quantity}</span>
-                        <button onClick={() => handleQuantityChange(1)}>+</button>
+                <div className="quantity-cart flex flex-col gap-4 mb-6">
+                    <div className="quantity-controls flex items-center border border-gray-200 rounded-md w-fit">
+                        <button
+                            className="px-3 py-1 text-gray-600 hover:bg-gray-100"
+                            onClick={() => handleQuantityChange(-1)}
+                        >
+                            -
+                        </button>
+                        <span className="px-4 py-1 text-gray-800">{quantity}</span>
+                        <button
+                            className="px-3 py-1 text-gray-600 hover:bg-gray-100"
+                            onClick={() => handleQuantityChange(1)}
+                        >
+                            +
+                        </button>
                     </div>
-                    <button className="add-to-cart" onClick={handleAddToCart}>
-                        {t('add_to_cart')}
-                    </button>
+                    <div className="cart-wishlist flex items-center gap-2">
+                        <button
+                            className="add-to-cart bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 transition-colors"
+                            onClick={handleAddToCart}
+                        >
+                            {t('add_to_cart')}
+                        </button>
+                        <button
+                            className={`wishlist-btn ${isInWishlist ? 'active' : ''}`}
+                            onClick={handleWishlistToggle}
+                            disabled={wishlistLoading}
+                            title={isInWishlist ? t('remove_wishlist') : t('add_wishlist')}
+                        >
+                            <i className={`${isInWishlist ? 'fas fa-heart' : 'far fa-heart'} text-xl`}></i>
+                        </button>
+                    </div>
                 </div>
             )}
             {showLoginModal && (
@@ -169,10 +265,17 @@ const ProductInfo = ({ productId = '1', onVariantChange }) => {
                         <h3 className="text-lg font-semibold mb-4">{t('login_required')}</h3>
                         <p className="text-gray-600 mb-6">{t('login_prompt')}</p>
                         <div className="flex justify-end gap-4">
-                            <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400" onClick={closeModal}>
+                            <button
+                                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                                onClick={closeModal}
+                            >
                                 {t('close')}
                             </button>
-                            <Link to="/login" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700" onClick={closeModal}>
+                            <Link
+                                to="/login"
+                                className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
+                                onClick={closeModal}
+                            >
                                 {t('login')}
                             </Link>
                         </div>
