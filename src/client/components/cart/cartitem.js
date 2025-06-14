@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../auth/authcontext';
 import { useCart } from '../../contexts/cartcontext';
 import VoucherModal from './vouchermodal';
-import { Button } from "react-bootstrap";
 
 const CART_API_URL = `${process.env.REACT_APP_API_BASE_URL || 'https://localhost:8443'}/api/cart`;
 const VOUCHER_API_URL = `${process.env.REACT_APP_API_BASE_URL || 'https://localhost:8443'}/api/e-vouchers/user`;

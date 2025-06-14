@@ -9,11 +9,14 @@ export const AuthProvider = ({ children }) => {
 
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:8443';
 
+    // Chuẩn hóa dữ liệu role từ backend (role hoặc roleName)
     const extractUserInfo = (data) => ({
         id: data.user.id,
         username: data.user.username || data.user.email.split('@')[0],
         email: data.user.email,
-        phone: data.user.phone
+        phone: data.user.phone,
+        // Ưu tiên lấy roleName nếu có, nếu không có dùng role
+        role: data.user.roleName || data.user.role
     });
 
     const setUserAndLogin = (userData) => {
@@ -65,7 +68,7 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const interval = setInterval(() => {
             if (user) refreshToken();
-        }, 14 * 60 * 1000); // 14 phút
+        }, 14 * 60 * 1000);
 
         return () => clearInterval(interval);
     }, [user]);
@@ -83,8 +86,15 @@ export const AuthProvider = ({ children }) => {
 
             if (res.ok) {
                 if (data.user) {
-                    setUserAndLogin(extractUserInfo(data));
-                    navigate('/home');
+                    const userData = extractUserInfo(data);
+                    setUserAndLogin(userData);
+                    // Điều hướng dựa trên role (ưu tiên roleName nếu có)
+                    const role = userData.role;
+                    if (role === 'ROLE_ADMIN' || role === 'ADMIN') {
+                        navigate('/admin');
+                    } else {
+                        navigate('/home');
+                    }
                     return { success: true };
                 }
             }

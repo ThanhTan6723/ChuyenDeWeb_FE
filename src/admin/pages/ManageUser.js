@@ -3,6 +3,8 @@ import Sidebar from "../components/layout/Sidebar";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { toast } from "react-toastify";
+import {useAuth} from "../../auth/authcontext";
+import {useNavigate} from "react-router-dom";
 
 const ManageUser = () => {
     const [users, setUsers] = useState([]);
@@ -10,6 +12,25 @@ const ManageUser = () => {
     const [loading, setLoading] = useState(false);
 
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://localhost:8443";
+
+    const { user, isLoggedIn } = useAuth(); // Kiểm tra trạng thái login và quyền admin
+    const navigate = useNavigate();
+    useEffect(() => {
+        // Nếu chưa login thì chuyển về login
+        if (!isLoggedIn || !user) {
+            navigate('/login');
+            return;
+        }
+        // Nếu đã login nhưng không phải admin thì chuyển về trang home (hoặc trang lỗi)
+        // Ưu tiên kiểm tra cả role và roleName
+        const role = user.role;
+        console.log('role: '+role)
+        if (role !== 'ROLE_ADMIN' && role !== 'ADMIN') {
+            navigate('/home');
+            return;
+        }
+        // eslint-disable-next-line
+    }, [isLoggedIn, user, navigate]);
 
     useEffect(() => {
         const fetchUsers = async () => {
