@@ -161,6 +161,8 @@ export default function ManageOrder() {
         updateOrderStatus(orderId, 'CANCELLED');
     };
 
+    const showDeliveryDateColumn = activeTab === 'all' || activeTab === 'DELIVERED';
+
     return (
         <div className="layout-wrapper layout-content-navbar">
             <div className="layout-container">
@@ -201,13 +203,13 @@ export default function ManageOrder() {
                                                         <th>Người nhận</th>
                                                         <th>Số điện thoại</th>
                                                         <th>Ngày đặt</th>
-                                                        <th>Ngày giao</th>
+                                                        {showDeliveryDateColumn && <th>Ngày giao</th>}
                                                         <th>Ghi chú</th>
                                                         <th>Giảm giá</th>
                                                         <th>Phí vận chuyển</th>
                                                         <th>Thành tiền</th>
                                                         <th>Xem chi tiết</th>
-                                                        <th>Hành động</th>
+                                                        {activeTab !== 'all' && <th>Hành động</th>}
                                                     </tr>
                                                     </thead>
                                                     <tbody>
@@ -218,7 +220,9 @@ export default function ManageOrder() {
                                                             <td>{order.consigneeName || 'N/A'}</td>
                                                             <td>{order.consigneePhone || 'N/A'}</td>
                                                             <td>{formatDate(order.bookingDate) || 'N/A'}</td>
-                                                            <td>{formatDate(order.deliveryDate) || 'N/A'}</td>
+                                                            {showDeliveryDateColumn && (
+                                                                <td>{formatDate(order.deliveryDate) || 'N/A'}</td>
+                                                            )}
                                                             <td>{order.orderNotes || 'N/A'}</td>
                                                             <td>{formatCurrency(order.discountValue) || '0'}</td>
                                                             <td>{formatCurrency(order.ship) || '0'}</td>
@@ -231,32 +235,34 @@ export default function ManageOrder() {
                                                                     Xem chi tiết
                                                                 </button>
                                                             </td>
-                                                            <td>
-                                                                {order.orderStatus === 'PENDING' && (
-                                                                    <button
-                                                                        className="btn btn-primary btn-sm me-2"
-                                                                        onClick={() => handleConfirmOrder(order.id)}
-                                                                    >
-                                                                        Xác nhận
-                                                                    </button>
-                                                                )}
-                                                                {order.orderStatus === 'CONFIRMED' && (
-                                                                    <button
-                                                                        className="btn btn-warning btn-sm me-2"
-                                                                        onClick={() => handlePrepareDelivery(order.id)}
-                                                                    >
-                                                                        Chuẩn bị giao
-                                                                    </button>
-                                                                )}
-                                                                {order.orderStatus !== 'CANCELLED' && order.orderStatus !== 'DELIVERED' && (
-                                                                    <button
-                                                                        className="btn btn-danger btn-sm"
-                                                                        onClick={() => handleCancelOrder(order.id)}
-                                                                    >
-                                                                        Hủy
-                                                                    </button>
-                                                                )}
-                                                            </td>
+                                                            {activeTab !== 'all' && (
+                                                                <td>
+                                                                    {order.orderStatus === 'PENDING' && (
+                                                                        <button
+                                                                            className="btn btn-primary btn-sm me-2"
+                                                                            onClick={() => handleConfirmOrder(order.id)}
+                                                                        >
+                                                                            Xác nhận
+                                                                        </button>
+                                                                    )}
+                                                                    {order.orderStatus === 'CONFIRMED' && (
+                                                                        <button
+                                                                            className="btn btn-warning btn-sm me-2"
+                                                                            onClick={() => handlePrepareDelivery(order.id)}
+                                                                        >
+                                                                            Giao hàng
+                                                                        </button>
+                                                                    )}
+                                                                    {order.orderStatus !== 'CANCELLED' && order.orderStatus !== 'DELIVERED' && (
+                                                                        <button
+                                                                            className="btn btn-danger btn-sm"
+                                                                            onClick={() => handleCancelOrder(order.id)}
+                                                                        >
+                                                                            Hủy
+                                                                        </button>
+                                                                    )}
+                                                                </td>
+                                                            )}
                                                         </tr>
                                                     ))}
                                                     </tbody>

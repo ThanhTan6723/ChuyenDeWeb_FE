@@ -59,7 +59,6 @@ const Confirmation = () => {
 
                 setOrderData(data);
             } catch (error) {
-                console.error('Lỗi khi lấy dữ liệu đơn hàng:', error);
                 setError(error.response?.data?.message || error.message);
                 setTransactionStatus({
                     success: false,
@@ -78,14 +77,11 @@ const Confirmation = () => {
     }, [user, authLoading, location.state, searchParams, navigate, location.pathname]);
 
     useEffect(() => {
-        // Thêm/xóa lớp no-scroll khi modal hiển thị/ẩn
         if (showModal) {
             document.body.classList.add('no-scroll');
         } else {
             document.body.classList.remove('no-scroll');
         }
-
-        // Cleanup khi component unmount hoặc state thay đổi
         return () => {
             document.body.classList.remove('no-scroll');
         };
@@ -133,6 +129,7 @@ const Confirmation = () => {
     }
 
     const { order, orderDateTime, selectedCartItems } = orderData;
+    const discountValue = order.discountValue || order.discountAmount || 0;
 
     const calculateSubtotal = () => {
         return selectedCartItems.reduce(
@@ -170,7 +167,6 @@ const Confirmation = () => {
                                 </span>
                             </div>
                         </div>
-
                         <div className="col-lg-6 col-lx-4">
                             <div className="single_confirmation_details">
                                 <h4>Thông tin đặt hàng</h4>
@@ -242,7 +238,6 @@ const Confirmation = () => {
                     <div className="row">
                         <div className="col-lg-12">
                             <div className="order_details_iner">
-                                {/*<h3>Sản phẩm đã đặt</h3>*/}
                                 <table className="table table-borderless">
                                     <thead>
                                     <tr>
@@ -280,6 +275,18 @@ const Confirmation = () => {
                                             <span style={{color:'red',fontSize:'15px', fontWeight:'bold',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>{calculateSubtotal().toLocaleString('vi-VN')}₫</span>
                                         </th>
                                     </tr>
+                                    {discountValue > 0 && (
+                                        <tr>
+                                            <th colSpan="3" style={{color:'black',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>
+                                                Giảm giá
+                                            </th>
+                                            <th>
+                                                <span style={{color:'#ff3900',fontSize:'15px', fontWeight:'bold',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>
+                                                    -{discountValue.toLocaleString('vi-VN')}₫
+                                                </span>
+                                            </th>
+                                        </tr>
+                                    )}
                                     <tr>
                                         <th colSpan="3" style={{color:'black',fontSize:'15px', fontWeight:'500',fontFamily:'Poppins, sans-serif', textTransform:'none'}}>
                                             Phí vận chuyển

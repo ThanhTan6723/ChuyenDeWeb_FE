@@ -11,8 +11,9 @@ const OrderInfo = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const selectedCartItems = location.state?.selectedCartItems || [];
+    const appliedVoucher = location.state?.appliedVoucher || null;
+    const discountAmount = location.state?.discountAmount || 0;
 
-    // State Management
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
@@ -29,6 +30,9 @@ const OrderInfo = () => {
         message: "",
     });
     const [errors, setErrors] = useState({});
+
+    // Hiển thị mở rộng danh sách sản phẩm
+    const [showAllProducts, setShowAllProducts] = useState(false);
 
     // Calculate total weight
     const calculateTotalWeight = () => {
@@ -57,9 +61,9 @@ const OrderInfo = () => {
         );
     };
 
-    // Calculate total
+    // Calculate total (tạm tính + phí ship - giảm giá nếu có)
     const calculateTotal = () => {
-        return calculateSubtotal() + shippingFee;
+        return calculateSubtotal() + shippingFee - (appliedVoucher ? discountAmount : 0);
     };
 
     // Fetch provinces
@@ -69,7 +73,6 @@ const OrderInfo = () => {
                 const response = await axios.get("https://provinces.open-api.vn/api/p/");
                 setProvinces(response.data);
             } catch (error) {
-                console.error("Error fetching provinces:", error);
                 setErrors(prev => ({ ...prev, api: "Không thể tải danh sách tỉnh/thành phố" }));
             }
         };
@@ -89,7 +92,6 @@ const OrderInfo = () => {
                     setSelectedDistrict("");
                     setSelectedWard("");
                 } catch (error) {
-                    console.error("Error fetching districts:", error);
                     setErrors(prev => ({ ...prev, api: "Không thể tải danh sách quận/huyện" }));
                 }
             };
@@ -108,7 +110,6 @@ const OrderInfo = () => {
                     setWards(response.data.wards);
                     setSelectedWard("");
                 } catch (error) {
-                    console.error("Error fetching wards:", error);
                     setErrors(prev => ({ ...prev, api: "Không thể tải danh sách phường/xã" }));
                 }
             };
@@ -148,7 +149,6 @@ const OrderInfo = () => {
                         setShippingFee(response.data.shipping_fee || 0);
                     }
                 } catch (error) {
-                    console.error('Error calculating shipping:', error);
                     setErrors(prev => ({
                         ...prev,
                         shipping: error.response?.data?.message || 'Không thể tính phí vận chuyển.'
@@ -204,7 +204,7 @@ const OrderInfo = () => {
                 address: `${formData.address}, ${wardName}, ${districtName}, ${provinceName}`,
                 orderNotes: formData.message,
                 ship: shippingFee,
-                discountValue: 0,
+                discountValue: appliedVoucher ? discountAmount : 0,
                 paymentId: paymentMethod === 'COD' ? 1 : paymentMethod === 'VNPAY' ? 2 : 3,
                 orderDetails: selectedCartItems.map(item => ({
                     productVariantId: item.productVariantId || item.id,
@@ -213,7 +213,6 @@ const OrderInfo = () => {
             };
 
             if (paymentMethod === 'VNPAY') {
-                // Store order data temporarily and get transaction reference
                 const response = await axios.post(`${PAYMENT_API_URL}/create-vnpay`, {
                     amount: calculateTotal(),
                     orderId: Date.now().toString(),
@@ -257,37 +256,9 @@ const OrderInfo = () => {
         }
     };
 
-    if (!user) {
-        return (
-            <section className="checkout_area padding_top" style={{ paddingTop: "80px" }}>
-                <div className="container">
-                    <div className="text-center">
-                        <h2>Vui lòng đăng nhập</h2>
-                        <p>Bạn cần đăng nhập để đặt hàng</p>
-                        <Link to="/login" state={{ from: '/checkout' }} className="btn_1">
-                            Đăng nhập
-                        </Link>
-                    </div>
-                </div>
-            </section>
-        );
-    }
-
-    if (selectedCartItems.length === 0) {
-        return (
-            <section className="checkout_area padding_top" style={{ paddingTop: "80px" }}>
-                <div className="container">
-                    <div className="text-center">
-                        <h2>Không có sản phẩm nào được chọn</h2>
-                        <p>Vui lòng quay lại giỏ hàng và chọn sản phẩm để đặt hàng.</p>
-                        <Link to="/cart" className="btn_1">
-                            Quay lại giỏ hàng
-                        </Link>
-                    </div>
-                </div>
-            </section>
-        );
-    }
+    // Xử lý danh sách hiển thị
+    const MAX_DISPLAY = 4;
+    const displayedItems = showAllProducts ? selectedCartItems : selectedCartItems.slice(0, MAX_DISPLAY);
 
     return (
         <section className="checkout_area padding_top" style={{ paddingTop: "80px" }}>
@@ -401,10 +372,10 @@ const OrderInfo = () => {
                                 <ul className="list">
                                     <li>
                                         <span href="#">
-                                            Sản phẩm<span>Tổng</span>
+                                            Sản phẩm<span style={{marginLeft:'260px'}}>Tổng</span>
                                         </span>
                                     </li>
-                                    {selectedCartItems.map((item) => (
+                                    {displayedItems.map((item) => (
                                         <li key={item.productVariantId || item.id}>
                                             <a href="#">
                                                 {item.productName || item.name}
@@ -420,6 +391,22 @@ const OrderInfo = () => {
                                             </a>
                                         </li>
                                     ))}
+                                    {/* Nút mở rộng/thu gọn nếu hơn 4 sản phẩm */}
+                                    {selectedCartItems.length > MAX_DISPLAY && (
+                                        <li style={{textAlign:'center', border:'none', background:'none', padding:0}}>
+                                            <button
+                                                type="button"
+                                                className="btn btn-link"
+                                                style={{fontWeight: 500, fontSize: 15, color: '#007bff', cursor: 'pointer'}}
+                                                onClick={() => setShowAllProducts((s) => !s)}
+                                            >
+                                                {showAllProducts
+                                                    ? <>Thu gọn <i className="ti-angle-up" style={{marginLeft: 5}}></i></>
+                                                    : <>Xem thêm {selectedCartItems.length - MAX_DISPLAY} sản phẩm <i className="ti-angle-down" style={{marginLeft: 5}}></i></>
+                                                }
+                                            </button>
+                                        </li>
+                                    )}
                                 </ul>
                                 <ul className="list list_2">
                                     <li>
@@ -451,6 +438,17 @@ const OrderInfo = () => {
                                             </span>
                                         )}
                                     </li>
+                                    {/* Hiển thị giảm giá nếu có */}
+                                    {appliedVoucher && discountAmount > 0 && (
+                                        <li>
+                                            <a href="#">
+                                                Giảm giá
+                                                <span style={{ fontWeight: 'bold', color: '#ff3900' }}>
+                                                    -{discountAmount.toLocaleString('vi-VN')}₫
+                                                </span>
+                                            </a>
+                                        </li>
+                                    )}
                                     <li>
                                         <a href="#">
                                             <strong>Tổng tiền</strong>
@@ -460,7 +458,6 @@ const OrderInfo = () => {
                                         </a>
                                     </li>
                                 </ul>
-
                                 <div className="payment_item">
                                     <div className="radion_btn">
                                         <input
@@ -500,7 +497,6 @@ const OrderInfo = () => {
                                         <div className="check"></div>
                                     </div>
                                 </div>
-
                                 <button
                                     className="btn_3"
                                     onClick={handleSubmit}
@@ -513,7 +509,6 @@ const OrderInfo = () => {
                                 >
                                     {isCalculatingShipping ? 'Đang xử lý...' : 'Thanh toán'}
                                 </button>
-
                                 {errors.submit && (
                                     <div className="error-message text-danger mt-3">
                                         {errors.submit}

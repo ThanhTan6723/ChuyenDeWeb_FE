@@ -104,24 +104,28 @@ const ManageVoucher = () => {
     const validateForm = () => {
         const errors = {};
         if (!newVoucher.code.trim()) errors.code = "Mã voucher không được để trống";
-        if (!newVoucher.discountPercentage || newVoucher.discountPercentage <= 0 || newVoucher.discountPercentage > 100)
+        const discountPercentage = parseFloat(newVoucher.discountPercentage);
+        if (!discountPercentage || discountPercentage <= 0 || discountPercentage > 100)
             errors.discountPercentage = "Phần trăm giảm giá phải từ 0.01 đến 100";
-        if (newVoucher.discountPercentage && newVoucher.discountPercentage % 5 !== 0)
+        if (discountPercentage && discountPercentage % 5 !== 0)
             errors.discountPercentage = "Phần trăm giảm giá phải là bội số của 5";
-        if (!newVoucher.quantity || newVoucher.quantity < 1) errors.quantity = "Số lượng phải lớn hơn 0";
-        if (newVoucher.quantity && newVoucher.quantity % 10 !== 0)
+        const quantity = parseInt(newVoucher.quantity);
+        if (!quantity || quantity < 1) errors.quantity = "Số lượng phải lớn hơn 0";
+        if (quantity && quantity % 10 !== 0)
             errors.quantity = "Số lượng phải là bội số của 10";
         if (!newVoucher.startDate) errors.startDate = "Ngày bắt đầu là bắt buộc";
         if (!newVoucher.endDate) errors.endDate = "Ngày kết thúc là bắt buộc";
         if (newVoucher.startDate && newVoucher.endDate && newVoucher.endDate < newVoucher.startDate)
             errors.endDate = "Ngày kết thúc phải sau ngày bắt đầu";
-        if (!newVoucher.minimumOrderValue || newVoucher.minimumOrderValue < 0)
+        const minimumOrderValue = parseFloat(newVoucher.minimumOrderValue);
+        if (isNaN(minimumOrderValue) || minimumOrderValue < 0)
             errors.minimumOrderValue = "Giá trị tối thiểu phải lớn hơn hoặc bằng 0";
-        if (newVoucher.minimumOrderValue && newVoucher.minimumOrderValue % 20000 !== 0)
+        if (!isNaN(minimumOrderValue) && minimumOrderValue % 20000 !== 0)
             errors.minimumOrderValue = "Giá trị tối thiểu phải là bội số của 20,000";
-        if (!newVoucher.maximumDiscount || newVoucher.maximumDiscount <= 0)
+        const maximumDiscount = parseFloat(newVoucher.maximumDiscount);
+        if (!maximumDiscount || maximumDiscount <= 0)
             errors.maximumDiscount = "Số tiền giảm tối đa phải lớn hơn 0";
-        if (newVoucher.maximumDiscount && newVoucher.maximumDiscount % 20000 !== 0)
+        if (maximumDiscount && maximumDiscount % 20000 !== 0)
             errors.maximumDiscount = "Số tiền giảm tối đa phải là bội số của 20,000";
         if (newVoucher.discountType.id === 2 && !newVoucher.category)
             errors.category = "Vui lòng chọn danh mục";
@@ -135,55 +139,80 @@ const ManageVoucher = () => {
     // Handle input changes
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        let updatedVoucher = { ...newVoucher };
-        let parsedValue = value;
+        setNewVoucher((prev) => {
+            let updatedVoucher = { ...prev };
 
-        if (name === "discountType") {
-            const discountTypeMap = { 1: "All", 2: "Category", 3: "Product" };
-            updatedVoucher = {
-                ...newVoucher,
-                discountType: { id: parseInt(value), type: discountTypeMap[value] },
-                category: value !== "2" ? null : newVoucher.category,
-                productVariantDTO: value !== "3" ? null : newVoucher.productVariantDTO,
-            };
-        } else if (name === "isActive") {
-            updatedVoucher = { ...newVoucher, isActive: value === "true" };
-        } else if (name === "category") {
-            const selectedCategory = categories.find((cat) => cat.id === parseInt(value));
-            updatedVoucher = {
-                ...newVoucher,
-                category: selectedCategory ? { id: selectedCategory.id, name: selectedCategory.name } : null,
-            };
-        } else if (name === "productVariantDTO") {
-            const selectedProduct = productVariants.find((prod) => prod.id === parseInt(value));
-            updatedVoucher = {
-                ...newVoucher,
-                productVariantDTO: selectedProduct
-                    ? {
-                        id: selectedProduct.id,
-                        productName: selectedProduct.productName,
-                        attribute: selectedProduct.attribute,
-                        variant: selectedProduct.variant,
-                        price: selectedProduct.price,
-                        quantity: selectedProduct.quantity,
-                    }
-                    : null,
-            };
-        } else if (name === "discountPercentage") {
-            parsedValue = value ? Math.round(parseFloat(value) / 5) * 5 : "";
-            updatedVoucher = { ...newVoucher, [name]: parsedValue };
-        } else if (name === "quantity") {
-            parsedValue = value ? Math.round(parseInt(value) / 10) * 10 : "";
-            updatedVoucher = { ...newVoucher, [name]: parsedValue };
-        } else if (name === "minimumOrderValue" || name === "maximumDiscount") {
-            parsedValue = value ? Math.round(parseFloat(value) / 20000) * 20000 : "";
-            updatedVoucher = { ...newVoucher, [name]: parsedValue };
-        } else {
-            updatedVoucher = { ...newVoucher, [name]: value };
+            switch (name) {
+                case "discountType": {
+                    const discountTypeMap = { 1: "All", 2: "Category", 3: "Product" };
+                    return {
+                        ...updatedVoucher,
+                        discountType: { id: parseInt(value), type: discountTypeMap[value] },
+                        category: value !== "2" ? null : prev.category,
+                        productVariantDTO: value !== "3" ? null : prev.productVariantDTO,
+                    };
+                }
+                case "isActive":
+                    return { ...updatedVoucher, isActive: value === "true" };
+                case "category": {
+                    const selectedCategory = categories.find((cat) => cat.id === parseInt(value));
+                    return {
+                        ...updatedVoucher,
+                        category: selectedCategory ? { id: selectedCategory.id, name: selectedCategory.name } : null,
+                    };
+                }
+                case "productVariantDTO": {
+                    const selectedProduct = productVariants.find((prod) => prod.id === parseInt(value));
+                    return {
+                        ...updatedVoucher,
+                        productVariantDTO: selectedProduct
+                            ? {
+                                id: selectedProduct.id,
+                                productName: selectedProduct.productName,
+                                attribute: selectedProduct.attribute,
+                                variant: selectedProduct.variant,
+                                price: selectedProduct.price,
+                                quantity: selectedProduct.quantity,
+                            }
+                            : null,
+                    };
+                }
+                default:
+                    return { ...updatedVoucher, [name]: value };
+            }
+        });
+        setFormErrors((prev) => ({ ...prev, [name]: "" }));
+    };
+
+    // Handle blur for numeric fields to enforce step constraints
+    const handleNumericBlur = (e) => {
+        const { name, value } = e.target;
+        if (!value) return;
+
+        let parsedValue;
+        switch (name) {
+            case "discountPercentage":
+                parsedValue = Math.round(parseFloat(value) / 5) * 5;
+                if (parsedValue > 100) parsedValue = 100;
+                if (parsedValue < 5) parsedValue = 5;
+                break;
+            case "quantity":
+                parsedValue = Math.round(parseInt(value) / 10) * 10;
+                if (parsedValue < 10) parsedValue = 10;
+                break;
+            case "minimumOrderValue":
+                parsedValue = Math.round(parseFloat(value) / 20000) * 20000;
+                if (parsedValue < 0) parsedValue = 0;
+                break;
+            case "maximumDiscount":
+                parsedValue = Math.round(parseFloat(value) / 20000) * 20000;
+                if (parsedValue < 20000) parsedValue = 20000;
+                break;
+            default:
+                return;
         }
 
-        setNewVoucher(updatedVoucher);
-        setFormErrors((prev) => ({ ...prev, [name]: "" }));
+        setNewVoucher((prev) => ({ ...prev, [name]: parsedValue.toString() }));
     };
 
     // Handle form submission
@@ -202,10 +231,10 @@ const ManageVoucher = () => {
                 credentials: "include",
                 body: JSON.stringify({
                     ...newVoucher,
-                    discountPercentage: parseFloat(newVoucher.discountPercentage),
-                    quantity: parseInt(newVoucher.quantity),
-                    minimumOrderValue: parseFloat(newVoucher.minimumOrderValue),
-                    maximumDiscount: parseFloat(newVoucher.maximumDiscount),
+                    discountPercentage: parseFloat(newVoucher.discountPercentage) || 0,
+                    quantity: parseInt(newVoucher.quantity) || 0,
+                    minimumOrderValue: parseFloat(newVoucher.minimumOrderValue) || 0,
+                    maximumDiscount: parseFloat(newVoucher.maximumDiscount) || 0,
                 }),
             });
 
@@ -397,6 +426,7 @@ const ManageVoucher = () => {
                                             onChange={handleInputChange}
                                             placeholder="VD: SALE2025"
                                             disabled={isSubmitting}
+                                            required
                                         />
                                         {formErrors.code && <p className="voucher-form-error-text">{formErrors.code}</p>}
                                     </div>
@@ -412,6 +442,7 @@ const ManageVoucher = () => {
                                             value={newVoucher.discountType.id}
                                             onChange={handleInputChange}
                                             disabled={isSubmitting}
+                                            required
                                         >
                                             <option value="1">Tất cả</option>
                                             <option value="2">Danh mục</option>
@@ -434,6 +465,7 @@ const ManageVoucher = () => {
                                                 value={newVoucher.category?.id || ""}
                                                 onChange={handleInputChange}
                                                 disabled={isSubmitting}
+                                                required
                                             >
                                                 <option value="">Chọn danh mục</option>
                                                 {categories.map((cat) => (
@@ -460,6 +492,7 @@ const ManageVoucher = () => {
                                                 value={newVoucher.productVariantDTO?.id || ""}
                                                 onChange={handleInputChange}
                                                 disabled={isSubmitting}
+                                                required
                                             >
                                                 <option value="">Chọn sản phẩm</option>
                                                 {productVariants.map((prod) => (
@@ -486,10 +519,12 @@ const ManageVoucher = () => {
                                             name="discountPercentage"
                                             value={newVoucher.discountPercentage}
                                             onChange={handleInputChange}
+                                            onBlur={handleNumericBlur}
                                             placeholder="VD: 10"
                                             min="5"
                                             max="100"
                                             disabled={isSubmitting}
+                                            required
                                         />
                                         {formErrors.discountPercentage && (
                                             <p className="voucher-form-error-text">{formErrors.discountPercentage}</p>
@@ -508,9 +543,11 @@ const ManageVoucher = () => {
                                             name="quantity"
                                             value={newVoucher.quantity}
                                             onChange={handleInputChange}
+                                            onBlur={handleNumericBlur}
                                             placeholder="VD: 100"
                                             min="10"
                                             disabled={isSubmitting}
+                                            required
                                         />
                                         {formErrors.quantity && (
                                             <p className="voucher-form-error-text">{formErrors.quantity}</p>
@@ -530,6 +567,7 @@ const ManageVoucher = () => {
                                             onChange={handleInputChange}
                                             min={new Date().toISOString().split("T")[0]}
                                             disabled={isSubmitting}
+                                            required
                                         />
                                         {formErrors.startDate && (
                                             <p className="voucher-form-error-text">{formErrors.startDate}</p>
@@ -549,6 +587,7 @@ const ManageVoucher = () => {
                                             onChange={handleInputChange}
                                             min={newVoucher.startDate || new Date().toISOString().split("T")[0]}
                                             disabled={isSubmitting}
+                                            required
                                         />
                                         {formErrors.endDate && (
                                             <p className="voucher-form-error-text">{formErrors.endDate}</p>
@@ -567,9 +606,11 @@ const ManageVoucher = () => {
                                             name="minimumOrderValue"
                                             value={newVoucher.minimumOrderValue}
                                             onChange={handleInputChange}
+                                            onBlur={handleNumericBlur}
                                             placeholder="VD: 500000"
                                             min="0"
                                             disabled={isSubmitting}
+                                            required
                                         />
                                         {formErrors.minimumOrderValue && (
                                             <p className="voucher-form-error-text">{formErrors.minimumOrderValue}</p>
@@ -588,9 +629,11 @@ const ManageVoucher = () => {
                                             name="maximumDiscount"
                                             value={newVoucher.maximumDiscount}
                                             onChange={handleInputChange}
+                                            onBlur={handleNumericBlur}
                                             placeholder="VD: 100000"
                                             min="20000"
                                             disabled={isSubmitting}
+                                            required
                                         />
                                         {formErrors.maximumDiscount && (
                                             <p className="voucher-form-error-text">{formErrors.maximumDiscount}</p>
@@ -608,6 +651,7 @@ const ManageVoucher = () => {
                                             value={newVoucher.isActive}
                                             onChange={handleInputChange}
                                             disabled={isSubmitting}
+                                            required
                                         >
                                             <option value="true">Hoạt động</option>
                                             <option value="false">Không hoạt động</option>

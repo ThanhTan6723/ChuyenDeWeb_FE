@@ -27,6 +27,18 @@ const Header = () => {
         }
     };
 
+    // Chat box
+    (function(d, w, c) {
+        w.ChatraID = 'o7fGkejJ6jz2WZT2s';
+        var s = d.createElement('script');
+        w[c] = w[c] || function() {
+            (w[c].q = w[c].q || []).push(arguments);
+        };
+        s.async = true;
+        s.src = 'https://call.chatra.io/chatra.js';
+        if (d.head) d.head.appendChild(s);
+    })(document, window, 'Chatra');
+
     const handleCartToggle = () => {
         if (!user) {
             alert(t('login_to_view_cart'));
@@ -95,7 +107,7 @@ const Header = () => {
                                         </span>
                                         <div className="dropdown-content">
                                             <a href="#" className="auth" onClick={(e) => { e.preventDefault(); handleLogout(); }}>{t('logout')}</a>
-                                            <Link to="/vouchers">{t('voucher_store')}</Link>
+                                            <Link to="/evoucher">{t('voucher_store')}</Link>
                                             <Link to="/order-history">{t('order_history')}</Link>
                                             <Link to="/admin">Admin</Link>
                                             <Link to="/update-profile">{t('account_info')}</Link>

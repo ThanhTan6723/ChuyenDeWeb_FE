@@ -9,6 +9,7 @@ import Layout from '../components/layout/layout';
 import '../../assets/css/style.css';
 import '../../assets/css/product-info.css';
 import '../../assets/css/success.css';
+import BestSellers from "../components/home/bestsellers";
 
 const ShopDetail = () => {
     const { t } = useTranslation();
@@ -36,6 +37,7 @@ const ShopDetail = () => {
                     </div>
                 </div>
             </div>
+            <BestSellers />
         </Layout>
     );
 };

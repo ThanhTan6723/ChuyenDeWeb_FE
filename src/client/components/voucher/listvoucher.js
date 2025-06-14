@@ -3,6 +3,8 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from '../../../auth/authcontext';
 
+const MAX_QUANTITY = 100; // hoặc bạn có thể lấy giá trị lớn nhất của quantity từ voucher list
+
 const VoucherList = () => {
     const [vouchers, setVouchers] = useState([]);
     const [savedVouchers, setSavedVouchers] = useState([]);
@@ -12,7 +14,6 @@ const VoucherList = () => {
 
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://localhost:8443";
 
-    // Lấy danh sách voucher và voucher đã lưu
     useEffect(() => {
         const fetchVouchers = async () => {
             setLoading(true);
@@ -22,7 +23,6 @@ const VoucherList = () => {
                     ...(isLoggedIn && { Authorization: `Bearer ${localStorage.getItem("token")}` }),
                 };
 
-                // Lấy danh sách voucher đang hoạt động
                 const voucherResponse = await fetch(`${API_BASE_URL}/api/vouchers/user`, {
                     method: "GET",
                     headers,
@@ -38,7 +38,6 @@ const VoucherList = () => {
                     setVouchers(activeVouchers);
                 }
 
-                // Lấy danh sách voucher đã lưu nếu đã đăng nhập
                 if (isLoggedIn) {
                     const savedResponse = await fetch(`${API_BASE_URL}/api/e-vouchers/user`, {
                         method: "GET",
@@ -63,7 +62,6 @@ const VoucherList = () => {
         fetchVouchers();
     }, [API_BASE_URL, isLoggedIn]);
 
-    // Xử lý lưu voucher
     const handleSaveVoucher = async (voucherId) => {
         if (!isLoggedIn) {
             toast.warn("Vui lòng đăng nhập để lưu voucher!");
@@ -125,136 +123,16 @@ const VoucherList = () => {
         }
     };
 
-    // Phân loại voucher theo discountType
-    const allVouchers = vouchers.filter((voucher) => voucher.discountType?.id === 1);
-    const categoryVouchers = vouchers.filter(
-        (voucher) => voucher.discountType?.id === 2 && voucher.category
-    );
-    const productVouchers = vouchers.filter(
-        (voucher) => voucher.discountType?.id === 3 && voucher.productVariantDTO
-    );
+    // Gộp tất cả voucher lại thành một danh sách duy nhất để render
+    const allVoucherList = [
+        ...vouchers.filter((voucher) => voucher.discountType?.id === 1),
+        ...vouchers.filter((voucher) => voucher.discountType?.id === 2 && voucher.category),
+        ...vouchers.filter((voucher) => voucher.discountType?.id === 3 && voucher.productVariantDTO)
+    ];
 
-    const renderVoucherGroup = (vouchers, title) => {
-        if (vouchers.length === 0) return null;
-        return (
-            <div className="voucher-group">
-                <h3 className="section-title">{title}</h3>
-                <div className="voucher-grid">
-                    {vouchers.map((voucher) => {
-                        const isSaved = savedVouchers.some((sv) => sv.id === voucher.id);
-                        const isOutOfStock = voucher.quantity <= 0;
-                        const buttonText = isSaved ? "Đã lưu" : isOutOfStock ? "Đã hết mã" : "Lưu Voucher";
-                        const isDisabled = isOutOfStock || isSaved;
-
-                        return (
-                            <div key={voucher.id} className="voucher-card">
-                                <div className="voucher-header">
-                                    <span className="voucher-code">{voucher.code}</span>
-                                    <span className="voucher-discount">{voucher.discountPercentage}%</span>
-                                </div>
-                                <div className="voucher-body">
-                                    <p className="voucher-info">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zm0 8c-2.761 0-5-2.239-5-5s2.239-5 5-5 5 2.239 5 5-2.239 5-5 5z"
-                                            />
-                                        </svg>
-                                        Tối đa: {voucher.maximumDiscount?.toLocaleString("vi-VN")} VNĐ
-                                    </p>
-                                    <p className="voucher-info">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                                            />
-                                        </svg>
-                                        Đơn tối thiểu: {voucher.minimumOrderValue?.toLocaleString("vi-VN")} VNĐ
-                                    </p>
-                                    <p className="voucher-info">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                            />
-                                        </svg>
-                                        HSD: {voucher.endDate} | Số lượng: {voucher.quantity}
-                                    </p>
-                                    {voucher.discountType?.id === 2 && voucher.category && (
-                                        <p className="voucher-info">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                                                />
-                                            </svg>
-                                            Danh mục: {voucher.category.name}
-                                        </p>
-                                    )}
-                                    {voucher.discountType?.id === 3 && voucher.productVariantDTO && (
-                                        <p className="voucher-info">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2"
-                                                />
-                                            </svg>
-                                            Sản phẩm: {voucher.productVariantDTO.variant} ({voucher.productVariantDTO.attribute})
-                                        </p>
-                                    )}
-                                    <span className="voucher-status">
-                                        {isOutOfStock ? "Đã hết mã" : isSaved ? "Đã lưu" : "Có thể sử dụng"}
-                                    </span>
-                                    <button
-                                        onClick={() => handleSaveVoucher(voucher.id)}
-                                        disabled={isDisabled}
-                                        className={`voucher-button ${isDisabled ? "disabled" : "enabled"}`}
-                                    >
-                                        {buttonText}
-                                    </button>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-        );
-    };
+    // Tìm số lượng lớn nhất để làm max cho thanh progress (hoặc bạn đặt MAX_QUANTITY cố định)
+    const getMaxQuantity = () =>
+        Math.max(...allVoucherList.map(v => v.quantity || 0), MAX_QUANTITY);
 
     return (
         <div className="voucher-container">
@@ -265,12 +143,80 @@ const VoucherList = () => {
                 </div>
             ) : (
                 <>
-                    {renderVoucherGroup(allVouchers, "Voucher Chung")}
-                    {renderVoucherGroup(categoryVouchers, "Voucher Theo Danh Mục")}
-                    {renderVoucherGroup(productVouchers, "Voucher Theo Sản Phẩm")}
-                    {allVouchers.length === 0 && categoryVouchers.length === 0 && productVouchers.length === 0 && (
-                        <p className="voucher-empty">Không có voucher nào đang hoạt động.</p>
-                    )}
+                    <div className="voucher-group">
+                        <div className="voucher-grid">
+                            {allVoucherList.map((voucher) => {
+                                const isSaved = savedVouchers.some((sv) => sv.id === voucher.id);
+                                const isOutOfStock = voucher.quantity <= 0;
+                                const buttonText = isSaved ? "Đã lưu" : isOutOfStock ? "Đã hết mã" : "Lưu mã";
+                                const isDisabled = isOutOfStock || isSaved;
+                                const percent =
+                                    getMaxQuantity() > 0
+                                        ? Math.min(100, Math.round((voucher.quantity / getMaxQuantity()) * 100))
+                                        : 0;
+                                return (
+                                    <div key={voucher.id} className="voucher-cardd voucher-ticket-uniform">
+                                        <div className="voucher-ticket-left-part">
+                                            <div className="voucher-left-content">
+                                                <div className="voucher-company">SPECIAL GIFT</div>
+                                                <div className="voucher-discount-big">
+                                                    <span className="voucher-discount-number">{voucher.discountPercentage}%</span>
+                                                    <span className="voucher-discount-label">OFF</span>
+                                                </div>
+                                                <div className="voucher-coupon-label">Coupon</div>
+                                            </div>
+                                        </div>
+                                        <div className="voucher-ticket-right-part">
+                                            <div className="voucher-info-list">
+                                                <div className="voucher-info-row">
+                                                    <span><b>{voucher.code}</b></span>
+                                                </div>
+                                                <div className="voucher-info-row">
+                                                    <span>Giảm tối đa {voucher.maximumDiscount?.toLocaleString("vi-VN")} VNĐ</span>
+                                                </div>
+                                                <div className="voucher-info-row">
+                                                    <span>Đơn tối thiểu {voucher.minimumOrderValue?.toLocaleString("vi-VN")} VNĐ</span>
+                                                </div>
+                                                <div className="voucher-info-row">
+                                                    <span>Ngày bắt đầu {voucher.startDate}</span>
+                                                </div>
+                                                <div className="voucher-info-row">
+                                                    <span>Ngày kết thúc: {voucher.endDate}</span>
+                                                </div>
+                                            </div>
+                                            {/* Thanh số lượng */}
+                                            <div className="voucher-quantity-bar-wrap">
+                                                <div className="voucher-quantity-bar-bg">
+                                                    <div
+                                                        className="voucher-quantity-bar-fg"
+                                                        style={{ width: `${percent}%` }}
+                                                    />
+                                                </div>
+                                                <span className="voucher-quantity-bar-text">
+                                                    {voucher.quantity}
+                                                </span>
+                                            </div>
+                                            <span className="voucher-status">
+                                                {isOutOfStock ? "Đã hết mã" : isSaved ? "Đã lưu" : "Có thể sử dụng"}
+                                            </span>
+                                            <div className="voucher-button-wrapper">
+                                                <button
+                                                    onClick={() => handleSaveVoucher(voucher.id)}
+                                                    disabled={isDisabled}
+                                                    className={`voucher-button ${isDisabled ? "disabled" : "enabled"}`}
+                                                >
+                                                    {buttonText}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        {allVoucherList.length === 0 && (
+                            <p className="voucher-empty">Không có voucher nào đang hoạt động.</p>
+                        )}
+                    </div>
                 </>
             )}
         </div>

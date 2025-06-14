@@ -54,9 +54,13 @@ const Login = () => {
         const phone = !emailRegex.test(identifier) ? identifier : "";
 
         try {
-            const success = await login(email, password, phone, navigate);
-            if (!success) {
-                setError("Đăng nhập thất bại. Vui lòng kiểm tra email/số điện thoại hoặc mật khẩu.");
+            const response = await login(email, password, phone, navigate);
+            if (!response.success) {
+                if (response.locked) {
+                    setError("Tài khoản đã bị khóa. Vui lòng đăng nhập lại sau 15 phút!");
+                } else {
+                    setError(`Đăng nhập thất bại. Vui lòng kiểm tra email/số điện thoại hoặc mật khẩu. (${response.failedAttempts}/5 lần thử)`);
+                }
             }
         } catch (err) {
             setError("Không thể kết nối tới máy chủ. Vui lòng thử lại sau.");
@@ -136,12 +140,12 @@ const Login = () => {
                     </form>
 
                     <div className="form-link">
-            <span>
-              Bạn chưa có tài khoản?{" "}
-                <Link to="/signup" className="link signup-link">
-                Đăng ký
-              </Link>
-            </span>
+                        <span>
+                            Bạn chưa có tài khoản?{" "}
+                            <Link to="/signup" className="link signup-link">
+                                Đăng ký
+                            </Link>
+                        </span>
                     </div>
                 </div>
 
