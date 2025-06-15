@@ -1,6 +1,22 @@
 import React from 'react';
+import { useAuth } from '../../../auth/authcontext';
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Navbar() {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try {
+            const success = await logout();
+            if (success) {
+                navigate("/home")
+            }
+        } catch (err) {
+            console.error('err: ', err);
+        }
+    };
+
     return (
         <nav className="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
             <div className="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
@@ -21,22 +37,25 @@ export default function Navbar() {
                     </div>
                 </div>
                 <ul className="navbar-nav flex-row align-items-center ms-auto">
-                    {/*<li className="nav-item lh-1 me-3">*/}
-                    {/*    <a*/}
-                    {/*        className="github-button"*/}
-                    {/*        href="https://github.com/themeselection/sneat-html-admin-template-free"*/}
-                    {/*        data-icon="octicon-star"*/}
-                    {/*        data-size="large"*/}
-                    {/*        data-show-count="true"*/}
-                    {/*        aria-label="Star themeselection/sneat-html-admin-template-free on GitHub"*/}
-                    {/*    >*/}
-                    {/*        Star*/}
-                    {/*    </a>*/}
-                    {/*</li>*/}
                     <li className="menu-item">
                         <a href="/shop" className="menu-link">
-                            <i className="menu-icon tf-icons bx bx-layout"></i>
-                            <div>Shop</div>
+                            <div>
+                                {user ? (
+                                <div className="user-dropdown">
+                                        <span className="user-name" style={{color:'black',fontSize:'16px'}}>
+                                            {user?.username || user?.email?.split('@')[0]}
+                                        </span>
+                                    <div className="dropdown-content">
+                                        <a href="#" className="auth" onClick={(e) => { e.preventDefault(); handleLogout(); }}>Logout</a>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="log">
+                                    <img src="/img/login.png" alt="Login" style={{ marginRight: '5px', color:'black' }} />
+                                    <Link to="/login">Login</Link>
+                                </div>
+                            )}
+                            </div>
                         </a>
                     </li>
                 </ul>

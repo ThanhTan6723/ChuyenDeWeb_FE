@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { toast } from "react-toastify";
+import React, { useState, useEffect, useRef } from "react";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from '../../../auth/authcontext';
 
-const MAX_QUANTITY = 100; // hoặc bạn có thể lấy giá trị lớn nhất của quantity từ voucher list
+const MAX_QUANTITY = 100;
 
 const VoucherList = () => {
     const [vouchers, setVouchers] = useState([]);
@@ -11,8 +11,10 @@ const VoucherList = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const { isLoggedIn } = useAuth();
+    const [alertMessage, setAlertMessage] = useState("");
 
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://localhost:8443";
+    const prevQuantities = useRef({});
 
     useEffect(() => {
         const fetchVouchers = async () => {
@@ -54,6 +56,7 @@ const VoucherList = () => {
                 }
             } catch (err) {
                 setError(`Lỗi: ${err.message}`);
+                setAlertMessage(`Lỗi: ${err.message}`);
                 toast.error(`Lỗi: ${err.message}`);
             } finally {
                 setLoading(false);
@@ -62,8 +65,15 @@ const VoucherList = () => {
         fetchVouchers();
     }, [API_BASE_URL, isLoggedIn]);
 
+    useEffect(() => {
+        const q = {};
+        vouchers.forEach(v => q[v.id] = v.quantity);
+        prevQuantities.current = q;
+    }, [vouchers]);
+
     const handleSaveVoucher = async (voucherId) => {
         if (!isLoggedIn) {
+            setAlertMessage("Vui lòng đăng nhập để lưu voucher!");
             toast.warn("Vui lòng đăng nhập để lưu voucher!");
             return;
         }
@@ -84,6 +94,7 @@ const VoucherList = () => {
             );
             const checkData = await checkResponse.json();
             if (checkData.status === "success" && checkData.data) {
+                setAlertMessage("Bạn đã lưu voucher này rồi!");
                 toast.warn("Bạn đã lưu voucher này rồi!");
                 return;
             }
@@ -102,6 +113,7 @@ const VoucherList = () => {
 
             const data = await response.json();
             if (data.status === "success") {
+                setAlertMessage("Lưu voucher thành công!");
                 toast.success("Lưu voucher thành công!");
                 const savedResponse = await fetch(`${API_BASE_URL}/api/e-vouchers/user`, {
                     method: "GET",
@@ -119,23 +131,58 @@ const VoucherList = () => {
                 );
             }
         } catch (err) {
+            setAlertMessage(`Lỗi: ${err.message}`);
             toast.error(`Lỗi: ${err.message}`);
         }
     };
 
-    // Gộp tất cả voucher lại thành một danh sách duy nhất để render
     const allVoucherList = [
         ...vouchers.filter((voucher) => voucher.discountType?.id === 1),
         ...vouchers.filter((voucher) => voucher.discountType?.id === 2 && voucher.category),
         ...vouchers.filter((voucher) => voucher.discountType?.id === 3 && voucher.productVariantDTO)
     ];
 
-    // Tìm số lượng lớn nhất để làm max cho thanh progress (hoặc bạn đặt MAX_QUANTITY cố định)
-    const getMaxQuantity = () =>
-        Math.max(...allVoucherList.map(v => v.quantity || 0), MAX_QUANTITY);
+    // Thanh bar width = tổng 100%, phần xám là tỷ lệ còn lại, phần trắng là đã mất
+    const getRemainPercent = (quantity) => {
+        let percent = (quantity / MAX_QUANTITY) * 100;
+        if (percent < 0) percent = 0;
+        if (percent > 100) percent = 100;
+        return percent;
+    };
 
     return (
         <div className="voucher-container">
+            <ToastContainer />
+            {alertMessage && (
+                <div
+                    style={{
+                        background: "#fffae6",
+                        border: "1px solid #ffe58f",
+                        color: "#ad6800",
+                        padding: "10px",
+                        borderRadius: "4px",
+                        marginBottom: "16px",
+                        textAlign: "center",
+                        fontWeight: 500,
+                    }}
+                >
+                    {alertMessage}
+                    <button
+                        onClick={() => setAlertMessage("")}
+                        style={{
+                            background: "none",
+                            border: "none",
+                            marginLeft: "12px",
+                            color: "#ad6800",
+                            cursor: "pointer",
+                            fontSize: "16px"
+                        }}
+                        aria-label="Đóng"
+                    >
+                        ×
+                    </button>
+                </div>
+            )}
             {loading ? (
                 <div className="voucher-loading">
                     <div className="voucher-spinner"></div>
@@ -148,67 +195,108 @@ const VoucherList = () => {
                             {allVoucherList.map((voucher) => {
                                 const isSaved = savedVouchers.some((sv) => sv.id === voucher.id);
                                 const isOutOfStock = voucher.quantity <= 0;
-                                const buttonText = isSaved ? "Đã lưu" : isOutOfStock ? "Đã hết mã" : "Lưu mã";
+                                const buttonText = isSaved ? "Đã lưu" : isOutOfStock ? "Đã hết mã" : "Lưu";
                                 const isDisabled = isOutOfStock || isSaved;
-                                const percent =
-                                    getMaxQuantity() > 0
-                                        ? Math.min(100, Math.round((voucher.quantity / getMaxQuantity()) * 100))
-                                        : 0;
+
+                                let fromDate = voucher.startDate;
+                                if (fromDate && fromDate.length === 10) {
+                                    fromDate = fromDate.split('-').reverse().join('/');
+                                }
+
+                                // percent còn lại
+                                const remainPercent = getRemainPercent(voucher.quantity);
+
                                 return (
-                                    <div key={voucher.id} className="voucher-cardd voucher-ticket-uniform">
-                                        <div className="voucher-ticket-left-part">
-                                            <div className="voucher-left-content">
-                                                <div className="voucher-company">SPECIAL GIFT</div>
-                                                <div className="voucher-discount-big">
-                                                    <span className="voucher-discount-number">{voucher.discountPercentage}%</span>
-                                                    <span className="voucher-discount-label">OFF</span>
-                                                </div>
-                                                <div className="voucher-coupon-label">Coupon</div>
+                                    <div key={voucher.id} className="voucher-image2-card">
+                                        <div className="voucher-image2-row voucher-image2-top">
+                                            <div className="voucher-image2-discount">
+                                                Giảm {(voucher.discountPercentage || 0).toFixed(2)}%
+                                            </div>
+                                            <div className="voucher-image2-type">
+                                                {voucher.category?.name?.toUpperCase() ||
+                                                    voucher.productVariantDTO?.name?.toUpperCase() ||
+                                                    "ALL"}
                                             </div>
                                         </div>
-                                        <div className="voucher-ticket-right-part">
-                                            <div className="voucher-info-list">
-                                                <div className="voucher-info-row">
-                                                    <span><b>{voucher.code}</b></span>
-                                                </div>
-                                                <div className="voucher-info-row">
-                                                    <span>Giảm tối đa {voucher.maximumDiscount?.toLocaleString("vi-VN")} VNĐ</span>
-                                                </div>
-                                                <div className="voucher-info-row">
-                                                    <span>Đơn tối thiểu {voucher.minimumOrderValue?.toLocaleString("vi-VN")} VNĐ</span>
-                                                </div>
-                                                <div className="voucher-info-row">
-                                                    <span>Ngày bắt đầu {voucher.startDate}</span>
-                                                </div>
-                                                <div className="voucher-info-row">
-                                                    <span>Ngày kết thúc: {voucher.endDate}</span>
-                                                </div>
-                                            </div>
-                                            {/* Thanh số lượng */}
-                                            <div className="voucher-quantity-bar-wrap">
-                                                <div className="voucher-quantity-bar-bg">
-                                                    <div
-                                                        className="voucher-quantity-bar-fg"
-                                                        style={{ width: `${percent}%` }}
-                                                    />
-                                                </div>
-                                                <span className="voucher-quantity-bar-text">
-                                                    {voucher.quantity}
+                                        <div className="voucher-image2-code">
+                                            {voucher.code}
+                                        </div>
+                                        <div className="voucher-image2-desc">
+                                            Giảm tối đa: {voucher.maximumDiscount?.toLocaleString("vi-VN")} đ
+                                        </div>
+                                        <div className="voucher-image2-desc">
+                                            Đơn tối thiểu: {voucher.minimumOrderValue?.toLocaleString("vi-VN")} đ
+                                        </div>
+                                        <div className="voucher-image2-desc">
+                                            Có hiệu lực từ {fromDate}
+                                        </div>
+                                        {/* Thanh số lượng còn lại với hiệu ứng rút ngắn */}
+                                        <div style={{
+                                            width: "90%",
+                                            margin: "8px 0 0 0",
+                                            height: "20px",
+                                            position: "relative",
+                                            overflow: "hidden",
+                                            borderRadius: "12px",
+                                            background: "#ededed",
+                                            border: "1px solid #e0e0e0",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center"
+                                        }}>
+                                            {/* Phần đã mất (màu trắng) */}
+                                            <div style={{
+                                                position: "absolute",
+                                                left: `${remainPercent}%`,
+                                                top: 0,
+                                                height: "100%",
+                                                width: `${100 - remainPercent}%`,
+                                                background: "#fff",
+                                                transition: "width 0.7s cubic-bezier(.77,0,.18,1), left 0.7s cubic-bezier(.77,0,.18,1)",
+                                                zIndex: 1
+                                            }} />
+                                            {/* Nội dung luôn nằm giữa */}
+                                            <div style={{
+                                                width: "100%",
+                                                textAlign: "center",
+                                                position: "absolute",
+                                                left: 0, top: 0, height: "100%",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                zIndex: 2,
+                                                pointerEvents: "none"
+                                            }}>
+                                                <span style={{
+                                                    fontSize: "12px",
+                                                    color: "#555",
+                                                    fontWeight: 600,
+                                                    background: "transparent",
+                                                    whiteSpace: "nowrap"
+                                                }}>
+                                                    Còn {voucher.quantity ?? 0}
                                                 </span>
                                             </div>
-                                            <span className="voucher-status">
-                                                {isOutOfStock ? "Đã hết mã" : isSaved ? "Đã lưu" : "Có thể sử dụng"}
-                                            </span>
-                                            <div className="voucher-button-wrapper">
-                                                <button
-                                                    onClick={() => handleSaveVoucher(voucher.id)}
-                                                    disabled={isDisabled}
-                                                    className={`voucher-button ${isDisabled ? "disabled" : "enabled"}`}
-                                                >
-                                                    {buttonText}
-                                                </button>
-                                            </div>
+                                            {/* Phần nền xám nhạt còn lại */}
+                                            <div style={{
+                                                position: "absolute",
+                                                left: 0,
+                                                top: 0,
+                                                height: "100%",
+                                                width: `${remainPercent}%`,
+                                                background: "#ededed",
+                                                transition: "width 0.7s cubic-bezier(.77,0,.18,1)",
+                                                zIndex: 0
+                                            }} />
                                         </div>
+                                        <button
+                                            onClick={() => handleSaveVoucher(voucher.id)}
+                                            disabled={isDisabled}
+                                            className={`voucher-image2-btn ${isDisabled ? "disabled" : ""}`}
+                                            style={{ marginTop: 10 }}
+                                        >
+                                            {buttonText}
+                                        </button>
                                     </div>
                                 );
                             })}

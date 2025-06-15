@@ -13,7 +13,7 @@ import '../../assets/css/themify-icons.css';
 import '../../assets/css/magnific-popup.css';
 import '../../assets/css/slick.css';
 import '../../assets/css/style.css';
-// import '../../assets/css/cart.css';
+import '../../assets/css/voucher-modal.css';
 
 const CartPage = () => {
     return (

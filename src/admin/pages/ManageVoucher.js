@@ -4,6 +4,8 @@ import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import "../../assets/css/voucher.css";
 import { toast } from "react-toastify";
+import {useAuth} from "../../auth/authcontext";
+import {useNavigate} from "react-router-dom";
 
 const ManageVoucher = () => {
     const [vouchers, setVouchers] = useState([]);
@@ -30,6 +32,25 @@ const ManageVoucher = () => {
         maximumDiscount: "",
         isActive: true,
     });
+
+    const { user, isLoggedIn } = useAuth(); // Kiểm tra trạng thái login và quyền admin
+    const navigate = useNavigate();
+    useEffect(() => {
+        // Nếu chưa login thì chuyển về login
+        if (!isLoggedIn || !user) {
+            navigate('/login');
+            return;
+        }
+        // Nếu đã login nhưng không phải admin thì chuyển về trang home (hoặc trang lỗi)
+        // Ưu tiên kiểm tra cả role và roleName
+        const role = user.role;
+        console.log('role: '+role)
+        if (role !== 'ROLE_ADMIN' && role !== 'ADMIN') {
+            navigate('/home');
+            return;
+        }
+        // eslint-disable-next-line
+    }, [isLoggedIn, user, navigate]);
 
     // Fetch categories and product variants
     useEffect(() => {
@@ -325,7 +346,7 @@ const ManageVoucher = () => {
                                     ) : (
                                         <div className="voucher-table-responsive">
                                             <table className="voucher-table">
-                                                <thead>
+                                                <thead className="table-dark">
                                                 <tr>
                                                     <th>ID</th>
                                                     <th>Mã</th>
