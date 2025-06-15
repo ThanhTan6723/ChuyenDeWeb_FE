@@ -11,35 +11,35 @@ const ManageUser = () => {
 
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://localhost:8443";
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            setLoading(true);
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/admin/list`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    credentials: "include",
-                });
+    const fetchUsers = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/list`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+            });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errorText}`);
-                }
-
-                const data = await response.json();
-                setUsers(data);
-                setError(null);
-            } catch (err) {
-                console.error("Lỗi khi fetch người dùng:", err);
-                setError("Không thể tải danh sách người dùng. " + err.message);
-                toast.error("Lỗi tải danh sách người dùng.");
-            } finally {
-                setLoading(false);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
             }
-        };
 
+            const data = await response.json();
+            setUsers(data);
+            setError(null);
+        } catch (err) {
+            console.error("Lỗi khi fetch người dùng:", err);
+            setError("Không thể tải danh sách người dùng. " + err.message);
+            toast.error("Lỗi tải danh sách người dùng.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchUsers();
     }, [API_BASE_URL]);
 
@@ -48,7 +48,7 @@ const ManageUser = () => {
         username: '',
         email: '',
         password: '',
-        phoneNumber: '', // Thêm phoneNumber
+        phoneNumber: '',
         roleName: 'ROLE_CLIENT'
     });
     const [formError, setFormError] = useState(null);
@@ -80,22 +80,37 @@ const ManageUser = () => {
             toast.success("Thêm người dùng thành công!");
             setShowModal(false);
             setNewUser({ username: '', email: '', password: '', phoneNumber: '', roleName: 'ROLE_CLIENT' });
+            fetchUsers();
+        } catch (err) {
+            setFormError(`Lỗi khi thêm người dùng: ${err.message}`);
+            toast.error(`Lỗi khi thêm người dùng: ${err.message}`);
+        }
+    };
 
-            const fetchResponse = await fetch(`${API_BASE_URL}/api/admin/list`, {
-                method: "GET",
+    const handleDelete = async (userId, username) => {
+        if (!window.confirm(`Bạn có chắc muốn xóa người dùng ${username}?`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
+                method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 credentials: "include",
             });
 
-            if (fetchResponse.ok) {
-                const data = await fetchResponse.json();
-                setUsers(data);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP ${response.status}`);
             }
+
+            toast.success(`Xóa người dùng ${username} thành công!`);
+            fetchUsers();
         } catch (err) {
-            setFormError(`Lỗi khi thêm người dùng: ${err.message}`);
-            toast.error(`Lỗi khi thêm người dùng: ${err.message}`);
+            console.error("Lỗi khi xóa người dùng:", err);
+            toast.error(`Lỗi khi xóa người dùng: ${err.message}`);
         }
     };
 
@@ -139,7 +154,7 @@ const ManageUser = () => {
                                                     <th>Số lần đăng nhập thất bại</th>
                                                     <th>Khóa</th>
                                                     <th>Thời gian khóa</th>
-                                                    <th>Hành động</th>
+                                                    <th style={{ width: '150px' }}>Hành động</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -160,7 +175,12 @@ const ManageUser = () => {
                                                             </td>
                                                             <td>
                                                                 <button className="btn btn-sm btn-primary me-2">Sửa</button>
-                                                                <button className="btn btn-sm btn-danger">Xóa</button>
+                                                                <button
+                                                                    className="btn btn-sm btn-danger"
+                                                                    onClick={() => handleDelete(user.id, user.username)}
+                                                                >
+                                                                    Xóa
+                                                                </button>
                                                             </td>
                                                         </tr>
                                                     ))
@@ -184,7 +204,6 @@ const ManageUser = () => {
                 </div>
             </div>
 
-            {/* Modal thêm người dùng */}
             {showModal && (
                 <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-dialog-centered">

@@ -49,7 +49,7 @@ const Header = () => {
         i18n.changeLanguage(lng);
     };
 
-    if (loading) return <div className="text-center py-3">{t('loading')}...</div>;
+    // if (loading) return <div className="text-center py-3">{t('loading')}...</div>;
 
     return (
         <header className="main_menu home_menu">
