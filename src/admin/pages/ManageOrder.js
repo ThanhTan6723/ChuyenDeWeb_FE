@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../auth/authcontext';
 import { Modal } from 'react-bootstrap';
 import Sidebar from "../components/layout/Sidebar";
 import Navbar from "../components/layout/Navbar";
@@ -6,6 +8,7 @@ import Footer from "../components/layout/Footer";
 import { formatDate, formatCurrency } from "../utils/formater";
 
 export default function ManageOrder() {
+    const { user, isLoggedIn } = useAuth();
     const [activeTab, setActiveTab] = useState('all');
     const [orders, setOrders] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -15,6 +18,8 @@ export default function ManageOrder() {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [pageSize] = useState(5);
+
+    const navigate = useNavigate();
 
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://localhost:8443";
     const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dp2jfvmlh/image/upload/';
@@ -26,6 +31,7 @@ export default function ManageOrder() {
         DELIVERED: 'Giao thành công',
         CANCELLED: 'Đã hủy',
         REFUSED: 'Bị từ chối',
+        CANCELLATION_REQUESTED: 'Yêu cầu hủy',
     };
 
     const tabs = [
@@ -34,19 +40,34 @@ export default function ManageOrder() {
         { key: 'CONFIRMED', label: statusLabels.CONFIRMED },
         { key: 'ON_DELIVERY', label: statusLabels.ON_DELIVERY },
         { key: 'DELIVERED', label: statusLabels.DELIVERED },
+        { key: 'CANCELLATION_REQUESTED', label: statusLabels.CANCELLATION_REQUESTED },
         { key: 'CANCELLED', label: statusLabels.CANCELLED },
         { key: 'REFUSED', label: statusLabels.REFUSED },
     ];
 
     useEffect(() => {
-        fetchOrders(activeTab, currentPage);
-    }, [activeTab, currentPage]);
+        if (!isLoggedIn || !user) {
+            navigate('/login');
+            return;
+        }
+        const role = user.role;
+        if (role !== 'ROLE_ADMIN' && role !== 'ADMIN') {
+            navigate('/home');
+            return;
+        }
+    }, [isLoggedIn, user, navigate]);
+
+    useEffect(() => {
+        if (isLoggedIn && user && (user.role === 'ROLE_ADMIN' || user.role === 'ADMIN')) {
+            fetchOrders(activeTab, currentPage);
+        }
+    }, [activeTab, currentPage, isLoggedIn, user]);
 
     const fetchOrders = async (status, page) => {
         try {
-            let url = `${API_BASE_URL}/api/orders/all?page=${page}&size=${pageSize}`;
+            let url = `${API_BASE_URL}/api/admin/all?page=${page}&size=${pageSize}`;
             if (status !== 'all') {
-                url = `${API_BASE_URL}/api/orders/status/${status}?page=${page}&size=${pageSize}`;
+                url = `${API_BASE_URL}/api/admin/status/${status}?page=${page}&size=${pageSize}`;
             }
             const response = await fetch(url, {
                 method: 'GET',
@@ -70,18 +91,16 @@ export default function ManageOrder() {
                     setNoOrdersMessage('');
                 }
             } else {
-                console.error('API response unsuccessful:', data.message);
                 setNoOrdersMessage(data.message || 'Không thể tải danh sách đơn hàng.');
             }
         } catch (error) {
-            console.error('Error fetching orders:', error);
             setNoOrdersMessage('Đã xảy ra lỗi khi tải danh sách đơn hàng.');
         }
     };
 
     const fetchOrderDetails = async (orderId) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/details`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/${orderId}/details`, {
                 method: 'GET',
                 headers: {
                     "Content-Type": "application/json",
@@ -96,11 +115,9 @@ export default function ManageOrder() {
                 setOrderDetails(data.data);
                 setShowModal(true);
             } else {
-                console.error('API response unsuccessful:', data.message);
                 setNoOrdersMessage(data.message || 'Không thể tải chi tiết đơn hàng.');
             }
         } catch (error) {
-            console.error('Error fetching order details:', error);
             setNoOrdersMessage('Đã xảy ra lỗi khi tải chi tiết đơn hàng.');
         }
     };
@@ -122,9 +139,52 @@ export default function ManageOrder() {
         }
     };
 
+    const handleAcceptCancelRequest = (orderId) => {
+        updateOrderStatus(orderId, 'CANCELLED');
+    };
+
+    const handleRejectCancelRequest = (orderId) => {
+        updateOrderStatus(orderId, 'CONFIRMED');
+    };
+
+    const handleRefuseOrder = (orderId) => {
+        updateOrderStatus(orderId, 'REFUSED');
+    };
+
+    const handleCompleteDelivery = (orderId) => {
+        updateOrderStatus(orderId, 'DELIVERED');
+    };
+
+    // Xóa đơn hàng (cho tab bị từ chối và đã hủy)
+    const handleDeleteOrder = async (orderId) => {
+        if (!window.confirm("Bạn có chắc chắn muốn xóa đơn hàng này?")) return;
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/${orderId}`, {
+                method: 'DELETE',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            if (data.success) {
+                fetchOrders(activeTab, currentPage);
+                setNoOrdersMessage('');
+                alert('Xóa đơn hàng thành công!');
+            } else {
+                setNoOrdersMessage(data.message || 'Không thể xóa đơn hàng.');
+            }
+        } catch (error) {
+            setNoOrdersMessage('Đã xảy ra lỗi khi xóa đơn hàng.');
+        }
+    };
+
     const updateOrderStatus = async (orderId, newStatus) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/status`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/${orderId}/status`, {
                 method: 'PUT',
                 headers: {
                     "Content-Type": "application/json",
@@ -139,12 +199,11 @@ export default function ManageOrder() {
             if (data.success) {
                 fetchOrders(activeTab, currentPage);
                 setNoOrdersMessage('');
+                alert('Cập nhật trạng thái đơn hàng thành công!');
             } else {
-                console.error('API response unsuccessful:', data.message);
                 setNoOrdersMessage(data.message || 'Không thể cập nhật trạng thái đơn hàng.');
             }
         } catch (error) {
-            console.error('Error updating order status:', error);
             setNoOrdersMessage('Đã xảy ra lỗi khi cập nhật trạng thái đơn hàng.');
         }
     };
@@ -158,10 +217,45 @@ export default function ManageOrder() {
     };
 
     const handleCancelOrder = (orderId) => {
-        updateOrderStatus(orderId, 'CANCELLED');
+        if (activeTab === 'CONFIRMED') {
+            handleRefuseOrder(orderId);
+        } else {
+            updateOrderStatus(orderId, 'CANCELLED');
+        }
     };
 
     const showDeliveryDateColumn = activeTab === 'all' || activeTab === 'DELIVERED';
+
+    // Căn giữa label trong cột trạng thái đơn (tab all)
+    const renderStatusLabelCell = (status) => {
+        let label;
+        let color;
+        switch (status) {
+            case "PENDING":
+                label = statusLabels.PENDING; color = "secondary"; break;
+            case "CONFIRMED":
+                label = statusLabels.CONFIRMED; color = "primary"; break;
+            case "ON_DELIVERY":
+                label = statusLabels.ON_DELIVERY; color = "info"; break;
+            case "DELIVERED":
+                label = statusLabels.DELIVERED; color = "success"; break;
+            case "CANCELLED":
+                label = statusLabels.CANCELLED; color = "dark"; break;
+            case "REFUSED":
+                label = statusLabels.REFUSED; color = "danger"; break;
+            case "CANCELLATION_REQUESTED":
+                label = statusLabels.CANCELLATION_REQUESTED; color = "warning text-dark"; break;
+            default:
+                label = status; color = "light text-dark";
+        }
+        return (
+            <td style={{ textAlign: "center", verticalAlign: "middle" }}>
+                <span className={`badge bg-${color}`}>{label}</span>
+            </td>
+        );
+    };
+
+    const showActionColumn = activeTab !== 'all' && activeTab !== 'DELIVERED';
 
     return (
         <div className="layout-wrapper layout-content-navbar">
@@ -195,7 +289,7 @@ export default function ManageOrder() {
                                     ) : (
                                         <>
                                             <div className="table-responsive">
-                                                <table className="table table-striped table-bordered">
+                                                <table className="table table-striped table-bordered align-middle">
                                                     <thead className="table-dark">
                                                     <tr>
                                                         <th>Mã đơn</th>
@@ -208,8 +302,9 @@ export default function ManageOrder() {
                                                         <th>Giảm giá</th>
                                                         <th>Phí vận chuyển</th>
                                                         <th>Thành tiền</th>
+                                                        {activeTab === 'all' && <th className="text-center" style={{ minWidth: 120 }}>Trạng thái đơn</th>}
                                                         <th>Xem chi tiết</th>
-                                                        {activeTab !== 'all' && <th>Hành động</th>}
+                                                        {showActionColumn && <th>Hành động</th>}
                                                     </tr>
                                                     </thead>
                                                     <tbody>
@@ -227,6 +322,7 @@ export default function ManageOrder() {
                                                             <td>{formatCurrency(order.discountValue) || '0'}</td>
                                                             <td>{formatCurrency(order.ship) || '0'}</td>
                                                             <td>{formatCurrency(order.totalMoney) || '0'}</td>
+                                                            {activeTab === 'all' && renderStatusLabelCell(order.orderStatus)}
                                                             <td>
                                                                 <button
                                                                     className="btn btn-info btn-sm"
@@ -235,30 +331,83 @@ export default function ManageOrder() {
                                                                     Xem chi tiết
                                                                 </button>
                                                             </td>
-                                                            {activeTab !== 'all' && (
+                                                            {showActionColumn && (
                                                                 <td>
-                                                                    {order.orderStatus === 'PENDING' && (
-                                                                        <button
-                                                                            className="btn btn-primary btn-sm me-2"
-                                                                            onClick={() => handleConfirmOrder(order.id)}
-                                                                        >
-                                                                            Xác nhận
-                                                                        </button>
+                                                                    {/* PENDING */}
+                                                                    {activeTab === 'PENDING' && order.orderStatus === 'PENDING' && (
+                                                                        <>
+                                                                            <button
+                                                                                className="btn btn-primary btn-sm me-2"
+                                                                                onClick={() => handleConfirmOrder(order.id)}
+                                                                            >
+                                                                                Xác nhận
+                                                                            </button>
+                                                                            <button
+                                                                                className="btn btn-danger btn-sm"
+                                                                                onClick={() => handleRefuseOrder(order.id)}
+                                                                            >
+                                                                                Từ chối
+                                                                            </button>
+                                                                        </>
                                                                     )}
-                                                                    {order.orderStatus === 'CONFIRMED' && (
-                                                                        <button
-                                                                            className="btn btn-warning btn-sm me-2"
-                                                                            onClick={() => handlePrepareDelivery(order.id)}
-                                                                        >
-                                                                            Giao hàng
-                                                                        </button>
+                                                                    {/* CONFIRMED */}
+                                                                    {activeTab === 'CONFIRMED' && order.orderStatus === 'CONFIRMED' && (
+                                                                        <>
+                                                                            <button
+                                                                                className="btn btn-warning btn-sm me-2"
+                                                                                onClick={() => handlePrepareDelivery(order.id)}
+                                                                            >
+                                                                                Giao hàng
+                                                                            </button>
+                                                                            <button
+                                                                                className="btn btn-danger btn-sm"
+                                                                                onClick={() => handleCancelOrder(order.id)}
+                                                                            >
+                                                                                Hủy
+                                                                            </button>
+                                                                        </>
                                                                     )}
-                                                                    {order.orderStatus !== 'CANCELLED' && order.orderStatus !== 'DELIVERED' && (
+                                                                    {/* ON_DELIVERY */}
+                                                                    {activeTab === 'ON_DELIVERY' && order.orderStatus === 'ON_DELIVERY' && (
+                                                                        <>
+                                                                            <button
+                                                                                className="btn btn-success btn-sm me-2"
+                                                                                onClick={() => handleCompleteDelivery(order.id)}
+                                                                            >
+                                                                                Hoàn thành
+                                                                            </button>
+                                                                            <button
+                                                                                className="btn btn-danger btn-sm"
+                                                                                onClick={() => handleCancelOrder(order.id)}
+                                                                            >
+                                                                                Hủy
+                                                                            </button>
+                                                                        </>
+                                                                    )}
+                                                                    {/* CANCELLATION_REQUESTED */}
+                                                                    {activeTab === 'CANCELLATION_REQUESTED' && order.orderStatus === 'CANCELLATION_REQUESTED' && (
+                                                                        <>
+                                                                            <button
+                                                                                className="btn btn-success btn-sm me-2"
+                                                                                onClick={() => handleAcceptCancelRequest(order.id)}
+                                                                            >
+                                                                                Chấp nhận
+                                                                            </button>
+                                                                            <button
+                                                                                className="btn btn-danger btn-sm"
+                                                                                onClick={() => handleRejectCancelRequest(order.id)}
+                                                                            >
+                                                                                Từ chối
+                                                                            </button>
+                                                                        </>
+                                                                    )}
+                                                                    {/* CANCELLED & REFUSED: nút Xóa */}
+                                                                    {(activeTab === 'CANCELLED' || activeTab === 'REFUSED') && (
                                                                         <button
                                                                             className="btn btn-danger btn-sm"
-                                                                            onClick={() => handleCancelOrder(order.id)}
+                                                                            onClick={() => handleDeleteOrder(order.id)}
                                                                         >
-                                                                            Hủy
+                                                                            Xóa
                                                                         </button>
                                                                     )}
                                                                 </td>
@@ -322,7 +471,6 @@ export default function ManageOrder() {
                             <tr>
                                 <th>Hình ảnh</th>
                                 <th>Sản phẩm</th>
-                                <th>Thuộc tính</th>
                                 <th>Giá</th>
                                 <th>Số lượng</th>
                                 <th>Tổng tiền</th>
@@ -347,15 +495,18 @@ export default function ManageOrder() {
                                                 />
                                             )}
                                         </td>
-                                        <td>{detail.productName || 'N/A'}</td>
                                         <td>
-                                            {detail.attribute && detail.variant
-                                                ? `${detail.attribute} - ${detail.variant}`
-                                                : 'N/A'}
+                                            {detail.productName || 'N/A'}
+                                            <br/>
+                                            <small style={{ color: '#666' }}>
+                                                {detail.variantAttribute && detail.variantName
+                                                    ? `${detail.variantAttribute} - ${detail.variantName}`
+                                                    : ''}
+                                            </small>
                                         </td>
-                                        <td>{formatCurrency(detail.price) || '0'}</td>
+                                        <td>{formatCurrency(detail.productPrice) || '0'}</td>
                                         <td>{detail.quantity || '0'}</td>
-                                        <td>{formatCurrency(detail.price * detail.quantity) || '0'}</td>
+                                        <td>{formatCurrency(detail.priceWithQuantity) || '0'}</td>
                                     </tr>
                                 ))
                             ) : (

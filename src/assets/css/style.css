@@ -4549,8 +4549,8 @@ ul {
 
 /* line 1071, ../../01 cl html template/03_jun 2019/188_Aranoz shop_html/sass/_product.scss */
 .cart_inner .table tbody tr td .media .d-flex img {
-    border: 1px solid #ffceb7;
-    border-radius: 14px;
+    border: 1px solid #eeeeee;
+    border-radius: 16px;
     max-width: 80px;
     max-height: 120px;
 }

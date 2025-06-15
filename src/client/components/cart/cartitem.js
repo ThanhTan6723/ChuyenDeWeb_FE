@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../auth/authcontext';
 import { useCart } from '../../contexts/cartcontext';
 import VoucherModal from './vouchermodal';
-import { Button } from "react-bootstrap";
 
 const CART_API_URL = `${process.env.REACT_APP_API_BASE_URL || 'https://localhost:8443'}/api/cart`;
 const VOUCHER_API_URL = `${process.env.REACT_APP_API_BASE_URL || 'https://localhost:8443'}/api/e-vouchers/user`;
@@ -576,7 +575,7 @@ const CartItem = () => {
                                             <div className="cupon_text" style={{marginBottom: 10,paddingTop:'14px',paddingLeft:'20px'}}>
                                                 <button
                                                     className="btn_1"
-                                                    style={{background:'#ff3368', color:'white', border:'none', marginRight:10, minWidth:110}}
+                                                    style={{border:'none', marginRight:10, minWidth:110}}
                                                     onClick={handleOpenVoucherModal}
                                                 >
                                                     Áp voucher
@@ -615,18 +614,18 @@ const CartItem = () => {
                                             gap: 4,
                                             minWidth: 250
                                         }}>
-                                            <div className="toal-info" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                                                <b style={{color:'black'}}>Sản phẩm: </b>
+                                            <div className="toal-info" style={{display: 'flex', alignItems: 'center', gap: '8px',marginRight:'30px'}}>
+                                                <span style={{color:'black',fontWeight:'500'}}>Sản phẩm: </span>
                                                 <h5 style={{margin: 0}}>{getSelectedSubtotal().toLocaleString('vi-VN')}<span style={{fontSize:'14px'}}>₫</span></h5>
                                             </div>
-                                            <div className="toal-info" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                                                <b style={{color:'black'}}>Giảm giá: </b>
+                                            <div className="toal-info" style={{display: 'flex', alignItems: 'center', gap: '8px',marginRight:'30px'}}>
+                                                <span style={{color:'black',fontWeight:'500'}}>Giảm giá: </span>
                                                 <h5 style={{fontWeight:'bold', color:'#ff3900', margin: 0}}>
                                                     {getDiscountAmount().toLocaleString('vi-VN')}₫
                                                 </h5>
                                             </div>
-                                            <div className="toal-info" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                                                <b style={{color:'black'}}>Tổng tiền: </b>
+                                            <div className="toal-info" style={{display: 'flex', alignItems: 'center', gap: '8px',marginRight:'30px'}}>
+                                                <span style={{color:'black',fontWeight:'500'}}>Tổng tiền: </span>
                                                 <h5 style={{fontWeight:'bold', color:'#ff3900', margin: 0}}>
                                                     {getTotalAfterDiscount().toLocaleString('vi-VN')}₫
                                                 </h5>

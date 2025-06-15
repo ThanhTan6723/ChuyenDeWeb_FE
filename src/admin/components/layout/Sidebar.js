@@ -24,6 +24,9 @@ export default function Sidebar() {
             <div className="menu-inner-shadow"></div>
             <ul className="menu-inner py-1">
                 <li className="menu-item">
+                    <Link to="/admin" className="menu-link">Dashboard</Link>
+                </li>
+                <li className="menu-item">
                     <Link to="/admin/pages/manage-user" className="menu-link">Manage User</Link>
                 </li>
                 <li className="menu-item">
