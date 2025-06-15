@@ -65,11 +65,16 @@ const ShopDetail = () => {
 
     const handleImageClick = useCallback((image) => {
         setSelectedImage(image.publicId);
-        const selectedVariant = product.variants.find(v => v.id === image.variantId);
-        if (selectedVariant && selectedVariant.id !== selectedVariant?.id) {
-            setSelectedVariant(selectedVariant);
+        // Chỉ thay đổi variant nếu hình ảnh thuộc variant khác
+        if (image.variantId !== selectedVariant?.id) {
+            const newVariant = product.variants.find(v => v.id === image.variantId);
+            if (newVariant) {
+                setSelectedVariant(newVariant);
+            }
         }
     }, [product, selectedVariant?.id]);
+
+    if (!product) return null;
 
     return (
         <Layout>
@@ -90,7 +95,7 @@ const ShopDetail = () => {
                         </div>
                         <div className="col-lg-5 col-xl-4">
                             <ProductInfo
-                                productId={productId}
+                                product={product} // Truyền product thay vì productId
                                 selectedVariant={selectedVariant}
                                 onVariantChange={handleVariantChange}
                             />

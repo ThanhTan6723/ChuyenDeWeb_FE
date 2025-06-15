@@ -8,15 +8,12 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:84
 const CART_API_URL = `${API_BASE_URL}/api/cart`;
 const WISHLIST_API_URL = `${API_BASE_URL}/api/wishlist`;
 
-const ProductInfo = ({ productId = '1', selectedVariant: externalVariant, onVariantChange }) => {
+const ProductInfo = ({ product, selectedVariant: externalVariant, onVariantChange }) => {
     const { t } = useTranslation();
     const { user } = useAuth();
     const { fetchCart } = useCart();
-    const [product, setProduct] = useState(null);
-    const [selectedVariant, setSelectedVariant] = useState(null);
+    const [selectedVariant, setSelectedVariant] = useState(externalVariant);
     const [quantity, setQuantity] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
     const [successModalOpen, setSuccessModalOpen] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [isInWishlist, setIsInWishlist] = useState(false);
@@ -30,50 +27,10 @@ const ProductInfo = ({ productId = '1', selectedVariant: externalVariant, onVari
         }
     }, [externalVariant, selectedVariant?.id]);
 
-    // Fetch dữ liệu sản phẩm
+    // Kiểm tra wishlist
     useEffect(() => {
-        const numericProductId = Number(productId);
-        if (isNaN(numericProductId) || numericProductId <= 0) {
-            setError(`${t('error_loading_product')}: ID sản phẩm không hợp lệ`);
-            return;
-        }
-
-        const fetchProductDetails = async () => {
-            setLoading(true);
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/products/${numericProductId}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`,
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const data = await response.json();
-                if (!data || !data.variants || data.variants.length === 0) {
-                    throw new Error(t('error_loading_product'));
-                }
-                const defaultVariant = data.variants.find(variant =>
-                    variant.images.some(img => img.main)
-                ) || data.variants[0];
-                setProduct(data);
-                setSelectedVariant(defaultVariant);
-                setQuantity(1);
-                if (onVariantChange) {
-                    onVariantChange(defaultVariant, data);
-                }
-            } catch (err) {
-                setError(`${t('error_loading_product')}: ${err.message}`);
-                console.error(t('error_loading_product'), err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         const checkWishlist = async () => {
-            if (user) {
+            if (user && product?.id) {
                 try {
                     const response = await fetch(`${WISHLIST_API_URL}/${user.id}`, {
                         headers: {
@@ -84,7 +41,7 @@ const ProductInfo = ({ productId = '1', selectedVariant: externalVariant, onVari
                     });
                     if (response.ok) {
                         const wishlist = await response.json();
-                        setIsInWishlist(wishlist.some(item => item.productId === numericProductId));
+                        setIsInWishlist(wishlist.some(item => item.productId === product.id));
                     }
                 } catch (err) {
                     // Silent fail
@@ -92,19 +49,18 @@ const ProductInfo = ({ productId = '1', selectedVariant: externalVariant, onVari
             }
         };
 
-        fetchProductDetails();
         checkWishlist();
-    }, [productId, user, t, onVariantChange]);
+    }, [user, product?.id]);
 
     const handleVariantChange = useCallback((variant) => {
         if (variant?.id !== selectedVariant?.id) {
             setSelectedVariant(variant);
             setQuantity(1);
             if (onVariantChange) {
-                onVariantChange(variant, product);
+                onVariantChange(variant);
             }
         }
-    }, [selectedVariant?.id, onVariantChange, product]);
+    }, [selectedVariant?.id, onVariantChange]);
 
     const handleQuantityChange = (delta) => {
         setQuantity((prev) => Math.max(1, prev + delta));
@@ -135,6 +91,7 @@ const ProductInfo = ({ productId = '1', selectedVariant: externalVariant, onVari
             await response.json();
             setSuccessModalOpen(true);
             fetchCart();
+            setTimeout(() => setSuccessModalOpen(false), 1500);
         } catch (err) {
             console.error(t('error_loading_product'), err);
             alert(err.message);
@@ -148,7 +105,7 @@ const ProductInfo = ({ productId = '1', selectedVariant: externalVariant, onVari
         }
         setWishlistLoading(true);
         try {
-            const numericProductId = Number(productId);
+            const numericProductId = product.id;
             if (isInWishlist) {
                 const response = await fetch(`${WISHLIST_API_URL}/${user.id}/${numericProductId}`, {
                     method: 'DELETE',
@@ -186,8 +143,6 @@ const ProductInfo = ({ productId = '1', selectedVariant: externalVariant, onVari
     const closeModal = () => setShowLoginModal(false);
     const closeSuccessModal = () => setSuccessModalOpen(false);
 
-    if (loading) return <div className="loading text-center py-6 text-gray-500">{t('loading')}...</div>;
-    if (error) return <div className="error text-center py-6 text-red-600 font-medium">{t('error_loading_product')}: {error}</div>;
     if (!product || !selectedVariant) return null;
 
     return (

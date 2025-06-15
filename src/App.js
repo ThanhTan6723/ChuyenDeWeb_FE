@@ -24,7 +24,9 @@ import ManageOrder from './admin/pages/ManageOrder';
 import ManageVoucher from './admin/pages/ManageVoucher';
 import Wishlist from "./client/components/home/Wishlist";
 import ManageReview from "./admin/pages/ManageReview";
-import i18n from "i18next";
+
+// Không được xóa dòng này
+import i18n from "./i18n";
 
 function App() {
     return (
