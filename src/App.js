@@ -23,7 +23,9 @@ import ManageProduct from './admin/pages/ManageProduct';
 import ManageOrder from './admin/pages/ManageOrder';
 import ManageVoucher from './admin/pages/ManageVoucher';
 import Wishlist from "./client/components/home/Wishlist";
-import i18n from "./i18n";
+import ManageReview from "./admin/pages/ManageReview";
+import i18n from "i18next";
+
 function App() {
     return (
         <AuthProvider>
@@ -33,6 +35,7 @@ function App() {
                         <Route path="/" element={<Home/>}/>
                         <Route path="/shop" element={<Shop/>}/>
                         <Route path="/shop-detail/:productId" element={<ShopDetail/>}/>
+                        <Route path="/wishlist" element={<Wishlist />} />
                         <Route path="/home" element={<Home/>}/>
                         <Route path="/login" element={<Login/>}/>
                         <Route path="/signup" element={<Signup/>}/>
@@ -50,7 +53,7 @@ function App() {
                         <Route path="/admin/pages/manage-product" element={<ManageProduct/>}/>
                         <Route path="/admin/pages/manage-order" element={<ManageOrder/>}/>
                         <Route path="/admin/pages/manage-voucher" element={<ManageVoucher/>}/>
-                        <Route path="/wishlist" element={<Wishlist />} />
+                        <Route path="/admin/pages/manage-review" element={<ManageReview/>}/>
                     </Routes>
                 </Router>
             </CartProvider>

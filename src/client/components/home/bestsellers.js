@@ -202,7 +202,7 @@ const BestSellers = () => {
     return (
         <section className="product_list best_seller section_padding">
             <div className="container">
-                <h2 className="section-title">Sản phẩm bán chạy<span></span></h2>
+                <h2 className="section-title" style={{textAlign:'center'}}>Sản phẩm bán chạy<span></span></h2>
                 {loading && <div className="loading">Đang tải...</div>}
                 {error && <div className="error">Lỗi: {error}</div>}
                 {!loading && !error && products.length > 0 && (
