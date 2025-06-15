@@ -160,7 +160,7 @@ const ManageUser = () => {
                                                     <th>Số lần đăng nhập thất bại</th>
                                                     <th>Khóa</th>
                                                     <th>Thời gian khóa</th>
-                                                    <th>Hành động</th>
+                                                    <th style={{ width: '150px' }}>Hành động</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -181,7 +181,12 @@ const ManageUser = () => {
                                                             </td>
                                                             <td>
                                                                 <button className="btn btn-sm btn-primary me-2">Sửa</button>
-                                                                <button className="btn btn-sm btn-danger">Xóa</button>
+                                                                <button
+                                                                    className="btn btn-sm btn-danger"
+                                                                    onClick={() => handleDelete(user.id, user.username)}
+                                                                >
+                                                                    Xóa
+                                                                </button>
                                                             </td>
                                                         </tr>
                                                     ))
@@ -205,7 +210,6 @@ const ManageUser = () => {
                 </div>
             </div>
 
-            {/* Modal thêm người dùng */}
             {showModal && (
                 <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-dialog-centered">

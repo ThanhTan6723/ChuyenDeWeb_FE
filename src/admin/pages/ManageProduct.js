@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 const ManageProduct = () => {
     const [products, setProducts] = useState([]);
     const [brands, setBrands] = useState([]);
-    const [categories, setCategories] = useState([]); // State cho danh sách category
+    const [categories, setCategories] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [totalPages, setTotalPages] = useState(0);
@@ -25,7 +25,6 @@ const ManageProduct = () => {
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://localhost:8443";
     const CLOUDINARY_BASE_URL = "https://res.cloudinary.com/dp2jfvmlh/image/upload/";
 
-    // Fetch danh sách brand và category
     useEffect(() => {
         const fetchBrandsAndCategories = async () => {
             try {
@@ -58,37 +57,36 @@ const ManageProduct = () => {
         fetchBrandsAndCategories();
     }, [API_BASE_URL]);
 
-    // Fetch danh sách sản phẩm
-    useEffect(() => {
-        const fetchProducts = async () => {
-            setLoading(true);
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/admin/products?page=${currentPage}&size=6`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    credentials: "include",
-                });
+    const fetchProducts = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/products?page=${currentPage}&size=6`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+            });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errorText}`);
-                }
-
-                const data = await response.json();
-                setProducts(data.products || []);
-                setTotalPages(data.totalPages || 0);
-                setError(null);
-            } catch (err) {
-                console.error("Lỗi khi lấy danh sách sản phẩm:", err);
-                setError("Không thể tải danh sách sản phẩm. " + err.message);
-                toast.error("Lỗi tải danh sách sản phẩm.");
-            } finally {
-                setLoading(false);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
             }
-        };
 
+            const data = await response.json();
+            setProducts(data.products || []);
+            setTotalPages(data.totalPages || 0);
+            setError(null);
+        } catch (err) {
+            console.error("Lỗi khi lấy danh sách sản phẩm:", err);
+            setError("Không thể tải danh sách sản phẩm. " + err.message);
+            toast.error("Lỗi tải danh sách sản phẩm.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchProducts();
     }, [API_BASE_URL, currentPage]);
 
@@ -149,12 +147,6 @@ const ManageProduct = () => {
             });
         });
 
-        // Debug: In ra FormData
-        console.log("FormData entries:");
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value instanceof File ? value.name : value}`);
-        }
-
         try {
             const response = await fetch(`${API_BASE_URL}/api/admin/products`, {
                 method: "POST",
@@ -163,8 +155,6 @@ const ManageProduct = () => {
             });
 
             const responseData = await response.json();
-            console.log("POST response:", responseData); // Debug
-
             if (!response.ok) {
                 throw new Error(responseData.error || `HTTP ${response.status}`);
             }
@@ -178,26 +168,40 @@ const ManageProduct = () => {
                 category: "",
                 variants: [{ attribute: "", variant: "", price: "", quantity: "", images: [] }],
             });
+            fetchProducts();
+        } catch (err) {
+            setFormError(`Lỗi khi thêm sản phẩm: ${err.message}`);
+            toast.error(`Lỗi khi thêm sản phẩm: ${err.message}`);
+        }
+    };
 
-            const fetchResponse = await fetch(`${API_BASE_URL}/api/admin/products?page=${currentPage}&size=6`, {
-                method: "GET",
+    const handleDelete = async (productId, productName) => {
+        if (!window.confirm(`Bạn có chắc muốn xóa sản phẩm ${productName}?`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/products/${productId}`, {
+                method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 credentials: "include",
             });
 
-            if (fetchResponse.ok) {
-                const data = await fetchResponse.json();
-                console.log("Products response:", data); // Debug
-                setProducts(data.products);
-                setTotalPages(data.totalPages);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP ${response.status}`);
             }
+
+            toast.success(`Xóa sản phẩm ${productName} thành công!`);
+            fetchProducts();
         } catch (err) {
-            setFormError(`Lỗi khi thêm sản phẩm: ${err.message}`);
-            toast.error(`Lỗi khi thêm sản phẩm: ${err.message}`);
+            console.error("Lỗi khi xóa sản phẩm:", err);
+            toast.error(`Lỗi khi xóa sản phẩm: ${err.message}`);
         }
     };
+
     const variantRows = products.flatMap((product) =>
         product.variants && product.variants.length > 0
             ? product.variants.map((variant) => ({ product, variant }))
@@ -243,7 +247,7 @@ const ManageProduct = () => {
                                                     <th>Giá</th>
                                                     <th>Tồn kho</th>
                                                     <th>Hình ảnh</th>
-                                                    <th>Hành động</th>
+                                                    <th style={{ width: '150px' }}>Hành động</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -288,7 +292,12 @@ const ManageProduct = () => {
                                                             </td>
                                                             <td>
                                                                 <button className="btn btn-sm btn-primary me-2">Sửa</button>
-                                                                <button className="btn btn-sm btn-danger">Xóa</button>
+                                                                <button
+                                                                    className="btn btn-sm btn-danger"
+                                                                    onClick={() => handleDelete(product.id, product.name)}
+                                                                >
+                                                                    Xóa
+                                                                </button>
                                                             </td>
                                                         </tr>
                                                     ))
@@ -340,7 +349,6 @@ const ManageProduct = () => {
                 </div>
             </div>
 
-            {/* Modal thêm sản phẩm */}
             {showModal && (
                 <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered">
