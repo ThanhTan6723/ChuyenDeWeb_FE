@@ -21,18 +21,18 @@ export default function Navbar() {
                     </div>
                 </div>
                 <ul className="navbar-nav flex-row align-items-center ms-auto">
-                    <li className="nav-item lh-1 me-3">
-                        <a
-                            className="github-button"
-                            href="https://github.com/themeselection/sneat-html-admin-template-free"
-                            data-icon="octicon-star"
-                            data-size="large"
-                            data-show-count="true"
-                            aria-label="Star themeselection/sneat-html-admin-template-free on GitHub"
-                        >
-                            Star
-                        </a>
-                    </li>
+                    {/*<li className="nav-item lh-1 me-3">*/}
+                    {/*    <a*/}
+                    {/*        className="github-button"*/}
+                    {/*        href="https://github.com/themeselection/sneat-html-admin-template-free"*/}
+                    {/*        data-icon="octicon-star"*/}
+                    {/*        data-size="large"*/}
+                    {/*        data-show-count="true"*/}
+                    {/*        aria-label="Star themeselection/sneat-html-admin-template-free on GitHub"*/}
+                    {/*    >*/}
+                    {/*        Star*/}
+                    {/*    </a>*/}
+                    {/*</li>*/}
                     <li className="menu-item">
                         <a href="/shop" className="menu-link">
                             <i className="menu-icon tf-icons bx bx-layout"></i>
