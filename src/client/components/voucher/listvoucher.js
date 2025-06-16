@@ -213,9 +213,10 @@ const VoucherList = () => {
                                                 Giảm {(voucher.discountPercentage || 0).toFixed(2)}%
                                             </div>
                                             <div className="voucher-image2-type">
-                                                {voucher.category?.name?.toUpperCase() ||
-                                                    voucher.productVariantDTO?.name?.toUpperCase() ||
-                                                    "ALL"}
+                                                <i className="fa fa-tags" style={{ marginRight: 3 }} />
+                                                {voucher.category?.name ||
+                                                    voucher.productVariantDTO?.name ||
+                                                    "Toàn shop"}
                                             </div>
                                         </div>
                                         <div className="voucher-image2-code">
@@ -239,7 +240,7 @@ const VoucherList = () => {
                                             overflow: "hidden",
                                             borderRadius: "12px",
                                             background: "#ededed",
-                                            border: "1px solid #e0e0e0",
+                                            border: "1px solid rgb(240 240 240)",
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "center"
@@ -269,7 +270,7 @@ const VoucherList = () => {
                                             }}>
                                                 <span style={{
                                                     fontSize: "12px",
-                                                    color: "#555",
+                                                    color: "#989898",
                                                     fontWeight: 600,
                                                     background: "transparent",
                                                     whiteSpace: "nowrap"
@@ -284,7 +285,7 @@ const VoucherList = () => {
                                                 top: 0,
                                                 height: "100%",
                                                 width: `${remainPercent}%`,
-                                                background: "#ededed",
+                                                background: "rgb(240 240 240)",
                                                 transition: "width 0.7s cubic-bezier(.77,0,.18,1)",
                                                 zIndex: 0
                                             }} />

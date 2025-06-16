@@ -36,7 +36,7 @@ const ProductImage = ({ product, variant, selectedImage, onImageClick }) => {
     return (
         <div className="modal-image">
             <img
-                style={{ height: '460px', width: '460px', transition: 'opacity 0.3s ease' }}
+                style={{ height: '460px', width: '460px', transition: 'opacity 0.3s ease', background:'#fcfcfc',borderRadius:'12px' }}
                 src={mainImageUrl}
                 alt="Product"
                 className="product-image"
@@ -45,9 +45,9 @@ const ProductImage = ({ product, variant, selectedImage, onImageClick }) => {
                 {allImages.map((image, index) => (
                     <img
                         style={{
-                            width: '120px',
-                            height: '120px',
-                            border: selectedImage === image.publicId ? '2px solid teal' : '1px solid #ddd',
+                            width: '80px',
+                            height: '80px',
+                            border: selectedImage === image.publicId ? '1px solid #4ce9d1' : '1px solid #ddd',
                             cursor: 'pointer',
                             transition: 'border 0.2s ease',
                         }}

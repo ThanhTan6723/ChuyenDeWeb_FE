@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+@import url("https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800&display=swap");
 
 .voucher-container {
     padding: 80px 0;
@@ -24,10 +24,10 @@
 .voucher-image2-card {
     min-width: 270px;
     min-height: 270px;
-    background: #fbfbfb;
-    border: 1px dashed #e6e6e6;
+    /*background: #fbfbfb;*/
+    border: 1px solid #e6e6e6;
     border-radius: 12px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -55,16 +55,16 @@
 }
 .voucher-image2-type {
     font-size: 1.03rem;
-    color: #636363;
-    font-weight: bold;
-    background: rgba(124, 124, 124, 0.1);
-    padding: 4px;
+    color: #7e7e7e;
+    font-weight: 500;
+    /*background: rgba(124, 124, 124, 0.1);*/
+    padding: 2px 4px 2px 4px;
     border-radius: 6px;
     letter-spacing: 0.6px;
 }
 .voucher-image2-code {
     font-size: 1.16rem;
-    color: #ff2a1e;
+    color: #ffab00;
     font-weight: bold;
     letter-spacing: 1px;
     margin: 0 0 8px 0;
@@ -79,25 +79,26 @@
 .voucher-image2-btn {
     margin: 14px 0 4px 0;
     width: 90%;
-    background: #02ef9d;
+    background: #4ce9d1;
     color: #fff;
     font-size: 1.06rem;
-    font-weight: 600;
+    /*font-weight: 600;*/
     border: none;
     border-radius: 2.5px;
-    padding: 2px 0;
+    /*padding: 2px 0;*/
     cursor: pointer;
     transition: background 0.18s;
     letter-spacing: 0.5px;
 }
 .voucher-image2-btn:disabled,
 .voucher-image2-btn.disabled {
-    background: #d6d6d6;
-    color: #fff;
+    background: #ffffff;
+    color: #595959;
+    border: 1px solid #ececec;
     cursor: not-allowed;
 }
 .voucher-image2-btn:not(:disabled):hover {
-    background: #01f6a1;
+    background: #4cf4db;
 }
 .voucher-image2-conditions {
     color: #f26b3a;

@@ -207,7 +207,7 @@ const ManageReview = () => {
                                                             </td>
                                                             <td>
                                                                 {!review.isAccept && (
-                                                                    <button
+                                                                    <button style={{marginBottom:'10px'}}
                                                                         className="btn btn-sm btn-success me-2"
                                                                         onClick={() => handleAcceptReview(review.id)}
                                                                     >

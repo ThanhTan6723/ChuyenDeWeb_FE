@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useAuth } from "../../../auth/authcontext";
 
 const ORDER_API_URL = `${process.env.REACT_APP_API_BASE_URL || 'https://localhost:8443'}/api/orders`;
 const PAYMENT_API_URL = `${process.env.REACT_APP_API_BASE_URL || 'https://localhost:8443'}/api/payment`;
 
 const OrderInfo = () => {
-    const { user } = useAuth();
+    const { user, refreshToken } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const selectedCartItems = location.state?.selectedCartItems || [];
@@ -31,10 +30,8 @@ const OrderInfo = () => {
     });
     const [errors, setErrors] = useState({});
 
-    // Hiển thị mở rộng danh sách sản phẩm
     const [showAllProducts, setShowAllProducts] = useState(false);
 
-    // Calculate total weight
     const calculateTotalWeight = () => {
         return selectedCartItems.reduce((total, item) => {
             const match = item.variant?.match(/(\d+)\s*(ml|g|kg|mg)/i);
@@ -53,7 +50,6 @@ const OrderInfo = () => {
         }, 0);
     };
 
-    // Calculate subtotal
     const calculateSubtotal = () => {
         return selectedCartItems.reduce(
             (total, item) => total + (item.price * item.quantity),
@@ -61,63 +57,64 @@ const OrderInfo = () => {
         );
     };
 
-    // Calculate total (tạm tính + phí ship - giảm giá nếu có)
     const calculateTotal = () => {
         return calculateSubtotal() + shippingFee - (appliedVoucher ? discountAmount : 0);
     };
 
-    // Fetch provinces
     useEffect(() => {
         const fetchProvinces = async () => {
             try {
-                const response = await axios.get("https://provinces.open-api.vn/api/p/");
-                setProvinces(response.data);
+                const response = await fetch("https://provinces.open-api.vn/api/p/");
+                if (!response.ok) throw new Error("Không thể tải danh sách tỉnh/thành phố");
+                const data = await response.json();
+                setProvinces(data);
             } catch (error) {
-                setErrors(prev => ({ ...prev, api: "Không thể tải danh sách tỉnh/thành phố" }));
+                setErrors(prev => ({ ...prev, api: error.message }));
             }
         };
         fetchProvinces();
     }, []);
 
-    // Fetch districts
     useEffect(() => {
         if (selectedProvince) {
             const fetchDistricts = async () => {
                 try {
-                    const response = await axios.get(
+                    const response = await fetch(
                         `https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`
                     );
-                    setDistricts(response.data.districts);
+                    if (!response.ok) throw new Error("Không thể tải danh sách quận/huyện");
+                    const data = await response.json();
+                    setDistricts(data.districts);
                     setWards([]);
                     setSelectedDistrict("");
                     setSelectedWard("");
                 } catch (error) {
-                    setErrors(prev => ({ ...prev, api: "Không thể tải danh sách quận/huyện" }));
+                    setErrors(prev => ({ ...prev, api: error.message }));
                 }
             };
             fetchDistricts();
         }
     }, [selectedProvince]);
 
-    // Fetch wards
     useEffect(() => {
         if (selectedDistrict) {
             const fetchWards = async () => {
                 try {
-                    const response = await axios.get(
+                    const response = await fetch(
                         `https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`
                     );
-                    setWards(response.data.wards);
+                    if (!response.ok) throw new Error("Không thể tải danh sách phường/xã");
+                    const data = await response.json();
+                    setWards(data.wards);
                     setSelectedWard("");
                 } catch (error) {
-                    setErrors(prev => ({ ...prev, api: "Không thể tải danh sách phường/xã" }));
+                    setErrors(prev => ({ ...prev, api: error.message }));
                 }
             };
             fetchWards();
         }
     }, [selectedDistrict]);
 
-    // Calculate shipping fee
     useEffect(() => {
         const calculateShipping = async () => {
             if (selectedProvince && selectedDistrict && selectedWard && formData.address) {
@@ -129,29 +126,30 @@ const OrderInfo = () => {
                     const wardName = wards.find(w => w.code === parseInt(selectedWard))?.name;
 
                     if (provinceName && districtName && wardName) {
-                        const response = await axios.post(
+                        const response = await fetch(
                             `${process.env.REACT_APP_API_BASE_URL || 'https://localhost:8443'}/api/shipping/fee`,
                             {
-                                city: provinceName,
-                                district: districtName,
-                                ward: wardName,
-                                address: formData.address,
-                                weight: calculateTotalWeight() * 1000,
-                                value: calculateSubtotal()
-                            },
-                            {
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    credentials: 'include'
-                                }
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                                body: JSON.stringify({
+                                    city: provinceName,
+                                    district: districtName,
+                                    ward: wardName,
+                                    address: formData.address,
+                                    weight: calculateTotalWeight() * 1000,
+                                    value: calculateSubtotal()
+                                })
                             }
                         );
-                        setShippingFee(response.data.shipping_fee || 0);
+                        if (!response.ok) throw new Error("Không thể tính phí vận chuyển");
+                        const data = await response.json();
+                        setShippingFee(data.shipping_fee || 0);
                     }
                 } catch (error) {
                     setErrors(prev => ({
                         ...prev,
-                        shipping: error.response?.data?.message || 'Không thể tính phí vận chuyển.'
+                        shipping: error.message || 'Không thể tính phí vận chuyển.'
                     }));
                     setShippingFee(0);
                 } finally {
@@ -186,6 +184,10 @@ const OrderInfo = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!user) {
+            navigate('/login', { state: { from: '/order-confirm' } });
+            return;
+        }
 
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
@@ -194,6 +196,8 @@ const OrderInfo = () => {
         }
 
         try {
+            await refreshToken(); // Làm mới token trước khi gửi yêu cầu
+
             const provinceName = provinces.find(p => p.code === parseInt(selectedProvince))?.name;
             const districtName = districts.find(d => d.code === parseInt(selectedDistrict))?.name;
             const wardName = wards.find(w => w.code === parseInt(selectedWard))?.name;
@@ -206,6 +210,7 @@ const OrderInfo = () => {
                 ship: shippingFee,
                 discountValue: appliedVoucher ? discountAmount : 0,
                 paymentId: paymentMethod === 'COD' ? 1 : paymentMethod === 'VNPAY' ? 2 : 3,
+                voucherId: appliedVoucher ? appliedVoucher.id : null,
                 orderDetails: selectedCartItems.map(item => ({
                     productVariantId: item.productVariantId || item.id,
                     quantity: item.quantity
@@ -213,50 +218,55 @@ const OrderInfo = () => {
             };
 
             if (paymentMethod === 'VNPAY') {
-                const response = await axios.post(`${PAYMENT_API_URL}/create-vnpay`, {
-                    amount: calculateTotal(),
-                    orderId: Date.now().toString(),
-                    orderData: orderData
-                }, {
+                const response = await fetch(`${PAYMENT_API_URL}/create-vnpay`, {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        amount: calculateTotal(),
+                        orderId: Date.now().toString(),
+                        orderData: orderData
+                    })
                 });
-
-                if (response.data.success) {
-                    window.location.href = response.data.data.paymentUrl;
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Không thể tạo thanh toán VNPay');
+                if (data.success) {
+                    window.location.href = data.data.paymentUrl;
                 } else {
                     setErrors(prev => ({
                         ...prev,
-                        submit: response.data.message || 'Không thể tạo thanh toán VNPay.'
+                        submit: data.message || 'Không thể tạo thanh toán VNPay.'
                     }));
                 }
             } else {
-                const response = await axios.post(ORDER_API_URL, orderData, {
+                const response = await fetch(ORDER_API_URL, {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true
+                    credentials: 'include',
+                    body: JSON.stringify(orderData)
                 });
-
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Đặt hàng thất bại');
                 navigate('/confirm-order', {
                     state: {
-                        order: response.data.data,
+                        order: data.data,
                         orderDateTime: new Date().toISOString(),
                         selectedCartItems
                     }
                 });
             }
         } catch (error) {
-            if (error.response?.status === 401) {
+            if (error.message.includes('401')) {
                 navigate('/login', { state: { from: '/checkout' } });
             } else {
                 setErrors(prev => ({
                     ...prev,
-                    submit: error.response?.data?.message || 'Đặt hàng thất bại. Vui lòng thử lại.'
+                    submit: error.message || 'Đặt hàng thất bại. Vui lòng thử lại.'
                 }));
             }
         }
     };
 
-    // Xử lý danh sách hiển thị
     const MAX_DISPLAY = 4;
     const displayedItems = showAllProducts ? selectedCartItems : selectedCartItems.slice(0, MAX_DISPLAY);
 
@@ -391,7 +401,6 @@ const OrderInfo = () => {
                                             </a>
                                         </li>
                                     ))}
-                                    {/* Nút mở rộng/thu gọn nếu hơn 4 sản phẩm */}
                                     {selectedCartItems.length > MAX_DISPLAY && (
                                         <li style={{textAlign:'center', border:'none', background:'none', padding:0}}>
                                             <button
@@ -438,7 +447,6 @@ const OrderInfo = () => {
                                             </span>
                                         )}
                                     </li>
-                                    {/* Hiển thị giảm giá nếu có */}
                                     {appliedVoucher && discountAmount > 0 && (
                                         <li>
                                             <a href="#">

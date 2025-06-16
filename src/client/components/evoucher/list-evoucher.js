@@ -133,9 +133,10 @@ const SavedVoucherList = () => {
                                                 Giảm {(voucher.discountPercentage || 0).toFixed(2)}%
                                             </div>
                                             <div className="voucher-image2-type">
-                                                {voucher.category?.name?.toUpperCase() ||
-                                                    voucher.productVariantDTO?.name?.toUpperCase() ||
-                                                    "ALL"}
+                                                <i className="fa fa-tags" style={{ marginRight: 3 }} />
+                                                {voucher.category?.name ||
+                                                    voucher.productVariantDTO?.name ||
+                                                    "Toàn shop"}
                                             </div>
                                         </div>
                                         <div className="voucher-image2-code">

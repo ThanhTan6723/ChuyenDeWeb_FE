@@ -138,7 +138,7 @@
     position: relative;
     border: 1.5px dashed #e2e2e2;
     border-radius: 8px;
-    margin: 16px 18px 0 18px;
+    margin: 16px 18px 15px 18px;
 }
 
 .voucher-row-arz input[type="radio"] {

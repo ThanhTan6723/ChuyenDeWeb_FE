@@ -120,6 +120,14 @@ const ManageUser = () => {
         }
     };
 
+    const handleDelete = async (userId, username) => {
+        if (!window.confirm(`Bạn có chắc muốn xóa người dùng ${username}?`)) {
+            return;
+        }
+
+    };
+
+
     return (
         <div className="layout-wrapper layout-content-navbar">
             <div className="layout-container">
